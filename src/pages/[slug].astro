@@ -1,0 +1,178 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Timeline from '../components/Timeline.astro';
+import DressCode from '../components/DressCode.astro';
+import RsvpForm from '../components/RsvpForm.astro';
+import HeroCover from '../components/HeroCover.astro';
+import HeroEditorial from '../components/HeroEditorial.astro';
+import HeroAmalfi from '../components/HeroAmalfi.astro';
+import Countdown from '../components/Countdown.astro';
+import Gallery from '../components/Gallery.astro';
+import Envelope from '../components/Envelope.astro';
+import Venue from '../components/Venue.astro';
+import Wishes from '../components/Wishes.astro';
+import Telegram from '../components/Telegram.astro';
+import Organizer from '../components/Organizer.astro';
+import Footer from '../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const invitations = await getCollection('invitations');
+  return invitations.map((inv) => ({
+    params: { slug: inv.id },
+    props: { inv: inv.data },
+  }));
+}
+
+const { inv } = Astro.props;
+const title = `${inv.groom} & ${inv.bride}`;
+const heroes = { cover: HeroCover, editorial: HeroEditorial, amalfi: HeroAmalfi };
+const Hero = heroes[inv.theme];
+---
+
+<Base title={title} theme={inv.theme} image={inv.heroPhoto} description={`${title} — приглашение на свадьбу, ${inv.date}`}>
+  {inv.envelope && <Envelope groom={inv.groom} bride={inv.bride} photo={inv.envelopePhoto} />}
+  {/* без JS конверт бы навсегда закрыл страницу */}
+  {inv.envelope && <noscript><style is:inline>.envelope{display:none!important}</style></noscript>}
+
+  <Hero groom={inv.groom} bride={inv.bride} date={inv.date} heroPhoto={inv.heroPhoto} />
+
+  <main id="content">
+    {inv.countdown && <Countdown target={inv.countdown} />}
+
+    {inv.welcome && (
+      <Section eyebrow="Дорогие гости" narrow>
+        <p class="lead">{inv.welcome}</p>
+      </Section>
+    )}
+
+    {inv.gallery && <Gallery photos={inv.gallery} />}
+
+    {inv.venue && <Venue name={inv.venue.name} address={inv.venue.address} mapIframe={inv.venue.mapIframe || undefined} />}
+
+    {inv.timeline && <Timeline items={inv.timeline} />}
+
+    {inv.dressCode && <DressCode text={inv.dressCode.text} colors={inv.dressCode.colors} />}
+
+    {inv.wishes && <Wishes items={inv.wishes} />}
+
+    {inv.transfer && (
+      <Section eyebrow="Логистика" title="Трансфер" narrow>
+        <p class="transfer">{inv.transfer}</p>
+      </Section>
+    )}
+
+    {inv.telegramChat && <Telegram url={inv.telegramChat.url} text={inv.telegramChat.text} />}
+
+    {inv.rsvp && <RsvpForm deadline={inv.rsvp.deadline} photo={inv.heroPhoto} />}
+
+    {inv.organizer && <Organizer name={inv.organizer.name} phone={inv.organizer.phone} />}
+  </main>
+
+  <Footer groom={inv.groom} bride={inv.bride} date={inv.date} />
+  <a class="back-home" href="/">← все темы</a>
+
+  {inv.music && (
+    <button id="music-btn" aria-label="Включить музыку" aria-pressed="false">
+      <svg class="icon icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+        <path d="M9 18V5l11-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="17" cy="16" r="3" />
+      </svg>
+      <span class="icon icon-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    </button>
+    <audio id="music" src={inv.music} loop preload="none" />
+  )}
+</Base>
+
+<script>
+  const btn = document.getElementById('music-btn');
+  const audio = document.getElementById('music') as HTMLAudioElement | null;
+  const sync = () => {
+    if (!btn || !audio) return;
+    btn.classList.toggle('playing', !audio.paused);
+    btn.setAttribute('aria-pressed', String(!audio.paused));
+    btn.setAttribute('aria-label', audio.paused ? 'Включить музыку' : 'Выключить музыку');
+  };
+  btn?.addEventListener('click', () => {
+    if (!audio) return;
+    audio.paused ? audio.play().catch(() => {}) : audio.pause();
+  });
+  audio?.addEventListener('play', sync);
+  audio?.addEventListener('pause', sync);
+</script>
+
+<style>
+  .back-home {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    left: 20px;
+    z-index: var(--z-music);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: inherit;
+    opacity: 0.5;
+    padding: 12px;
+    margin: -12px; /* тап-зона 40px+ при прежней визуальной позиции */
+    transition: opacity 0.3s;
+  }
+  .back-home:hover { opacity: 1; }
+
+  .transfer { max-width: 40ch; margin: 0 auto; }
+
+  /* плавающая стеклянная кнопка музыки */
+  #music-btn {
+    position: fixed;
+    left: max(20px, env(safe-area-inset-left));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: var(--z-music);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    /* почти непрозрачный фон вместо backdrop-filter: блюр подложки на fixed-элементе пересчитывается каждый кадр скролла */
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    color: var(--text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.6s var(--ease), background-color 0.4s var(--ease);
+  }
+  #music-btn:hover { transform: translateY(-2px); }
+  #music-btn:active { transform: scale(0.96); }
+  #music-btn.playing { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  #music-btn .icon {
+    position: absolute;
+    inset: 0;
+    margin: auto; /* иначе svg с фикс. размером прилипает к левому верхнему углу */
+    display: grid;
+    place-items: center;
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+  }
+  #music-btn svg { width: 20px; height: 20px; }
+  #music-btn .icon-bars {
+    opacity: 0;
+    transform: scale(0.6);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    padding-bottom: 17px;
+  }
+  #music-btn .icon-bars i {
+    width: 2px;
+    height: 14px;
+    background: currentColor;
+    border-radius: 1px;
+    transform-origin: bottom;
+    animation: eq 1s ease-in-out infinite alternate;
+  }
+  #music-btn .icon-bars i:nth-child(2) { animation-delay: -0.3s; }
+  #music-btn .icon-bars i:nth-child(3) { animation-delay: -0.6s; }
+  #music-btn .icon-bars i:nth-child(4) { animation-delay: -0.15s; }
+  @keyframes eq { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+  #music-btn.playing .icon-play { opacity: 0; transform: scale(0.6); }
+  #music-btn.playing .icon-bars { opacity: 1; transform: scale(1); }
+</style>

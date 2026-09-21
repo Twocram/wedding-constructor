@@ -1,0 +1,26 @@
+---
+import Ornament from './Ornament.astro';
+interface Props {
+  title?: string;
+  eyebrow?: string;
+  variant?: 'plain' | 'surface' | 'photo';
+  photo?: string;
+  narrow?: boolean;
+  id?: string;
+}
+const { title, eyebrow, variant = 'plain', photo, narrow, id } = Astro.props;
+---
+
+<section id={id} class:list={['section', `section--${variant}`, { 'fade-up': true }]}>
+  {variant === 'photo' && photo && <img class="section-bg" src={photo} alt="" loading="lazy" decoding="async" />}
+  <div class:list={['wrap', { 'wrap--narrow': narrow }]}>
+    {(title || eyebrow) && (
+      <header class="section-head">
+        {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+        {title && <h2>{title}</h2>}
+        <Ornament />
+      </header>
+    )}
+    <slot />
+  </div>
+</section>

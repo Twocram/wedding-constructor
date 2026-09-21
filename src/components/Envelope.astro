@@ -1,0 +1,190 @@
+---
+interface Props {
+  groom: string;
+  bride: string;
+  photo?: string;
+}
+const { groom, bride, photo } = Astro.props;
+const initials = `${groom[0]}${bride[0]}`;
+---
+
+<div id="envelope" class:list={['envelope', { 'envelope-photo': photo }]}>
+  {photo && <img src={photo} alt="" fetchpriority="high" />}
+  <div class="envelope-veil" aria-hidden="true"></div>
+  <div class="envelope-frame" aria-hidden="true"></div>
+
+  <div class="envelope-content">
+    <p class="envelope-label">Приглашение на свадьбу</p>
+    <p class="envelope-names">{groom} <i>&</i> {bride}</p>
+
+    <button type="button" class="envelope-seal" aria-label="Открыть приглашение">
+      <span class="seal-ring" aria-hidden="true"></span>
+      <span class="seal-body" aria-hidden="true">
+        <span class="seal-text">{initials[0]}<i>&</i>{initials[1]}</span>
+      </span>
+    </button>
+    <p class="envelope-hint">нажмите на печать, чтобы открыть</p>
+  </div>
+</div>
+
+<script>
+  const envelope = document.getElementById('envelope');
+  if (envelope) {
+    document.body.style.overflow = 'hidden';
+    envelope.querySelector('button')?.addEventListener('click', () => {
+      envelope.classList.add('opened');
+      document.body.style.overflow = '';
+      // тап = жест пользователя, можно включать музыку
+      const audio = document.getElementById('music') as HTMLAudioElement | null;
+      audio?.play().catch(() => {});
+      const btn = document.getElementById('music-btn');
+      if (btn && audio && !audio.paused) btn.classList.add('playing');
+      envelope.addEventListener('transitionend', () => envelope.remove(), { once: true });
+    });
+  }
+</script>
+
+<style>
+  .envelope {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-envelope);
+    display: grid;
+    place-items: end center;
+    background: var(--bg);
+    color: var(--text);
+    isolation: isolate;
+    clip-path: circle(160% at 50% 78%);
+    transition: clip-path 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+  }
+  .envelope.opened { clip-path: circle(0% at 50% 78%); pointer-events: none; }
+  .envelope-photo { color: #fbf8f2; }
+  .envelope img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+  }
+  .envelope.opened img { transform: scale(1.08); }
+  .envelope-veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(to bottom, rgba(10, 14, 8, 0.25), transparent 35%, rgba(10, 14, 8, 0.75));
+  }
+  .envelope:not(.envelope-photo) .envelope-veil { display: none; }
+  .envelope-frame {
+    position: absolute;
+    inset: 18px;
+    border: 1px solid currentColor;
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .envelope-content {
+    position: relative;
+    text-align: center;
+    padding: 0 24px 12svh;
+    display: grid;
+    gap: 18px;
+    justify-items: center;
+  }
+  .envelope-content > * { animation: env-rise 1s var(--ease-out) both; }
+  .envelope-content > :nth-child(2) { animation-delay: 0.15s; }
+  .envelope-content > :nth-child(3) { animation-delay: 0.35s; }
+  .envelope-content > :nth-child(4) { animation-delay: 0.55s; }
+  @keyframes env-rise {
+    from { opacity: 0; transform: translateY(20px); filter: blur(6px); }
+    to { opacity: 1; transform: none; filter: none; }
+  }
+
+  .envelope-label {
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.34em;
+    font-size: 0.66rem;
+    opacity: 0.85;
+  }
+  .envelope-names {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 9vw, 3.2rem);
+    line-height: 1.1;
+    text-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  }
+  .envelope-names i {
+    font-family: var(--font-accent);
+    font-style: italic;
+    opacity: 0.85;
+  }
+
+  /* сургучная печать */
+  .envelope-seal {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    margin-top: 10px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform 0.6s var(--ease);
+  }
+  .envelope-seal:hover { transform: scale(1.04); }
+  .envelope-seal:active { transform: scale(0.96); }
+  .seal-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    opacity: 0.5;
+    animation: seal-pulse 2.6s var(--ease-out) infinite;
+  }
+  @keyframes seal-pulse {
+    0% { transform: scale(0.9); opacity: 0.6; }
+    100% { transform: scale(1.45); opacity: 0; }
+  }
+  .seal-body {
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent) 70%, white 30%), var(--accent) 45%, color-mix(in srgb, var(--accent) 75%, black 25%));
+    box-shadow:
+      inset 0 2px 4px rgba(255, 255, 255, 0.35),
+      inset 0 -4px 8px rgba(0, 0, 0, 0.25),
+      0 14px 30px -10px rgba(0, 0, 0, 0.5);
+    color: var(--accent-ink);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+  }
+  .seal-body::before {
+    content: '';
+    position: absolute;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--accent-ink) 40%, transparent);
+  }
+  .seal-text { position: relative; display: inline-flex; align-items: baseline; }
+  .seal-text i { font-family: var(--font-accent); font-style: italic; font-size: 0.7em; margin: 0 0.06em; }
+  .envelope-hint {
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .seal-ring, .envelope-content > * { animation: none; }
+    .envelope { transition: opacity 0.5s; }
+    .envelope.opened { clip-path: none; opacity: 0; }
+  }
+</style>

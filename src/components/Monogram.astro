@@ -1,0 +1,56 @@
+---
+interface Props {
+  groom: string;
+  bride: string;
+  size?: number;
+  class?: string;
+}
+const { groom, bride, size = 72, class: cls } = Astro.props;
+const initials = `${groom[0]}${bride[0]}`;
+---
+<span class:list={['monogram', cls]} style={`--s:${size}px`} aria-hidden="true">
+  <span class="monogram-ring"></span>
+  <span class="monogram-text">{initials[0]}<i>&</i>{initials[1]}</span>
+</span>
+
+<style>
+  .monogram {
+    --s: 72px;
+    position: relative;
+    width: var(--s);
+    height: var(--s);
+    display: inline-grid;
+    place-items: center;
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: calc(var(--s) * 0.34);
+    line-height: 1;
+    letter-spacing: 0.04em;
+  }
+  .monogram-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    opacity: 0.7;
+  }
+  .monogram-ring::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    opacity: 0.35;
+  }
+  .monogram-text { position: relative; display: inline-flex; align-items: baseline; }
+  .monogram-text i {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 0.7em;
+    margin: 0 0.06em;
+    opacity: 0.85;
+  }
+  /* editorial — квадратная монограмма вместо круглой */
+  :global(body[data-theme='editorial']) .monogram-ring,
+  :global(body[data-theme='editorial']) .monogram-ring::after { border-radius: 0; }
+</style>

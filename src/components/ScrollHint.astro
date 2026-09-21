@@ -1,0 +1,52 @@
+---
+// подсказка «листать»: бегущая точка в тонкой линии
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+---
+<a href="#content" class:list={['scroll-hint', cls]} aria-label="Листать вниз">
+  <span class="scroll-hint-text">листать</span>
+  <span class="scroll-hint-line" aria-hidden="true"><i></i></span>
+</a>
+
+<style>
+  .scroll-hint {
+    display: inline-grid;
+    justify-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    opacity: 0.75;
+    padding: 8px 16px;
+    transition: opacity 0.4s var(--ease);
+  }
+  .scroll-hint:hover { opacity: 1; }
+  .scroll-hint-text {
+    font-family: var(--font-label);
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  .scroll-hint-line {
+    width: 1px;
+    height: 44px;
+    background: currentColor;
+    opacity: 0.35;
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-hint-line i {
+    position: absolute;
+    left: -1px;
+    top: 0;
+    width: 3px;
+    height: 12px;
+    border-radius: 2px;
+    background: currentColor;
+    animation: hint-run 1.8s var(--ease) infinite;
+  }
+  @keyframes hint-run {
+    0% { transform: translateY(-14px); opacity: 0; }
+    30% { opacity: 1; }
+    100% { transform: translateY(48px); opacity: 0; }
+  }
+</style>

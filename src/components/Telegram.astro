@@ -1,0 +1,33 @@
+---
+import Section from './Section.astro';
+interface Props {
+  url: string;
+  text: string;
+}
+const { url, text } = Astro.props;
+---
+
+<Section variant="surface" narrow>
+  <div class="tg plate">
+    <div class="plate-inner">
+      <svg class="tg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 3 3 10.5l6.5 2.2L12 20l9-17Z" /><path d="M9.5 12.7 21 3" />
+      </svg>
+      <p class="eyebrow">чат праздника</p>
+      <p class="tg-text">{text}</p>
+      <a class="btn" href={url} target="_blank" rel="noopener">
+        Вступить в чат
+        <span class="btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 12 12 4M6 4h6v6" /></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .tg .plate-inner { display: grid; justify-items: center; text-align: center; gap: 14px; }
+  .tg-icon { width: 34px; height: 34px; color: var(--accent); }
+  .tg-text { max-width: 38ch; }
+  .tg .btn { margin-top: 6px; }
+</style>

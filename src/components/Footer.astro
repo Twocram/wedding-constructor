@@ -1,0 +1,53 @@
+---
+import Monogram from './Monogram.astro';
+interface Props {
+  groom: string;
+  bride: string;
+  date: string;
+}
+const { groom, bride, date } = Astro.props;
+---
+
+<footer class="foot fade-up">
+  <Monogram groom={groom} bride={bride} size={88} />
+  <p class="foot-names">{groom} <i>&</i> {bride}</p>
+  <p class="foot-date">{date}</p>
+  <p class="foot-note">Ждём вас с любовью</p>
+</footer>
+
+<style>
+  .foot {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    text-align: center;
+    padding: clamp(72px, 12vw, 120px) 24px clamp(56px, 9vw, 88px);
+    border-top: 1px solid var(--line);
+  }
+  .foot-names {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+    line-height: 1.2;
+  }
+  .foot-names i {
+    font-family: var(--font-accent);
+    font-style: italic;
+    color: var(--accent);
+    margin: 0 0.1em;
+  }
+  .foot-date {
+    font-family: var(--font-label);
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .foot-note {
+    margin-top: 20px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--text-2);
+  }
+  :global(body[data-theme='amalfi']) .foot-note { font-family: var(--font-accent); font-size: 1.3rem; }
+</style>

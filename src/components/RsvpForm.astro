@@ -1,0 +1,89 @@
+---
+import Section from './Section.astro';
+interface Props {
+  deadline: string;
+  photo?: string;
+}
+const { deadline, photo } = Astro.props;
+const botToken = import.meta.env.PUBLIC_TG_BOT_TOKEN ?? '';
+const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
+---
+
+<Section id="rsvp" eyebrow="Анкета гостя" title="Подтвердите присутствие" variant={photo ? 'photo' : 'plain'} photo={photo} narrow>
+  <p class="rsvp-intro">Пожалуйста, ответьте до <strong>{deadline}</strong> — так нам будет проще всё подготовить.</p>
+  <div class="plate rsvp-plate">
+    <form id="rsvp-form" class="plate-inner" novalidate>
+      <label class="field">
+        <span>Имя и фамилия</span>
+        <input name="name" type="text" required autocomplete="name" placeholder="Как к вам обращаться" />
+      </label>
+      <fieldset class="field">
+        <span>Сможете ли вы присутствовать?</span>
+        <div class="choice-group">
+          <label class="choice">
+            <input type="radio" name="attending" value="Приду" required />
+            <strong>С радостью приду</strong>
+            <small>Будем ждать вас в этот день</small>
+          </label>
+          <label class="choice">
+            <input type="radio" name="attending" value="Не смогу" />
+            <strong>К сожалению, не смогу</strong>
+            <small>Мы всё равно вас любим</small>
+          </label>
+        </div>
+      </fieldset>
+      <label class="field">
+        <span>Пожелания, аллергии</span>
+        <textarea name="notes" rows="3" placeholder="Предпочтения по еде, напиткам, музыке — всё, что нам стоит знать"></textarea>
+      </label>
+      <button type="submit" class="btn btn--block">
+        Отправить ответ
+        <span class="btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+        </span>
+      </button>
+      <p class="form-status" role="status"></p>
+    </form>
+  </div>
+</Section>
+
+<script define:vars={{ botToken, chatId }}>
+  // ponytail: токен бота виден в клиенте, для MVP-демо ок; на этапе 3 — отправка через свой server endpoint
+  const form = document.getElementById('rsvp-form');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const status = form.querySelector('.form-status');
+    if (!form.reportValidity()) {
+      status.textContent = 'Заполните имя и выберите ответ.';
+      return;
+    }
+    const button = form.querySelector('button[type="submit"]');
+    const data = new FormData(form);
+    const text = `RSVP\nИмя: ${data.get('name')}\nОтвет: ${data.get('attending')}\nПожелания: ${data.get('notes') || '—'}`;
+    button.disabled = true;
+    status.textContent = 'Отправляем…';
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text }),
+      });
+      if (!res.ok) throw new Error();
+      status.textContent = 'Спасибо. Ваш ответ получен.';
+      form.reset();
+    } catch {
+      status.textContent = 'Не удалось отправить. Попробуйте ещё раз.';
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .rsvp-intro { max-width: 36ch; margin: -20px auto 36px; }
+  .rsvp-plate { text-align: left; }
+  .rsvp-plate form { display: grid; gap: 22px; }
+  .rsvp-plate fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  .rsvp-plate .btn { margin-top: 6px; }
+  .rsvp-plate .form-status { margin-top: -10px; }
+</style>

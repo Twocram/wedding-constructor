@@ -1,0 +1,106 @@
+---
+import Section from './Section.astro';
+interface Item {
+  time: string;
+  title: string;
+  text?: string;
+}
+interface Props {
+  items: Item[];
+}
+const { items } = Astro.props;
+---
+
+<Section eyebrow="Программа" title="Как пройдёт день" narrow>
+  <ol class="timeline">
+    {items.map((item, i) => (
+      <li class="fade-up" style={`--i:${i + 1}`}>
+        <span class="tl-time">{item.time}</span>
+        <span class="tl-dot" aria-hidden="true"></span>
+        <div class="tl-body">
+          <h3>{item.title}</h3>
+          {item.text && <p>{item.text}</p>}
+        </div>
+      </li>
+    ))}
+  </ol>
+</Section>
+
+<style>
+  .timeline {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    display: grid;
+    gap: 0;
+    position: relative;
+  }
+  .timeline li {
+    display: grid;
+    grid-template-columns: 72px 24px 1fr;
+    gap: 0 14px;
+    align-items: start;
+    position: relative;
+    padding-bottom: 36px;
+  }
+  .timeline li:last-child { padding-bottom: 0; }
+  /* вертикальная нить программы */
+  .timeline li::before {
+    content: '';
+    position: absolute;
+    left: calc(72px + 14px + 11.5px);
+    top: 22px;
+    bottom: -6px;
+    width: 1px;
+    background: linear-gradient(var(--line-strong), var(--line));
+  }
+  .timeline li:last-child::before { display: none; }
+  .tl-time {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.3;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    letter-spacing: 0.02em;
+  }
+  .tl-dot {
+    width: 24px;
+    height: 24px;
+    margin-top: 6px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    position: relative;
+    z-index: 1;
+  }
+  .tl-dot::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .tl-body h3 {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    padding-top: 4px;
+  }
+  .tl-body p { margin-top: 4px; font-size: 0.98rem; color: var(--text-2); }
+  :global(body[data-theme='editorial']) .tl-time { font-style: italic; font-weight: 300; font-size: 1.75rem; }
+  :global(body[data-theme='amalfi']) .tl-time { font-size: 1.25rem; font-family: var(--font-label); }
+  :global(body[data-theme='amalfi']) .tl-dot { background: var(--surface); }
+  /* формы маркеров: editorial — квадрат, amalfi — ромб */
+  :global(body[data-theme='editorial']) .tl-dot { border-radius: 0; }
+  :global(body[data-theme='amalfi']) .tl-dot { border-radius: 4px; transform: rotate(45deg); }
+  @media (max-width: 420px) {
+    .timeline li { grid-template-columns: 56px 24px 1fr; gap: 0 10px; }
+    .timeline li::before { left: calc(56px + 10px + 11.5px); }
+    .tl-time { font-size: 1.25rem; }
+  }
+</style>

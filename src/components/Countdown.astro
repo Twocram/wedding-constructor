@@ -1,0 +1,77 @@
+---
+interface Props {
+  target: string; // ISO-дата
+}
+const { target } = Astro.props;
+---
+
+<section class="section countdown fade-up" data-target={target}>
+  <div class="wrap">
+    <p class="eyebrow">до свадьбы осталось</p>
+    <div class="countdown-grid">
+      <div><span data-unit="days">–</span><small>дней</small></div>
+      <div><span data-unit="hours">–</span><small>часов</small></div>
+      <div><span data-unit="minutes">–</span><small>минут</small></div>
+      <div><span data-unit="seconds">–</span><small>секунд</small></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.countdown').forEach((el) => {
+    const target = new Date(el.dataset.target ?? '').getTime();
+    if (Number.isNaN(target)) return;
+    const q = (u: string) => el.querySelector(`[data-unit="${u}"]`)!;
+    const units = { days: q('days'), hours: q('hours'), minutes: q('minutes'), seconds: q('seconds') };
+    const tick = () => {
+      const diff = Math.max(0, target - Date.now());
+      units.days.textContent = String(Math.floor(diff / 864e5));
+      units.hours.textContent = String(Math.floor(diff / 36e5) % 24).padStart(2, '0');
+      units.minutes.textContent = String(Math.floor(diff / 6e4) % 60).padStart(2, '0');
+      units.seconds.textContent = String(Math.floor(diff / 1e3) % 60).padStart(2, '0');
+    };
+    tick();
+    setInterval(tick, 1000);
+  });
+</script>
+
+<style>
+  .countdown { padding-top: clamp(56px, 9vw, 96px); padding-bottom: clamp(56px, 9vw, 96px); }
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 28px;
+  }
+  .countdown-grid div {
+    display: grid;
+    gap: 2px;
+    padding: 8px 4px;
+    position: relative;
+  }
+  /* волосяные разделители вместо коробок */
+  .countdown-grid div + div::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18%;
+    height: 64%;
+    width: 1px;
+    background: var(--line-strong);
+  }
+  .countdown-grid span {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 10vw, 4rem);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .countdown-grid small {
+    font-family: var(--font-label);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+  }
+  :global(body[data-theme='amalfi']) .countdown-grid span { color: var(--accent-2); }
+  :global(body[data-theme='editorial']) .countdown-grid span { font-weight: 300; }
+</style>

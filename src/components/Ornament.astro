@@ -1,0 +1,27 @@
+---
+// разделитель секций; знак зависит от темы:
+// cover — ромб с листками, editorial — журнальное двойное правило, amalfi — ар-деко веер
+---
+<svg class="ornament" viewBox="0 0 128 14" fill="none" aria-hidden="true">
+  <g class="orn orn--cover">
+    <path d="M0 7h46M82 7h46" stroke="currentColor" stroke-opacity="0.6" />
+    <path d="M64 1.5 69.5 7 64 12.5 58.5 7Z" stroke="currentColor" />
+    <path d="M52 7c2.5-3 5-3 7.5 0-2.5 3-5 3-7.5 0ZM76 7c-2.5-3-5-3-7.5 0 2.5 3 5 3 7.5 0Z" fill="currentColor" fill-opacity="0.75" />
+  </g>
+  <g class="orn orn--editorial">
+    <path d="M0 4h128M0 10h128" stroke="currentColor" stroke-opacity="0.7" />
+  </g>
+  <g class="orn orn--amalfi">
+    <path d="M0 7h42M86 7h42" stroke="currentColor" stroke-opacity="0.5" />
+    <path d="M64 1l6 6-6 6-6-6Z" stroke="currentColor" />
+    <path d="M50 7l5-4M50 7l5 4M78 7l-5-4M78 7l-5 4" stroke="currentColor" stroke-opacity="0.8" />
+  </g>
+</svg>
+
+<style>
+  .orn--editorial, .orn--amalfi { display: none; }
+  :global(body[data-theme='editorial']) .orn--cover { display: none; }
+  :global(body[data-theme='editorial']) .orn--editorial { display: block; }
+  :global(body[data-theme='amalfi']) .orn--cover { display: none; }
+  :global(body[data-theme='amalfi']) .orn--amalfi { display: block; }
+</style>

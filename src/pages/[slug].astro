@@ -36,7 +36,7 @@ const Hero = heroes[inv.theme];
   {/* без JS конверт бы навсегда закрыл страницу */}
   {inv.envelope && <noscript><style is:inline>.envelope{display:none!important}</style></noscript>}
 
-  <Hero groom={inv.groom} bride={inv.bride} date={inv.date} heroPhoto={inv.heroPhoto} />
+  <Hero groom={inv.groom} bride={inv.bride} date={inv.date} heroPhoto={inv.heroPhoto} countdown={inv.countdown} />
 
   <main id="content">
     {inv.countdown && <Countdown target={inv.countdown} />}

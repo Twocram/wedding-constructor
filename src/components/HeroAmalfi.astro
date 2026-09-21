@@ -5,8 +5,23 @@ interface Props {
   bride: string;
   date: string;
   heroPhoto?: string;
+  countdown?: string;
 }
-const { groom, bride, date, heroPhoto } = Astro.props;
+const { groom, bride, date, heroPhoto, countdown } = Astro.props;
+
+// луна с реальной фазой на ночь свадьбы: считается на билде по ISO-дате countdown
+let moonPath: string | null = null;
+if (countdown) {
+  const synodic = 29.530588853;
+  const epoch = Date.UTC(2000, 0, 6, 18, 14); // известное новолуние
+  const days = (new Date(countdown).getTime() - epoch) / 86400000;
+  const p = (((days % synodic) + synodic) % synodic) / synodic;
+  const c = 30, r = 26;
+  const t = Math.cos(2 * Math.PI * p);
+  const rx = (Math.abs(t) * r).toFixed(2);
+  // освещённая область: внешний полукруг + дуга-терминатор
+  moonPath = `M ${c} ${c - r} A ${r} ${r} 0 0 ${p < 0.5 ? 1 : 0} ${c} ${c + r} A ${rx} ${r} 0 0 ${t > 0 ? 0 : 1} ${c} ${c - r}`;
+}
 // детерминированный псевдорандом (SSR-стабильный): 42 звезды вместо россыпи nth-child
 const rand = (seed: number) => {
   const x = Math.sin(seed * 127.1) * 43758.5453;
@@ -27,6 +42,14 @@ const stars = Array.from({ length: 42 }, (_, i) => ({
       <i class:list={[{ big: s.big }]} style={`left:${s.left}%;top:${s.top}%;--d:${s.d}s;animation-delay:${s.delay}s`} />
     ))}
   </div>
+  {moonPath && (
+    <svg class="moon" viewBox="0 0 60 60" role="img" aria-label="Луна в ночь свадьбы">
+      <title>Такой будет луна в ночь свадьбы</title>
+      <circle cx="30" cy="30" r="26" fill="#17293d" stroke="rgba(232,201,135,0.25)" stroke-width="1" />
+      <path d={moonPath} fill="#f0e6cd" />
+    </svg>
+  )}
+  <b class="shooting" aria-hidden="true"></b>
   <div class="hero-am-glow" aria-hidden="true"></div>
 
   <div class="hero-am-text">
@@ -158,6 +181,36 @@ const stars = Array.from({ length: 42 }, (_, i) => ({
     50% { opacity: 0.9; transform: scale(1); }
   }
 
+  /* луна с фазой дня свадьбы */
+  .moon {
+    position: absolute;
+    top: 9%;
+    right: 10%;
+    z-index: -1;
+    width: clamp(44px, 9vw, 64px);
+    filter: drop-shadow(0 0 16px rgba(240, 230, 205, 0.35));
+  }
+
+  /* редкая падающая звезда */
+  .shooting {
+    position: absolute;
+    top: 20%;
+    left: 80%;
+    z-index: -1;
+    width: 130px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), transparent);
+    transform: rotate(148deg);
+    opacity: 0;
+    animation: shoot 11s linear infinite;
+  }
+  @keyframes shoot {
+    0% { opacity: 0; transform: rotate(148deg) translateX(0); }
+    1.5% { opacity: 1; }
+    8%, 100% { opacity: 0; transform: rotate(148deg) translateX(360px); }
+  }
+
   .hero-am > :not(.stars):not(.hero-am-glow) { animation: am-rise 1.1s var(--ease-out) both; }
   .hero-am-figure { animation-delay: 0.35s !important; }
   .hero-am-hint { animation-delay: 0.7s !important; }
@@ -183,7 +236,7 @@ const stars = Array.from({ length: 42 }, (_, i) => ({
     .hero-am-hint { grid-area: hint; justify-self: center; margin-top: 48px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .stars { display: none; }
+    .stars, .shooting { display: none; }
     .hero-am > *, .hero-am-frame img { animation: none !important; }
   }
 </style>

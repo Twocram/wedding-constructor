@@ -9,6 +9,7 @@ const invitations = defineCollection({
     groom: z.string(),
     bride: z.string(),
     date: z.string(), // "3 октября 2026"
+    city: z.string().optional(), // город для первого экрана
     heroPhoto: z.string().optional(),
     welcome: z.string().optional(),
     venue: z.object({

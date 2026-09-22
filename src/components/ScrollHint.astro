@@ -3,8 +3,8 @@
 interface Props { class?: string }
 const { class: cls } = Astro.props;
 ---
-<a href="#content" class:list={['scroll-hint', cls]} aria-label="Листать вниз">
-  <span class="scroll-hint-text">листать</span>
+<a href="#content" class:list={['scroll-hint', cls]} aria-label="Открыть приглашение">
+  <span class="scroll-hint-text">открыть приглашение</span>
   <span class="scroll-hint-line" aria-hidden="true"><i></i></span>
 </a>
 

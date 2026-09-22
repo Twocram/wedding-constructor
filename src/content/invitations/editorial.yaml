@@ -2,12 +2,13 @@ theme: editorial
 groom: Александр
 bride: Мария
 date: 12 сентября 2026
+city: Москва
 heroPhoto: /photos/story/story-11.jpg
 gallery:
   - /photos/story/story-7.jpg
   - /photos/story/story-10.jpg
   - /photos/story/story-3.jpg
-welcome: Однажды мы встретили друг друга — и всё изменилось. Теперь мы хотим, чтобы самый важный день в нашей жизни мы провели вместе с вами, нашими самыми дорогими людьми.
+welcome: Самый важный день нашей жизни хотим провести с вами — нашими самыми дорогими людьми.
 venue:
   name: Ресторан «Летний сад»
   address: г. Москва, наб. Реки Летней, 12

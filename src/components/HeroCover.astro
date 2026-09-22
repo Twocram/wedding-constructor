@@ -5,9 +5,10 @@ interface Props {
   groom: string;
   bride: string;
   date: string;
+  city?: string;
   heroPhoto?: string;
 }
-const { groom, bride, date, heroPhoto } = Astro.props;
+const { groom, bride, date, city, heroPhoto } = Astro.props;
 ---
 
 <header class="hero">
@@ -29,7 +30,7 @@ const { groom, bride, date, heroPhoto } = Astro.props;
       <span class="hero-amp">&</span>
       <span class="hero-name">{bride}</span>
     </h1>
-    <p class="hero-date"><span>{date}</span></p>
+    <p class="hero-date"><span>{date}{city && ` · ${city}`}</span></p>
     <ScrollHint />
   </div>
 </header>

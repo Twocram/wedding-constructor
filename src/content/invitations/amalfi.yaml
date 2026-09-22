@@ -2,6 +2,7 @@ theme: amalfi
 groom: Маттео
 bride: София
 date: 20 июня 2027
+city: Амальфи, Италия
 countdown: "2027-06-20T18:00:00"
 heroPhoto: /photos/amalfi.jpg
 gallery:
@@ -9,7 +10,7 @@ gallery:
   - /photos/story/story-8.jpg
   - /photos/sunset.jpg
   - /photos/story/story-12.jpg
-welcome: Приглашаем вас на вечер у моря — скажем друг другу «да» на закате, а потом будем танцевать под звёздами.
+welcome: Скажем друг другу «да» на закате — и будем танцевать под звёздами.
 venue:
   name: Вилла «Лимония»
   address: побережье Амальфи, Италия

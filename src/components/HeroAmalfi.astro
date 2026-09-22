@@ -4,9 +4,10 @@ interface Props {
   groom: string;
   bride: string;
   date: string;
+  city?: string;
   heroPhoto?: string;
 }
-const { groom, bride, date, heroPhoto } = Astro.props;
+const { groom, bride, date, city, heroPhoto } = Astro.props;
 // детерминированный псевдорандом (SSR-стабильный): 42 звезды вместо россыпи nth-child
 const rand = (seed: number) => {
   const x = Math.sin(seed * 127.1) * 43758.5453;
@@ -30,7 +31,7 @@ const stars = Array.from({ length: 42 }, (_, i) => ({
   <div class="hero-am-glow" aria-hidden="true"></div>
 
   <div class="hero-am-text">
-    <p class="hero-am-date">{date}</p>
+    <p class="hero-am-date">{date}{city && ` · ${city}`}</p>
     <h1>
       <span class="hero-am-name">{groom}</span>
       <span class="hero-am-amp">&</span>

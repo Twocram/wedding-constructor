@@ -1,0 +1,38 @@
+theme: ticket
+groom: Илья
+bride: Полина
+date: 18 апреля 2027
+city: Лиссабон
+countdown: "2027-04-18T16:00:00"
+heroPhoto: /photos/hero.jpg
+gallery:
+  - /photos/story/story-6.jpg
+  - /photos/story/story-8.jpg
+  - /photos/story/story-12.jpg
+  - /photos/amalfi.jpg
+welcome: Рейс «в семью» объявлен на посадку — летим свадьбой в Лиссабон.
+venue:
+  name: Палацету в Белене
+  address: Лиссабон, Португалия
+timeline:
+  - time: "15:00"
+    title: Посадка
+    text: Welcome-дринки на террасе.
+  - time: "16:00"
+    title: Взлёт
+    text: Церемония под пастельное небо.
+  - time: "17:30"
+    title: Полёт
+    text: Ужин, тосты и танцы до полуночи.
+dressCode:
+  text: "Дресс-код — пастель и лён: мы в тёплых краях. Белый — только невесте."
+  colors: ["#f3efe6", "#e0d8c4", "#d96a4f", "#77808c", "#25303c"]
+wishes:
+  - Ваше присутствие — лучший багаж этого рейса.
+  - Вместо цветов — бутылка вин Verde для наших закатов.
+rsvp:
+  deadline: 18.03.2027
+organizer:
+  name: Беатрис
+  phone: "+351 912 345 678"
+music: /music/song.mp3

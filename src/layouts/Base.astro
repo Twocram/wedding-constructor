@@ -2,7 +2,7 @@
 interface Props {
   title: string;
   description?: string;
-  theme?: 'cover' | 'editorial' | 'amalfi' | 'deco';
+  theme?: 'cover' | 'editorial' | 'amalfi' | 'deco' | 'ticket';
   image?: string;
 }
 const { title, description = 'Приглашение на свадьбу', theme = 'cover', image } = Astro.props;
@@ -18,6 +18,8 @@ const fontSets: Record<string, string> = {
     'https://fonts.googleapis.com/css2?family=Prata&family=Tenor+Sans&family=Cormorant+Garamond:ital@1&family=Jost:wght@300;400;500&display=swap',
   deco:
     'https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&display=swap',
+  ticket:
+    'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,500&family=Space+Mono:wght@400;700&family=Jost:wght@300;400;500&display=swap',
 };
 // favicon: «&» в акцентном цвете темы
 const accents: Record<string, [string, string]> = {
@@ -25,9 +27,10 @@ const accents: Record<string, [string, string]> = {
   editorial: ['%23f4efe6', '%237a6a57'],
   amalfi: ['%230c1520', '%23d2a552'],
   deco: ['%23141311', '%23c9a227'],
+  ticket: ['%23f3efe6', '%23c2452d'],
 };
 const [favBg, favFg] = accents[theme];
-const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520', deco: '#141311' };
+const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520', deco: '#141311', ticket: '#f3efe6' };
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -239,6 +242,34 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   body[data-theme='deco'] .plate > .plate-inner {
     background: var(--surface);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), var(--shadow);
+  }
+
+  body[data-theme='ticket'] {
+    --bg: #f3efe6;
+    --surface: #eae4d3;
+    --surface-2: #e0d8c4;
+    --text: #25303c;
+    --text-2: #4d5764;
+    --muted: #77808c;
+    --accent: #c2452d;
+    --accent-2: #d96a4f;
+    --accent-ink: #fdf9ef;
+    --line: rgba(37, 48, 60, 0.14);
+    --line-strong: rgba(37, 48, 60, 0.34);
+    --shadow: 0 24px 48px -24px rgba(37, 48, 60, 0.35), 0 8px 20px -12px rgba(37, 48, 60, 0.15);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-label: 'Space Mono', ui-monospace, monospace;
+    --grain-opacity: 0.05;
+  }
+  /* билетная пунктирность: все карточки с рваным краем */
+  body[data-theme='ticket'] .plate {
+    border-style: dashed;
+    border-color: var(--line-strong);
+  }
+  body[data-theme='ticket'] .field input,
+  body[data-theme='ticket'] .field textarea,
+  body[data-theme='ticket'] .choice {
+    border-style: dashed;
   }
 
   * { margin: 0; box-sizing: border-box; }

@@ -9,21 +9,17 @@ const botToken = import.meta.env.PUBLIC_TG_BOT_TOKEN ?? '';
 const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
 ---
 
-<Section id="rsvp" eyebrow="Анкета гостя" title="Подтвердите присутствие" variant={photo ? 'photo' : 'plain'} photo={photo} narrow>
+<Section id="rsvp" eyebrow="Анкета гостя" title="Будете с нами?" variant={photo ? 'photo' : 'plain'} photo={photo} narrow>
   <p class="rsvp-intro">Пожалуйста, ответьте до <strong>{deadline}</strong> — так нам будет проще всё подготовить.</p>
   <div class="plate rsvp-plate">
     <form id="rsvp-form" class="plate-inner" novalidate>
-      <label class="field">
-        <span>Имя и фамилия</span>
-        <input name="name" type="text" required autocomplete="name" placeholder="Как к вам обращаться" />
-      </label>
       <fieldset class="field">
         <span>Сможете ли вы присутствовать?</span>
         <div class="choice-group">
           <label class="choice">
             <input type="radio" name="attending" value="Приду" required />
-            <strong>С радостью приду</strong>
-            <small>Будем ждать вас в этот день</small>
+            <strong>Да, я буду</strong>
+            <small>Ждём вас в этот день</small>
           </label>
           <label class="choice">
             <input type="radio" name="attending" value="Не смогу" />
@@ -32,6 +28,10 @@ const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
           </label>
         </div>
       </fieldset>
+      <label class="field">
+        <span>Имя и фамилия</span>
+        <input name="name" type="text" required autocomplete="name" placeholder="Как к вам обращаться" />
+      </label>
       <label class="field">
         <span>Пожелания, аллергии</span>
         <textarea name="notes" rows="3" placeholder="Предпочтения по еде, напиткам, музыке — всё, что нам стоит знать"></textarea>

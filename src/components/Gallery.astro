@@ -4,91 +4,47 @@ interface Props {
   photos: string[];
 }
 const { photos } = Astro.props;
+const total = String(photos.length).padStart(2, '0');
 ---
 
 <Section eyebrow="Наша история" title="Несколько моментов">
-  <div class="gallery" tabindex="0" aria-label="Галерея фотографий">
+  <div class="gallery">
     {photos.map((p, i) => (
-      <figure class="fade-up" style={`--i:${i}`}>
-        <img src={p} alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+      <figure class:list={['fade-up', { wide: i === 0 }]} style={`--i:${i}`}>
+        <img src={p} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+        <figcaption>{String(i + 1).padStart(2, '0')} / {total}</figcaption>
       </figure>
     ))}
   </div>
-  <div class="gallery-bar" aria-hidden="true"><i></i></div>
 </Section>
 
-<script>
-  // индикатор прогресса по горизонтальному скроллу
-  document.querySelectorAll<HTMLElement>('.gallery').forEach((gal) => {
-    const bar = gal.parentElement?.querySelector<HTMLElement>('.gallery-bar i');
-    if (!bar) return;
-    const update = () => {
-      const max = gal.scrollWidth - gal.clientWidth;
-      const p = max > 0 ? gal.scrollLeft / max : 0;
-      const w = Math.max(0.2, gal.clientWidth / gal.scrollWidth);
-      bar.style.width = `${w * 100}%`;
-      bar.style.transform = `translateX(${(p * (1 - w) * 100) / w}%)`;
-    };
-    gal.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    update();
-  });
-</script>
-
 <style>
+  /* одно широкое фото + асимметричная пара ниже — журнальная вёрстка */
   .gallery {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding: 0 24px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    margin: 0 -24px;
-    padding: 0 24px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(16px, 3vw, 28px);
   }
-  .gallery::-webkit-scrollbar { display: none; }
-  .gallery figure {
-    flex: 0 0 74%;
-    scroll-snap-align: center;
-    padding: 6px;
-    border: 1px solid var(--line);
-    border-radius: var(--r-lg);
-    background: color-mix(in srgb, var(--text) 3%, transparent);
-  }
-  /* арка на каждой третьей — форма разная, уровень один */
-  .gallery figure:nth-child(3n + 1) { border-radius: 200px 200px var(--r-lg) var(--r-lg); }
-  .gallery figure:nth-child(3n + 1) img { border-radius: 194px 194px calc(var(--r-lg) - 6px) calc(var(--r-lg) - 6px); }
+  .gallery figure { margin: 0; }
+  .gallery .wide { grid-column: 1 / -1; }
   .gallery img {
     width: 100%;
-    aspect-ratio: 3 / 4;
     object-fit: cover;
     border-radius: calc(var(--r-lg) - 6px);
     box-shadow: var(--shadow);
   }
-  @media (min-width: 720px) {
-    .gallery figure { flex-basis: 40%; }
+  .gallery .wide img { aspect-ratio: 16 / 10; }
+  .gallery figure:not(.wide) img { aspect-ratio: 3 / 4; }
+  .gallery figcaption {
+    margin-top: 10px;
+    text-align: left;
+    font-family: var(--font-label);
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    color: var(--muted);
   }
-  /* editorial — строгая сетка без арок; amalfi — арка на каждом фото */
-  :global(body[data-theme='editorial']) .gallery figure:nth-child(3n + 1),
-  :global(body[data-theme='editorial']) .gallery figure:nth-child(3n + 1) img { border-radius: 0; }
-  :global(body[data-theme='amalfi']) .gallery figure { border-radius: 200px 200px var(--r-lg) var(--r-lg); }
-  :global(body[data-theme='amalfi']) .gallery img { border-radius: 194px 194px calc(var(--r-lg) - 6px) calc(var(--r-lg) - 6px); }
-  .gallery-bar {
-    width: 140px;
-    height: 2px;
-    margin: 0 auto;
-    background: var(--line);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .gallery-bar i {
-    display: block;
-    height: 100%;
-    width: 30%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: transform 0.2s linear, width 0.2s linear;
+  @media (min-width: 640px) {
+    /* правая колонка опущена — асимметрия */
+    .gallery figure:nth-child(odd):not(.wide) { margin-top: clamp(32px, 7vw, 72px); }
   }
 </style>

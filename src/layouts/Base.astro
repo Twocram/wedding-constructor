@@ -2,7 +2,7 @@
 interface Props {
   title: string;
   description?: string;
-  theme?: 'cover' | 'editorial' | 'amalfi';
+  theme?: 'cover' | 'editorial' | 'amalfi' | 'deco';
   image?: string;
 }
 const { title, description = 'Приглашение на свадьбу', theme = 'cover', image } = Astro.props;
@@ -16,15 +16,18 @@ const fontSets: Record<string, string> = {
     'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap',
   amalfi:
     'https://fonts.googleapis.com/css2?family=Prata&family=Tenor+Sans&family=Cormorant+Garamond:ital@1&family=Jost:wght@300;400;500&display=swap',
+  deco:
+    'https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&display=swap',
 };
 // favicon: «&» в акцентном цвете темы
 const accents: Record<string, [string, string]> = {
   cover: ['%23f6f2ea', '%2378865a'],
   editorial: ['%23f4efe6', '%237a6a57'],
   amalfi: ['%230c1520', '%23d2a552'],
+  deco: ['%23141311', '%23c9a227'],
 };
 const [favBg, favFg] = accents[theme];
-const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520' };
+const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520', deco: '#141311' };
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -73,7 +76,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
         gsap.registerPlugin(ScrollTrigger);
 
         // hero-фото: глушим CSS-зум (конфликт transform), GSAP совмещает зум + параллакс
-        const hero = document.querySelector('header.hero, header.hero-ed, header.hero-am');
+        const hero = document.querySelector('header.hero, header.hero-ed, header.hero-am, header.hero-deco');
         const heroImg = hero?.querySelector<HTMLElement>('.hero-photo, .hero-ed-arch img, .hero-am-frame img');
         if (heroImg && hero) {
           heroImg.style.animation = 'none';
@@ -97,7 +100,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
         }
 
         // контент hero уплывает вверх и тает при скролле
-        const heroContent = hero?.querySelector<HTMLElement>('.hero-content, .hero-ed-text, .hero-am-text');
+        const heroContent = hero?.querySelector<HTMLElement>('.hero-content, .hero-ed-text, .hero-am-text, .hero-deco-content');
         if (hero && heroContent) {
           // ждём CSS-интро: fill-режим анимации перекрывает inline-стили GSAP
           gsap.delayedCall(2, () => {
@@ -196,6 +199,46 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     --img-outline: rgba(255, 255, 255, 0.1);
     --grain-opacity: 0.09;
     color-scheme: dark;
+  }
+
+  body[data-theme='deco'] {
+    --bg: #141311;
+    --surface: #1c1a16;
+    --surface-2: #24211b;
+    --text: #efe9da;
+    --text-2: #b4ab99;
+    --muted: #878072;
+    --accent: #c9a227;
+    --accent-2: #e6cd7f;
+    --accent-ink: #141311;
+    --line: rgba(239, 233, 218, 0.12);
+    --line-strong: rgba(201, 162, 39, 0.42);
+    --shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.85), 0 10px 24px -14px rgba(0, 0, 0, 0.55);
+    --font-display: 'Marcellus', Georgia, serif;
+    --font-label: 'Marcellus', var(--font-body);
+    --r-lg: 0;
+    --r-md: 0;
+    --r-btn: 0;
+    --r-swatch: 0;
+    --img-outline: rgba(201, 162, 39, 0.25);
+    --grain-opacity: 0.08;
+    color-scheme: dark;
+  }
+  body[data-theme='deco'] .section h2 {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  body[data-theme='deco'] .btn {
+    background: linear-gradient(180deg, var(--accent-2), var(--accent));
+  }
+  body[data-theme='deco'] .plate {
+    background: rgba(201, 162, 39, 0.05);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  body[data-theme='deco'] .plate > .plate-inner {
+    background: var(--surface);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), var(--shadow);
   }
 
   * { margin: 0; box-sizing: border-box; }

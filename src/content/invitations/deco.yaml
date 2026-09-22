@@ -1,0 +1,38 @@
+theme: deco
+groom: Степан
+bride: Анна
+date: 5 декабря 2026
+city: Москва
+countdown: "2026-12-05T17:00:00"
+heroPhoto: /photos/sunset.jpg
+gallery:
+  - /photos/sunset.jpg
+  - /photos/story/story-1.jpg
+  - /photos/story/story-3.jpg
+  - /photos/story/story-9.jpg
+welcome: Вечер в стиле ар-деко — скажем «да» под джаз и хрусталь.
+venue:
+  name: Особняк на Мойке
+  address: наб. реки Мойки, 40
+timeline:
+  - time: "16:00"
+    title: Welcome
+    text: Шампанское и джаз-бэнд.
+  - time: "17:00"
+    title: Церемония
+    text: Главный момент вечера.
+  - time: "18:00"
+    title: Ужин
+    text: Тосты, танцы и чарльстон.
+dressCode:
+  text: "Black tie с оттенком Гэтсби: чёрный, золото, блеск. Перья и браслеты приветствуются."
+  colors: ["#141311", "#3a332a", "#c9a227", "#e6cd7f", "#efe9da"]
+wishes:
+  - Ваше присутствие — лучший подарок.
+  - Вместо цветов — бутылка вина для нашей коллекции.
+rsvp:
+  deadline: 05.11.2026
+organizer:
+  name: Маргарита
+  phone: "+7 (921) 555-01-23"
+music: /music/song.mp3

@@ -8,6 +8,7 @@ import RsvpForm from '../components/RsvpForm.astro';
 import HeroCover from '../components/HeroCover.astro';
 import HeroEditorial from '../components/HeroEditorial.astro';
 import HeroAmalfi from '../components/HeroAmalfi.astro';
+import HeroDeco from '../components/HeroDeco.astro';
 import Countdown from '../components/Countdown.astro';
 import Gallery from '../components/Gallery.astro';
 import Envelope from '../components/Envelope.astro';
@@ -27,7 +28,7 @@ export async function getStaticPaths() {
 
 const { inv } = Astro.props;
 const title = `${inv.groom} & ${inv.bride}`;
-const heroes = { cover: HeroCover, editorial: HeroEditorial, amalfi: HeroAmalfi };
+const heroes = { cover: HeroCover, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco };
 const Hero = heroes[inv.theme];
 ---
 

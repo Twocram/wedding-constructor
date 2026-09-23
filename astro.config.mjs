@@ -4,4 +4,6 @@ import { defineConfig } from 'astro/config';
 // На деплое задать PUBLIC_SITE_URL; плейсхолдер — заменить на боевой домен.
 export default defineConfig({
   site: process.env.PUBLIC_SITE_URL ?? 'https://wedding-invite.example.com',
+  // аудит тулбара перекачивает каждую <img> на любую мутацию DOM — countdown тикает раз в секунду
+  devToolbar: { enabled: false },
 });

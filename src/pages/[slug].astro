@@ -18,6 +18,7 @@ import Wishes from '../components/Wishes.astro';
 import Telegram from '../components/Telegram.astro';
 import Organizer from '../components/Organizer.astro';
 import Footer from '../components/Footer.astro';
+import Cinema from '../components/Cinema.astro';
 
 export async function getStaticPaths() {
   const invitations = await getCollection('invitations');
@@ -30,7 +31,8 @@ export async function getStaticPaths() {
 const { inv } = Astro.props;
 const title = `${inv.groom} & ${inv.bride}`;
 const heroes = { cover: HeroCover, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket };
-const Hero = heroes[inv.theme];
+// cinema — отдельный одноэкранный формат, у него нет hero и ленты секций
+const Hero = inv.theme === 'cinema' ? null : heroes[inv.theme];
 ---
 
 <Base title={title} theme={inv.theme} image={inv.heroPhoto} description={`${title} — приглашение на свадьбу, ${inv.date}`}>
@@ -38,9 +40,11 @@ const Hero = heroes[inv.theme];
   {/* без JS конверт бы навсегда закрыл страницу */}
   {inv.envelope && <noscript><style is:inline>.envelope{display:none!important}</style></noscript>}
 
-  <Hero groom={inv.groom} bride={inv.bride} date={inv.date} city={inv.city} heroPhoto={inv.heroPhoto} />
+  {!Hero && <Cinema inv={inv} />}
 
-  <main id="content">
+  {Hero && <Hero groom={inv.groom} bride={inv.bride} date={inv.date} city={inv.city} heroPhoto={inv.heroPhoto} />}
+
+  {Hero && <main id="content">
     {inv.countdown && <Countdown target={inv.countdown} />}
 
     {inv.welcome && (
@@ -70,9 +74,9 @@ const Hero = heroes[inv.theme];
     {inv.rsvp && <RsvpForm deadline={inv.rsvp.deadline} photo={inv.heroPhoto} />}
 
     {inv.organizer && <Organizer name={inv.organizer.name} phone={inv.organizer.phone} />}
-  </main>
+  </main>}
 
-  <Footer groom={inv.groom} bride={inv.bride} date={inv.date} />
+  {Hero && <Footer groom={inv.groom} bride={inv.bride} date={inv.date} />}
   <a class="back-home" href="/">← все темы</a>
 
   {inv.music && (

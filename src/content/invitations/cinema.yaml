@@ -1,0 +1,37 @@
+theme: cinema
+groom: Марк
+bride: Ева
+date: 12 июня 2027
+city: Санкт-Петербург
+countdown: "2027-06-12T17:00:00"
+heroPhoto: /photos/story/story-8.jpg
+gallery:
+  - /photos/story/story-7.jpg
+  - /photos/story/story-6.jpg
+  - /photos/story/story-3.jpg
+welcome: Эту историю мы снимали несколько лет. Осталась главная сцена — и мы хотим, чтобы вы были в кадре.
+venue:
+  name: Лофт «Ленфильм»
+  address: Каменноостровский пр., 10
+timeline:
+  - time: "17:00"
+    title: Сбор гостей
+    text: Шампанское и живой джаз.
+  - time: "17:30"
+    title: Церемония
+    text: Та самая сцена, ради которой всё.
+  - time: "18:30"
+    title: Банкет
+    text: Ужин, тосты и танцы до финальных титров.
+dressCode:
+  text: Чёрно-белое кино — чёрный, белый и все оттенки серого. Золото — для деталей.
+  colors: ["#0b0a09", "#3a3632", "#8a847b", "#f2ece1", "#e0b36a"]
+wishes:
+  - Вместо цветов — бутылка вина для нашего домашнего кинозала.
+  - Телефоны не прячем — снимайте всё, потом смонтируем.
+rsvp:
+  deadline: 12.05.2027
+organizer:
+  name: Алина
+  phone: "+7 999 123-45-67"
+music: /music/song.mp3

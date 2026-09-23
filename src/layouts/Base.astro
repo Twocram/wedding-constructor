@@ -2,7 +2,7 @@
 interface Props {
   title: string;
   description?: string;
-  theme?: 'cover' | 'editorial' | 'amalfi' | 'deco' | 'ticket';
+  theme?: 'cover' | 'editorial' | 'amalfi' | 'deco' | 'ticket' | 'cinema';
   image?: string;
 }
 const { title, description = 'Приглашение на свадьбу', theme = 'cover', image } = Astro.props;
@@ -20,6 +20,8 @@ const fontSets: Record<string, string> = {
     'https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&display=swap',
   ticket:
     'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,500&family=Space+Mono:wght@400;700&family=Jost:wght@300;400;500&display=swap',
+  cinema:
+    'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@300;400;500&display=swap',
 };
 // favicon: «&» в акцентном цвете темы
 const accents: Record<string, [string, string]> = {
@@ -28,9 +30,10 @@ const accents: Record<string, [string, string]> = {
   amalfi: ['%230c1520', '%23d2a552'],
   deco: ['%23141311', '%23c9a227'],
   ticket: ['%23f3efe6', '%23c2452d'],
+  cinema: ['%230b0a09', '%23e0b36a'],
 };
 const [favBg, favFg] = accents[theme];
-const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520', deco: '#141311', ticket: '#f3efe6' };
+const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520', deco: '#141311', ticket: '#f3efe6', cinema: '#0b0a09' };
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -270,6 +273,29 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   body[data-theme='ticket'] .field textarea,
   body[data-theme='ticket'] .choice {
     border-style: dashed;
+  }
+
+  body[data-theme='cinema'] {
+    --bg: #0b0a09;
+    --surface: #151311;
+    --surface-2: #1e1b17;
+    --text: #f2ece1;
+    --text-2: #cfc6b8;
+    --muted: #91887b;
+    --accent: #e0b36a;
+    --accent-2: #f0cf94;
+    --accent-ink: #0b0a09;
+    --line: rgba(242, 236, 225, 0.12);
+    --line-strong: rgba(242, 236, 225, 0.3);
+    --shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.9), 0 10px 24px -14px rgba(0, 0, 0, 0.6);
+    --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+    --font-label: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-accent: 'Cormorant Garamond', Georgia, serif;
+    --r-lg: 6px;
+    --r-md: 4px;
+    --r-btn: 2px;
+    --img-outline: rgba(255, 255, 255, 0.08);
+    --grain-opacity: 0.09;
   }
 
   * { margin: 0; box-sizing: border-box; }

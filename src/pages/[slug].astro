@@ -35,7 +35,7 @@ const heroes = { cover: HeroCover, editorial: HeroEditorial, amalfi: HeroAmalfi,
 const Hero = inv.theme === 'cinema' ? null : heroes[inv.theme];
 ---
 
-<Base title={title} theme={inv.theme} image={inv.heroPhoto} description={`${title} — приглашение на свадьбу, ${inv.date}`}>
+<Base title={title} theme={inv.theme} image={`/og/${Astro.params.slug}.jpg`} description={`${title} — приглашение на свадьбу, ${inv.date}`}>
   {inv.envelope && <Envelope groom={inv.groom} bride={inv.bride} photo={inv.envelopePhoto} />}
   {/* без JS конверт бы навсегда закрыл страницу */}
   {inv.envelope && <noscript><style is:inline>.envelope{display:none!important}</style></noscript>}

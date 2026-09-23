@@ -4,13 +4,22 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "previews": "node scripts/previews.mjs"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/jost": "^5.3.0",
+    "@fontsource/marcellus": "^5.3.0",
+    "@fontsource/oswald": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
+    "@fontsource/prata": "^5.3.0",
     "astro": "^5.13.0",
-    "gsap": "^3.15.0"
+    "gsap": "^3.15.0",
+    "satori": "^0.33.5"
   },
   "devDependencies": {
+    "playwright": "^1.63.0",
     "typescript": "^5.9.0"
   }
 }

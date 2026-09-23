@@ -4,47 +4,98 @@ interface Props {
   photos: string[];
 }
 const { photos } = Astro.props;
-const total = String(photos.length).padStart(2, '0');
 ---
 
 <Section eyebrow="Наша история" title="Несколько моментов">
-  <div class="gallery">
+  <div class="stack">
     {photos.map((p, i) => (
-      <figure class:list={['fade-up', { wide: i === 0 }]} style={`--i:${i}`}>
+      <figure class:list={['card', { wide: i === 0 }]} style={`--z:${i + 1}`}>
         <img src={p} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
-        <figcaption>{String(i + 1).padStart(2, '0')} / {total}</figcaption>
       </figure>
     ))}
   </div>
 </Section>
 
+<script>
+  // карточки «ложатся» на стопку по одной, когда доскроллили до каждой
+  const cards = document.querySelectorAll('.stack .card');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    cards.forEach((c) => c.classList.add('landed'));
+  } else {
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('landed');
+          io.unobserve(e.target);
+        }),
+      { threshold: 0.3, rootMargin: '0px 0px -10% 0px' }
+    );
+    cards.forEach((c) => io.observe(c));
+  }
+</script>
+
 <style>
-  /* одно широкое фото + асимметричная пара ниже — журнальная вёрстка */
-  .gallery {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(16px, 3vw, 28px);
+  /* фотокарточки зигзагом внахлёст: каждая следующая ложится поверх предыдущей */
+  .stack {
+    --card-bg: color-mix(in srgb, #fff 72%, var(--bg));
+    --card-border: transparent;
+    display: flex;
+    flex-direction: column;
+    /* выезд карточек и углы поворота не должны давать горизонтальный скролл —
+       iOS Safari игнорирует overflow-x у body, и страница дёргается вбок */
+    overflow-x: clip;
+    margin-inline: -24px;
+    padding: 8px 24px 24px;
   }
-  .gallery figure { margin: 0; }
-  .gallery .wide { grid-column: 1 / -1; }
-  .gallery img {
+  :global(body[data-theme='deco']) .stack,
+  :global(body[data-theme='amalfi']) .stack {
+    --card-bg: var(--surface-2);
+    --card-border: var(--line-strong);
+  }
+
+  .card {
+    --rot: -3deg;
+    --from-x: -32px;
+    position: relative;
+    z-index: var(--z);
+    width: 74%;
+    margin: -20% 0 0;
+    padding: 10px 10px 26px; /* полароидное поле снизу */
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow), 0 2px 6px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    transform: translate(var(--from-x), 70px) rotate(calc(var(--rot) * 3)) scale(1.06);
+    transition:
+      opacity 0.6s var(--ease-out),
+      transform 1s cubic-bezier(0.2, 1.15, 0.35, 1);
+  }
+  .card:not(.landed) { will-change: transform, opacity; }
+  .card:first-child { margin-top: 0; }
+  .card:nth-child(even) {
+    --rot: 2.5deg;
+    --from-x: 32px;
+    align-self: flex-end;
+  }
+  .card:nth-child(4n + 3) { --rot: -1.8deg; }
+  .card:nth-child(4n) { --rot: 3.4deg; }
+  .card.wide { width: 90%; --rot: -1.5deg; }
+  .card.landed {
+    opacity: 1;
+    transform: rotate(var(--rot));
+  }
+
+  .card img {
+    display: block;
     width: 100%;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
-    border-radius: calc(var(--r-lg) - 6px);
-    box-shadow: var(--shadow);
   }
-  .gallery .wide img { aspect-ratio: 16 / 10; }
-  .gallery figure:not(.wide) img { aspect-ratio: 3 / 4; }
-  .gallery figcaption {
-    margin-top: 10px;
-    text-align: left;
-    font-family: var(--font-label);
-    font-size: 0.65rem;
-    letter-spacing: 0.22em;
-    color: var(--muted);
-  }
+  .card.wide img { aspect-ratio: 16 / 11; }
+
   @media (min-width: 640px) {
-    /* правая колонка опущена — асимметрия */
-    .gallery figure:nth-child(odd):not(.wide) { margin-top: clamp(32px, 7vw, 72px); }
+    .card { width: 58%; margin-top: -16%; padding: 14px 14px 36px; }
+    .card.wide { width: 76%; }
   }
 </style>

@@ -1,0 +1,48 @@
+---
+// россыпь звёзд для ночных секций; псевдорандом детерминирован — SSR и клиент совпадают
+interface Props {
+  count?: number;
+  seed?: number;
+  top?: number; // нижняя граница неба в %: ниже — «море», звёзд нет
+}
+const { count = 36, seed = 1, top = 90 } = Astro.props;
+const rand = (n: number) => {
+  const x = Math.sin((n + seed * 101) * 127.1) * 43758.5453;
+  return x - Math.floor(x);
+};
+const stars = Array.from({ length: count }, (_, i) => ({
+  left: (rand(i * 3 + 1) * 96 + 2).toFixed(1),
+  top: (rand(i * 3 + 2) * (top - 4) + 2).toFixed(1),
+  d: (2.4 + rand(i * 3 + 3) * 2.2).toFixed(1),
+  delay: (rand(i * 7 + 4) * 3).toFixed(1),
+  big: i % 4 === 0,
+}));
+---
+
+<div class="am-stars" aria-hidden="true">
+  {stars.map((s) => (
+    <i class:list={[{ big: s.big }]} style={`left:${s.left}%;top:${s.top}%;--d:${s.d}s;animation-delay:${s.delay}s`} />
+  ))}
+</div>
+
+<style>
+  .am-stars { position: absolute; inset: 0; pointer-events: none; z-index: -1; }
+  .am-stars i {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.45);
+    opacity: 0.15;
+    animation: am-twinkle var(--d) ease-in-out infinite;
+  }
+  .am-stars i.big { width: 3px; height: 3px; background: var(--accent-2); box-shadow: 0 0 8px 2px rgba(232, 201, 135, 0.45); }
+  @keyframes am-twinkle {
+    0%, 100% { opacity: 0.15; transform: scale(0.7); }
+    50% { opacity: 0.95; transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .am-stars i { animation: none; opacity: 0.6; }
+  }
+</style>

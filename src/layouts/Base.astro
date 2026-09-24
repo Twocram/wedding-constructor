@@ -2,10 +2,11 @@
 interface Props {
   title: string;
   description?: string;
-  theme?: 'cover' | 'editorial' | 'amalfi' | 'deco' | 'ticket' | 'cinema';
+  theme?: 'cover' | 'editorial' | 'amalfi' | 'deco' | 'ticket' | 'cinema' | 'stories';
   image?: string;
+  noindex?: boolean;
 }
-const { title, description = 'Приглашение на свадьбу', theme = 'cover', image } = Astro.props;
+const { title, description = 'Приглашение на свадьбу', theme = 'cover', image, noindex } = Astro.props;
 // og:image мессенджеры берут только по абсолютному URL
 const ogImage = image && Astro.site ? new URL(image, Astro.site).href : image;
 // каждая тема — свой набор гарнитур; Jost — общий текстовый шрифт
@@ -17,9 +18,11 @@ const fontSets: Record<string, string> = {
   amalfi:
     'https://fonts.googleapis.com/css2?family=Prata&family=Tenor+Sans&family=Cormorant+Garamond:ital@1&family=Jost:wght@300;400;500&display=swap',
   deco:
-    'https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&display=swap',
+    'https://fonts.googleapis.com/css2?family=Forum&family=Poiret+One&family=Jost:wght@300;400;500&display=swap',
   ticket:
-    'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,500&family=Space+Mono:wght@400;700&family=Jost:wght@300;400;500&display=swap',
+    'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,500&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Jost:wght@300;400;500&display=swap',
+  stories:
+    'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Caveat:wght@700&family=Playfair+Display:ital@1&display=swap',
   cinema:
     'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@300;400;500&display=swap',
 };
@@ -31,9 +34,10 @@ const accents: Record<string, [string, string]> = {
   deco: ['%23141311', '%23c9a227'],
   ticket: ['%23f3efe6', '%23c2452d'],
   cinema: ['%230b0a09', '%23e0b36a'],
+  stories: ['%23b24f78', '%23ffffff'],
 };
 const [favBg, favFg] = accents[theme];
-const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520', deco: '#141311', ticket: '#f3efe6', cinema: '#0b0a09' };
+const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520', deco: '#141311', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000' };
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -45,6 +49,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     <meta name="format-detection" content="telephone=no" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -222,8 +227,9 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     --line: rgba(239, 233, 218, 0.12);
     --line-strong: rgba(201, 162, 39, 0.42);
     --shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.85), 0 10px 24px -14px rgba(0, 0, 0, 0.55);
-    --font-display: 'Marcellus', Georgia, serif;
-    --font-label: 'Marcellus', var(--font-body);
+    --font-display: 'Forum', Georgia, serif;
+    --font-label: 'Forum', var(--font-body);
+    --font-accent: 'Poiret One', var(--font-body);
     --r-lg: 0;
     --r-md: 0;
     --r-btn: 0;
@@ -263,7 +269,8 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     --line-strong: rgba(37, 48, 60, 0.34);
     --shadow: 0 24px 48px -24px rgba(37, 48, 60, 0.35), 0 8px 20px -12px rgba(37, 48, 60, 0.15);
     --font-display: 'Playfair Display', Georgia, serif;
-    --font-label: 'Space Mono', ui-monospace, monospace;
+    /* в Space Mono нет кириллицы — русские буквы берёт JetBrains Mono */
+    --font-label: 'Space Mono', 'JetBrains Mono', ui-monospace, monospace;
     --grain-opacity: 0.05;
   }
   /* билетная пунктирность: все карточки с рваным краем */
@@ -277,6 +284,27 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     border-style: dashed;
   }
 
+  /* stories: сторис поверх фото — белый текст; токены нужны листу анкеты */
+  body[data-theme='stories'] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f1eff3;
+    --text: #1b1a1d;
+    --text-2: #4b4850;
+    --muted: #7b7880;
+    --accent: #b24f78;
+    --accent-2: #f19a7e;
+    --accent-ink: #ffffff;
+    --line: rgba(27, 26, 29, 0.1);
+    --line-strong: rgba(27, 26, 29, 0.22);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
+    --font-label: 'Manrope', system-ui, sans-serif;
+    --font-accent: 'Caveat', cursive;
+    --r-lg: 18px;
+    --r-md: 14px;
+    --r-btn: 14px;
+  }
   body[data-theme='cinema'] {
     --bg: #0b0a09;
     --surface: #151311;

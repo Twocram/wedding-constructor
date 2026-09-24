@@ -1,0 +1,129 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+// служебная страница пары: список гостей → личные ссылки вида /slug?g=Имя
+export async function getStaticPaths() {
+  const invitations = await getCollection('invitations');
+  return invitations.map((inv) => ({ params: { slug: inv.id }, props: { inv: inv.data } }));
+}
+
+const { inv } = Astro.props;
+const { slug } = Astro.params;
+const base = new URL(`/${slug}`, Astro.site).href;
+---
+
+<Base title={`Ссылки для гостей — ${inv.groom} & ${inv.bride}`} theme={inv.theme} noindex>
+  <main class="section">
+    <div class="wrap wrap--narrow guests" data-base={base} data-slug={slug}>
+      <header class="section-head">
+        <p class="eyebrow">{inv.groom} & {inv.bride}</p>
+        <h1>Личные ссылки для гостей</h1>
+      </header>
+      <p class="guests-intro">
+        Впишите гостей — по одному в строке, пару можно вместе: «Анна и Дмитрий».
+        Каждый увидит своё имя в приглашении, а в анкете оно подставится само.
+      </p>
+
+      <div class="plate">
+        <div class="plate-inner">
+          <label class="field">
+            <span>Гости</span>
+            <textarea id="guest-names" rows="6" placeholder={'Анна и Дмитрий\nТётя Света\nМаксим'}></textarea>
+          </label>
+        </div>
+      </div>
+
+      <div class="guests-bar" hidden>
+        <p id="guest-count"></p>
+        <button type="button" class="btn btn--ghost" id="copy-all">
+          Скопировать все
+          <span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M5 5V3h8v8h-2M3 5h8v8H3z" /></svg></span>
+        </button>
+      </div>
+      <ul id="guest-links" class="guest-links"></ul>
+      <p class="guests-status" role="status"></p>
+    </div>
+  </main>
+</Base>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.guests')!;
+  const base = root.dataset.base!;
+  const key = `guests:${root.dataset.slug}`;
+  const input = document.getElementById('guest-names') as HTMLTextAreaElement;
+  const list = document.getElementById('guest-links')!;
+  const bar = document.querySelector<HTMLElement>('.guests-bar')!;
+  const count = document.getElementById('guest-count')!;
+  const status = document.querySelector('.guests-status')!;
+
+  const linkFor = (name: string) => `${base}?${new URLSearchParams({ g: name })}`;
+  const names = () => [...new Set(input.value.split('\n').map((n) => n.trim()).filter(Boolean))];
+
+  const flash = (msg: string) => {
+    status.textContent = msg;
+    setTimeout(() => { if (status.textContent === msg) status.textContent = ''; }, 2000);
+  };
+  const copy = (text: string) =>
+    navigator.clipboard.writeText(text).then(() => flash('Скопировано'), () => flash('Не удалось скопировать'));
+
+  const icon = (d: string) =>
+    `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="${d}"/></svg>`;
+
+  const render = () => {
+    const all = names();
+    try { localStorage.setItem(key, input.value); } catch {}
+    bar.hidden = all.length === 0;
+    count.textContent = `Ссылок: ${all.length}`;
+    list.replaceChildren(...all.map((name) => {
+      const url = linkFor(name);
+      const msg = `${name}, приглашаем вас на нашу свадьбу!`;
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <div class="gl-text"><strong></strong><small></small></div>
+        <div class="gl-actions">
+          <button type="button" class="gl-btn" data-copy aria-label="Скопировать ссылку">${icon('M5 5V3h8v8h-2M3 5h8v8H3z')}</button>
+          <a class="gl-btn" target="_blank" rel="noopener" data-tg aria-label="Отправить в Telegram">TG</a>
+          <a class="gl-btn" target="_blank" rel="noopener" data-wa aria-label="Отправить в WhatsApp">WA</a>
+        </div>`;
+      // имена — пользовательский ввод: только textContent/атрибуты, без HTML
+      li.querySelector('strong')!.textContent = name;
+      li.querySelector('small')!.textContent = url;
+      li.querySelector<HTMLAnchorElement>('[data-tg]')!.href = `https://t.me/share/url?${new URLSearchParams({ url, text: msg })}`;
+      li.querySelector<HTMLAnchorElement>('[data-wa]')!.href = `https://wa.me/?${new URLSearchParams({ text: `${msg}\n${url}` })}`;
+      li.querySelector('[data-copy]')!.addEventListener('click', () => copy(url));
+      return li;
+    }));
+  };
+
+  try { input.value = localStorage.getItem(key) ?? ''; } catch {}
+  input.addEventListener('input', render);
+  document.getElementById('copy-all')!.addEventListener('click', () =>
+    copy(names().map((n) => `${n} — ${linkFor(n)}`).join('\n')));
+  render();
+</script>
+
+<style>
+  .guests { display: grid; gap: 24px; }
+  .guests h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2rem, 7vw, 2.8rem); line-height: 1.1; margin: 0; text-align: center; }
+  .guests-intro { margin: 0 auto; max-width: 42ch; text-align: center; color: var(--text-2); }
+  .guests-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .guests-bar[hidden] { display: none; }
+  .guests-bar p { margin: 0; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .guest-links { list-style: none; padding: 0; margin: 0; display: grid; gap: 1px; background: var(--line); border-radius: 16px; overflow: hidden; }
+  .guest-links:empty { display: none; }
+  .guest-links :global(li) { display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 18px; background: var(--surface); }
+  .guest-links :global(.gl-text) { display: grid; min-width: 0; flex: 1; }
+  .guest-links :global(strong) { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .guest-links :global(small) { color: var(--muted); font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .guest-links :global(.gl-actions) { display: flex; gap: 6px; flex: none; }
+  .guest-links :global(.gl-btn) {
+    width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+    border: 1px solid var(--line-strong); background: transparent; color: var(--text); cursor: pointer;
+    font: 500 0.66rem/1 var(--font-label); letter-spacing: 0.06em; text-decoration: none;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  .guest-links :global(.gl-btn:hover) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .guest-links :global(.gl-btn svg) { width: 15px; height: 15px; }
+  .guests-status { margin: 0; text-align: center; min-height: 1.5em; color: var(--accent); }
+</style>

@@ -1,0 +1,156 @@
+---
+import Head from './Head.astro';
+import Maiolica from './Maiolica.astro';
+// галерея-колоннада: ряд арочных окон; на телефоне — карусель со snap
+interface Props {
+  photos: string[];
+}
+const { photos } = Astro.props;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="am-colonnade" aria-labelledby="am-gal-title">
+  <Head it="La nostra estate" title="Мгновения" id="am-gal-title" />
+  <div class="am-arcade" tabindex="0" aria-label="Фотографии, листайте вбок">
+    {photos.map((p, i) => (
+      <figure class="am-arch fade-up" style={`--i:${i % 6}`}>
+        <div class="am-arch-frame">
+          <div class="am-arch-clip">
+            <img src={p} alt={`Фотография ${i + 1} из ${photos.length}`} loading="lazy" decoding="async" />
+          </div>
+        </div>
+        <figcaption>{pad(i + 1)}</figcaption>
+      </figure>
+    ))}
+  </div>
+  <p class="am-arcade-hint" aria-hidden="true">
+    <span class="am-arcade-count"><b>01</b> / {pad(photos.length)}</span>
+    <span class="am-arcade-swipe">листайте</span>
+  </p>
+  <Maiolica class="am-colonnade-floor" />
+</section>
+
+<script>
+  // счётчик «01 / 06» в карусели — по ближайшей к центру арке
+  document.querySelectorAll<HTMLElement>('.am-arcade').forEach((track) => {
+    const counter = track.parentElement?.querySelector('.am-arcade-count b');
+    const arches = [...track.querySelectorAll<HTMLElement>('.am-arch')];
+    if (!counter || !arches.length) return;
+    let raf = 0;
+    track.addEventListener(
+      'scroll',
+      () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const mid = track.scrollLeft + track.clientWidth / 2;
+          let best = 0;
+          arches.forEach((a, i) => {
+            if (Math.abs(a.offsetLeft + a.offsetWidth / 2 - mid) < Math.abs(arches[best].offsetLeft + arches[best].offsetWidth / 2 - mid)) best = i;
+          });
+          counter.textContent = String(best + 1).padStart(2, '0');
+        });
+      },
+      { passive: true }
+    );
+  });
+</script>
+
+<style>
+  .am-colonnade {
+    position: relative;
+    padding: clamp(80px, 12vw, 128px) 0 0;
+    overflow: hidden;
+  }
+  .am-arcade {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* поля по краям — чтобы первая и последняя арки вставали по центру */
+    padding: 8px 17vw 28px;
+    scroll-padding-inline: 17vw;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .am-arcade::-webkit-scrollbar { display: none; }
+  .am-arcade:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .am-arch {
+    flex: 0 0 66vw;
+    margin: 0;
+    scroll-snap-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+  }
+  .am-arch-frame {
+    position: relative;
+    width: 100%;
+    padding: 7px;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    border-radius: 999px 999px 4px 4px;
+    background: linear-gradient(180deg, rgba(210, 165, 82, 0.1), transparent 60%);
+  }
+  /* замковый камень на вершине арки */
+  .am-arch-frame::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    translate: -50% 0;
+    rotate: 45deg;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    z-index: 1;
+  }
+  .am-arch-clip { overflow: hidden; border-radius: 999px 999px 2px 2px; outline: 1px solid var(--img-outline); outline-offset: -1px; }
+  .am-arch-frame img {
+    width: 100%;
+    aspect-ratio: 3 / 4.4;
+    object-fit: cover;
+    filter: saturate(0.88) contrast(1.03);
+    transition: transform 1.2s var(--ease), filter 0.8s var(--ease);
+  }
+  .am-arch figcaption {
+    display: none;
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+  }
+
+  .am-arcade-hint {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: clamp(40px, 6vw, 56px);
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .am-arcade-count b { font-weight: 400; color: var(--accent-2); }
+  .am-arcade-swipe::after { content: ' →'; letter-spacing: 0; }
+
+  @media (min-width: 900px) {
+    .am-arcade {
+      overflow: visible;
+      justify-content: center;
+      gap: clamp(16px, 2vw, 28px);
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 8px 48px 40px;
+    }
+    .am-arch { flex: 1 1 0; max-width: 240px; }
+    /* ритм колоннады: чётные арки чуть ниже — как в перспективе галереи */
+    .am-arch:nth-child(even) { translate: 0 36px; }
+    .am-arch-frame:hover img { transform: scale(1.05); filter: saturate(1) contrast(1.05); }
+    .am-arcade-hint { display: none; }
+    .am-arch figcaption { display: block; }
+    .am-colonnade :global(.am-colonnade-floor) { margin-top: 64px; }
+  }
+</style>

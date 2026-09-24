@@ -14,6 +14,7 @@ const { target } = Astro.props;
       <div><span data-unit="minutes">–</span><small>минут</small></div>
       <div><span data-unit="seconds">–</span><small>секунд</small></div>
     </div>
+    {Astro.slots.has('default') && <div class="countdown-extra"><slot /></div>}
   </div>
 </section>
 
@@ -42,6 +43,7 @@ const { target } = Astro.props;
     grid-template-columns: repeat(4, 1fr);
     margin-top: 28px;
   }
+  .countdown-extra { margin-top: 32px; }
   .countdown-grid div {
     display: grid;
     gap: 2px;

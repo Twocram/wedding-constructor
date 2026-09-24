@@ -1,0 +1,171 @@
+---
+// организатор — служебный бейдж экипажа на ленте: «старший бортпроводник» с номером телефона
+import Sign from './Sign.astro';
+interface Props {
+  name: string;
+  phone: string;
+  code: string;
+}
+const { name, phone, code } = Astro.props;
+const tel = phone.replace(/[^+\d]/g, '');
+---
+
+<section class="tk-sec crew-sec fade-up">
+  <div class="tk-wrap">
+    <Sign code={code} label="Экипаж" en="Crew" title="Остались вопросы?" />
+
+    <div class="badge-wrap">
+      <span class="lanyard" aria-hidden="true"></span>
+      <article class="badge">
+        <span class="badge-clip" aria-hidden="true"></span>
+        <div class="badge-band" aria-hidden="true">Crew · Экипаж</div>
+        <div class="badge-body">
+          <span class="badge-photo" aria-hidden="true">{name[0]}</span>
+          <div class="badge-id">
+            <p class="badge-name">{name}</p>
+            <p class="badge-role">Старший бортпроводник</p>
+            <p class="badge-sub">свадебный организатор · на связи в любое время</p>
+          </div>
+        </div>
+        <a class="badge-call" href={`tel:${tel}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" /></svg>
+          <span>{phone}</span>
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  @media (min-width: 860px) {
+    .crew-sec .tk-wrap { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 48px; }
+    .badge-wrap { padding-right: 40px; }
+  }
+  .badge-wrap {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    padding-top: 48px;
+  }
+  /* лента бейджа уходит за верх секции */
+  .lanyard {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 26px;
+    height: 52px;
+    translate: -50% 0;
+    background: repeating-linear-gradient(0deg, var(--accent) 0 8px, var(--accent-2) 8px 16px);
+    border-radius: 2px;
+    z-index: 2;
+    box-shadow: 0 4px 8px -4px rgba(37, 48, 60, 0.5);
+  }
+  /* металлический карабин продевается в прорезь бейджа */
+  .lanyard::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -14px;
+    width: 16px;
+    height: 20px;
+    translate: -50% 0;
+    border: 3px solid #aab2bb;
+    border-top-width: 5px;
+    border-radius: 3px 3px 8px 8px;
+    background: transparent;
+  }
+  .badge {
+    position: relative;
+    width: min(100%, 400px);
+    background: #fbf7ec;
+    border-radius: 16px;
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    rotate: 2deg;
+    transform-origin: 50% -40px;
+    transition: rotate 0.9s var(--ease);
+  }
+  .badge:hover { rotate: 0deg; }
+  @media (max-width: 480px) { .badge { rotate: 1deg; } }
+  .badge-clip {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 54px;
+    height: 10px;
+    translate: -50% 0;
+    border-radius: 99px;
+    background: var(--bg);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  .badge-band {
+    padding: 30px 20px 10px;
+    background: var(--text);
+    color: #f2b84b;
+    text-align: center;
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  .badge-body {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 18px;
+    align-items: center;
+    padding: 22px;
+  }
+  .badge-photo {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 92px;
+    border-radius: 6px;
+    background:
+      radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--accent) 18%, transparent) 0 20px, transparent 21px),
+      var(--surface-2);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 2.4rem;
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+  }
+  .badge-name {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.8rem;
+    line-height: 1.1;
+    color: var(--text) !important;
+  }
+  .badge-role {
+    margin-top: 6px;
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent) !important;
+  }
+  .badge-sub { margin-top: 4px; font-size: 0.84rem; color: var(--muted) !important; line-height: 1.4; }
+  .badge-call {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 2px dashed var(--line-strong);
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+  }
+  .badge-call svg { width: 18px; height: 18px; color: var(--accent); transition: color 0.3s; }
+  .badge-call:hover { background: var(--text); color: var(--bg); }
+  .badge-call:hover svg { color: #f2b84b; }
+</style>

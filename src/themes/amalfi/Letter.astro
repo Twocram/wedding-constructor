@@ -1,0 +1,138 @@
+---
+import Sprig from './Sprig.astro';
+// приветствие — письмо с террасы: арочное окно, текст курсивом, внизу балюстрада
+interface Props {
+  text: string;
+  groom: string;
+  bride: string;
+}
+const { text, groom, bride } = Astro.props;
+const balusterSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 48'><path fill='#c89b4c' d='M7 0h14l-2 5c6 5 7 12 3 18 4 5 6 12 1 18l2 7H6l2-7c-5-6-3-13 1-18-4-6-3-13 3-18Z'/><path fill='#fff' fill-opacity='.18' d='M9 7c-3 4-2 10 1 15-3 5-4 11-1 16l1-1c-2-5-1-10 2-15-3-5-4-10-1-14Z'/></svg>`;
+const baluster = `url("data:image/svg+xml,${encodeURIComponent(balusterSvg)}")`;
+---
+
+<section class="am-letter" aria-labelledby="am-letter-title">
+  <div class="am-letter-window fade-up">
+    <div class="am-letter-inner">
+      <p class="am-letter-it" lang="it">Cari amici</p>
+      <h2 id="am-letter-title" class="am-letter-hello" data-guest="{g}, ждём вас">Дорогие гости,</h2>
+      <p class="am-letter-text">{text}</p>
+      <div class="am-letter-sign">
+        <span>С любовью,</span>
+        <span class="am-letter-names">{groom} <i>&</i> {bride}</span>
+      </div>
+      <Sprig kind="lemon" class="am-letter-lemon" />
+    </div>
+    <!-- балюстрада террасы: перила + балясины (плитка повторяется целиком через background-repeat: space) -->
+    <div class="am-letter-rail" style={`--baluster:${baluster}`} aria-hidden="true"></div>
+  </div>
+</section>
+
+<style>
+  .am-letter {
+    padding: clamp(80px, 12vw, 128px) 20px clamp(64px, 10vw, 104px);
+    /* подхватываем тёплый отсвет горизонта из hero, чтобы не было шва */
+    /* те же два слоя, что у низа hero (золото 10% + синева 8%), — стык совпадает до пикселя и плавно гаснет */
+    background:
+      linear-gradient(180deg, rgba(210, 165, 82, 0.1), transparent 280px),
+      linear-gradient(180deg, rgba(80, 130, 180, 0.08), transparent 200px),
+      var(--bg);
+  }
+  .am-letter-window {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 8px 8px 0;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    border-bottom: 0;
+    border-radius: 999px 999px 0 0;
+  }
+  .am-letter-inner {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    text-align: center;
+    padding: clamp(96px, 26vw, 150px) clamp(22px, 7vw, 64px) clamp(40px, 8vw, 64px);
+    border-radius: 999px 999px 0 0;
+    /* «вид из окна»: сумеречное небо сверху, тёплый отсвет террасы снизу */
+    background:
+      radial-gradient(120% 60% at 50% 100%, rgba(210, 165, 82, 0.14), transparent 70%),
+      linear-gradient(180deg, #16283b 0%, var(--surface) 45%, #0f1a27 100%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), var(--shadow);
+  }
+  .am-letter-it {
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .am-letter-hello {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: clamp(2.2rem, 9vw, 3.2rem);
+    line-height: 1.05;
+    color: var(--accent-2);
+  }
+  .am-letter-text {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: clamp(1.28rem, 4.6vw, 1.6rem);
+    line-height: 1.5;
+    color: var(--text);
+    max-width: 30ch;
+  }
+  .am-letter-sign {
+    display: grid;
+    gap: 2px;
+    margin-top: 6px;
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--text-2);
+  }
+  .am-letter-names {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+    color: var(--text);
+  }
+  .am-letter-names i { font-family: var(--font-accent); font-style: italic; color: var(--accent); }
+  .am-letter-inner :global(.am-letter-lemon) {
+    position: absolute;
+    top: clamp(44px, 12vw, 70px);
+    left: 50%;
+    width: 72px;
+    translate: -50% 0;
+  }
+  .am-letter-rail {
+    position: relative;
+    height: 60px;
+    margin: 0 -9px;
+    padding: 7px 10px;
+    background-image: var(--baluster);
+    background-size: auto 46px;
+    background-repeat: space no-repeat;
+    background-origin: content-box;
+    background-clip: content-box;
+  }
+  /* поручень и цоколь */
+  .am-letter-rail::before,
+  .am-letter-rail::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 7px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--accent-2), #a98039);
+    box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.6);
+  }
+  .am-letter-rail::before { top: 0; }
+  .am-letter-rail::after { bottom: 0; }
+  @media (min-width: 900px) {
+    .am-letter-text { max-width: 34ch; }
+  }
+</style>

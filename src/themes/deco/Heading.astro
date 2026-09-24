@@ -1,0 +1,87 @@
+---
+// шапка секции: веер + подпись + заголовок.
+// Forum (римские капители, есть кириллица) — цифры, имена, латиница; Poiret One — геометрические заголовки 1920-х
+interface Props {
+  kicker?: string;
+  title: string;
+}
+const { kicker, title } = Astro.props;
+const isLatin = /^[\x20-\x7E]+$/.test(title);
+---
+
+<div class="dc-head">
+  <svg class="dc-head-fan" viewBox="0 0 120 46" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+    <path d="M60 44V8M60 44 38 12M60 44 82 12M60 44 20 22M60 44 100 22M60 44 8 38M60 44 112 38" opacity=".55" />
+    <path d="M8 44a52 36 0 0 1 104 0" />
+    <path d="M24 44a36 25 0 0 1 72 0" opacity=".55" />
+    <path d="M60 36 64 44H56Z" fill="currentColor" stroke="none" />
+  </svg>
+  {kicker && <p class="dc-kicker">{kicker}</p>}
+  <h2 class:list={['dc-title', { 'dc-title--latin': isLatin }]}>{title}</h2>
+  <span class="dc-head-rule" aria-hidden="true"><i></i></span>
+</div>
+
+<style>
+  .dc-head {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    text-align: center;
+    margin-bottom: clamp(40px, 7vw, 64px);
+  }
+  .dc-head-fan { width: 84px; color: var(--accent); margin-bottom: 4px; }
+  .dc-kicker {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.68rem;
+    letter-spacing: 0.42em;
+    margin-right: -0.42em; /* разрядка съедает центровку — компенсируем хвост */
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .dc-title {
+    font-family: var(--dc-display);
+    font-weight: 300;
+    font-size: clamp(1.45rem, 6.2vw, 2.4rem);
+    line-height: 1.25;
+    letter-spacing: 0.26em;
+    margin-right: -0.26em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .dc-title--latin {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.9rem, 8vw, 3.2rem);
+    letter-spacing: 0.16em;
+    margin-right: -0.16em;
+    background: var(--dc-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* черта с ромбом: линии уходят в стороны от центра */
+  .dc-head-rule {
+    display: grid;
+    grid-template-columns: 56px 9px 56px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .dc-head-rule::before,
+  .dc-head-rule::after {
+    content: '';
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent));
+  }
+  .dc-head-rule::after { background: linear-gradient(270deg, transparent, var(--accent)); }
+  .dc-head-rule i {
+    width: 7px;
+    height: 7px;
+    margin: auto;
+    transform: rotate(45deg);
+    border: 1px solid var(--accent);
+    grid-column: 2;
+    grid-row: 1;
+  }
+</style>

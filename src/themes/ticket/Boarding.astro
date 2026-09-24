@@ -1,0 +1,243 @@
+---
+// «Посадка через»: перекидные цифры как на табло + «Сохранить рейс» (календарь)
+import Sign from './Sign.astro';
+interface Props {
+  target: string; // ISO-дата
+  code: string;
+  flight: string;
+  city?: string;
+  slug: string;
+  google?: string;
+}
+const { target, code, flight, city, slug, google } = Astro.props;
+const units = [
+  { key: 'days', label: 'дней' },
+  { key: 'hours', label: 'часов' },
+  { key: 'minutes', label: 'минут' },
+  { key: 'seconds', label: 'секунд' },
+];
+const departs = target.slice(11, 16);
+---
+
+<section class="tk-sec boarding fade-up" data-target={target}>
+  <div class="tk-wrap">
+    <Sign code={code} label="Посадка через" en="Boarding in" />
+
+    <div class="bd-panel">
+      <p class="bd-meta">
+        <span>Рейс <b>{flight}</b></span>
+        {city && <span>→ <b>{city}</b></span>}
+        {departs && <span>Вылет <b>{departs}</b></span>}
+      </p>
+
+      {/* для скринридера — статичная дата: ежесекундный отсчёт был бы шумом */}
+      <p class="tk-sr">Вылет {target.slice(0, 10).split('-').reverse().join('.')} в {departs}</p>
+      <div class="bd-grid" aria-hidden="true">
+        {units.map((u) => (
+          <div class="bd-unit">
+            <div class="flip" data-unit={u.key}>
+              <span class="half top"><span>–</span></span>
+              <span class="half bottom"><span>–</span></span>
+              <span class="half top flap"><span>–</span></span>
+              <span class="half bottom flap"><span>–</span></span>
+            </div>
+            <small>{u.label}</small>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {google && (
+      <div class="bd-save">
+        <p class="bd-save-cap">Сохранить рейс в календарь</p>
+        <a class="bd-btn" href={`/ics/${slug}.ics`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4" /></svg>
+          Apple / Outlook
+        </a>
+        <a class="bd-btn" href={google} target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4" /></svg>
+          Google
+        </a>
+      </div>
+    )}
+  </div>
+</section>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('.boarding').forEach((root) => {
+    const target = new Date(root.dataset.target ?? '').getTime();
+    if (Number.isNaN(target)) return;
+    const cards = new Map<string, { el: HTMLElement; parts: HTMLElement[]; value: string }>();
+    root.querySelectorAll<HTMLElement>('.flip').forEach((el) => {
+      cards.set(el.dataset.unit!, { el, parts: [...el.querySelectorAll<HTMLElement>('.half > span')], value: '' });
+    });
+    const set = (unit: string, next: string) => {
+      const c = cards.get(unit);
+      if (!c || c.value === next) return;
+      const [top, bottom, flapTop, flapBottom] = c.parts;
+      c.el.dataset.len = String(next.length);
+      const prev = c.value;
+      c.value = next;
+      const still = reduce || !prev; // первый кадр и reduced-motion — без флажка
+      // статичная верхняя половина сразу новая, нижняя — старая, пока не упадёт флажок
+      top.textContent = next;
+      flapTop.textContent = prev;
+      flapBottom.textContent = next;
+      bottom.textContent = still ? next : prev;
+      if (still) return;
+      c.el.classList.remove('is-flipping');
+      void c.el.offsetWidth; // перезапуск анимации
+      c.el.classList.add('is-flipping');
+    };
+    root.querySelectorAll<HTMLElement>('.flip').forEach((el) => {
+      el.addEventListener('animationend', (e) => {
+        if (!(e.target as HTMLElement).classList.contains('bottom')) return;
+        el.classList.remove('is-flipping');
+        el.querySelector('.half.bottom:not(.flap) > span')!.textContent = cards.get(el.dataset.unit!)!.value;
+      });
+    });
+    const tick = () => {
+      const diff = Math.max(0, target - Date.now());
+      set('days', String(Math.floor(diff / 864e5)).padStart(2, '0'));
+      set('hours', String(Math.floor(diff / 36e5) % 24).padStart(2, '0'));
+      set('minutes', String(Math.floor(diff / 6e4) % 60).padStart(2, '0'));
+      set('seconds', String(Math.floor(diff / 1e3) % 60).padStart(2, '0'));
+    };
+    tick();
+    setInterval(tick, 1000);
+  });
+</script>
+
+<style>
+  .bd-panel {
+    display: grid;
+    gap: 22px;
+    padding: clamp(18px, 4vw, 32px);
+    background: #1b232d;
+    border-radius: 14px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), var(--shadow);
+    color: #f3efe6;
+  }
+  .bd-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(243, 239, 230, 0.55);
+  }
+  .bd-meta b { color: #f2b84b; font-weight: 700; }
+
+  .bd-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(8px, 2.4vw, 20px);
+  }
+  .bd-unit { display: grid; gap: 10px; justify-items: center; }
+  .bd-unit small {
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(243, 239, 230, 0.5);
+  }
+
+  /* ── перекидная карточка: 4 половинки, две из них — падающий флажок ── */
+  .flip {
+    --h: clamp(64px, 19vw, 132px);
+    position: relative;
+    width: 100%;
+    height: var(--h);
+    perspective: 400px;
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: calc(var(--h) * 0.56);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    color: #f7f3ea;
+  }
+  /* трёхзначные дни не должны вылезать за карточку */
+  .flip[data-len='3'] { font-size: calc(var(--h) * 0.4); }
+  .half {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    background: #2a3440;
+    backface-visibility: hidden;
+  }
+  .half > span {
+    display: block;
+    height: var(--h);
+    line-height: var(--h);
+    text-align: center;
+  }
+  .half.top {
+    top: 0;
+    border-radius: 8px 8px 0 0;
+    transform-origin: bottom;
+    /* верх чуть светлее — свет с потолка терминала */
+    background: linear-gradient(#34404d, #2c3743);
+  }
+  .half.bottom {
+    bottom: 0;
+    border-radius: 0 0 8px 8px;
+    transform-origin: top;
+    box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.6);
+  }
+  .half.bottom > span { transform: translateY(-50%); }
+  /* щель между половинками и заклёпки по бокам */
+  .flip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    background: #141a21;
+    z-index: 3;
+  }
+  .flap { visibility: hidden; z-index: 2; }
+  .is-flipping .flap { visibility: visible; }
+  .is-flipping .flap.top { animation: flap-top 0.3s ease-in forwards; }
+  .is-flipping .flap.bottom { transform: rotateX(90deg); animation: flap-bottom 0.3s 0.3s ease-out forwards; }
+  @keyframes flap-top { to { transform: rotateX(-90deg); } }
+  @keyframes flap-bottom { from { transform: rotateX(90deg); } to { transform: rotateX(0deg); } }
+
+  .bd-save {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .bd-save-cap {
+    flex-basis: 100%;
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .bd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border: 1.5px solid var(--text);
+    border-radius: 4px;
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--font-label);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: background-color 0.3s var(--ease), color 0.3s var(--ease), transform 0.4s var(--ease);
+  }
+  .bd-btn svg { width: 16px; height: 16px; flex: none; }
+  .bd-btn:hover { background: var(--text); color: var(--bg); transform: translateY(-2px); }
+</style>

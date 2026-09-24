@@ -1,0 +1,215 @@
+---
+// обратный отсчёт как лифтовый указатель этажей 1920-х: полукруглая шкала, стрелка показывает дни
+interface Props {
+  target: string; // ISO-дата
+}
+const { target } = Astro.props;
+
+const cx = 160;
+const cy = 160;
+const polar = (deg: number, r: number) => {
+  const a = (deg * Math.PI) / 180;
+  return [+(cx + r * Math.cos(a)).toFixed(2), +(cy + r * Math.sin(a)).toFixed(2)];
+};
+// 21 деление по 9°: слева направо через верх
+const ticks = Array.from({ length: 21 }, (_, i) => {
+  const deg = 180 + i * 9;
+  const major = i % 5 === 0;
+  const [x1, y1] = polar(deg, 126);
+  const [x2, y2] = polar(deg, major ? 112 : 119);
+  return { x1, y1, x2, y2, major };
+});
+const labels = [0, 1, 2, 3, 4].map((i) => {
+  const [x, y] = polar(180 + i * 45, 99);
+  // крайние подписи лежат на оси — поднимаем над цоколем
+  return { x, y: i === 0 || i === 4 ? y - 12 : y };
+});
+// солнечные лучи под шкалой — мотив веера из hero
+const rays = Array.from({ length: 25 }, (_, i) => {
+  const deg = 180 + i * 7.5;
+  const [x1, y1] = polar(deg, 24);
+  const [x2, y2] = polar(deg, i % 2 ? 70 : 88);
+  return { x1, y1, x2, y2 };
+});
+---
+
+<div class="dc-count" data-target={target}>
+  <div class="dc-dial">
+    <svg viewBox="0 0 320 184" role="img" aria-label="Шкала: сколько дней осталось до свадьбы">
+      <g class="dc-dial-rays">
+        {rays.map((r) => <line x1={r.x1} y1={r.y1} x2={r.x2} y2={r.y2} />)}
+      </g>
+      <path class="dc-dial-ring" d="M22 160A138 138 0 0 1 298 160" />
+      <path class="dc-dial-ring dc-dial-ring--thin" d="M28 160A132 132 0 0 1 292 160" />
+      <path class="dc-dial-ring dc-dial-ring--thin" d="M52 160A108 108 0 0 1 268 160" opacity=".5" />
+      <g class="dc-dial-ticks">
+        {ticks.map((t) => <line class:list={{ major: t.major }} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />)}
+      </g>
+      <g class="dc-dial-labels">
+        {labels.map((l, i) => <text x={l.x} y={l.y} data-label={i}>{i * 25}</text>)}
+      </g>
+      {/* ступенчатый цоколь под осью */}
+      <path class="dc-dial-ring" d="M10 160H310M122 160V167H198V160M136 167V174H184V167M148 174V181H172V174" />
+      <g class="dc-dial-needle">
+        <path d="M160 156.4 44 160 160 163.6 174 160Z" />
+      </g>
+      <circle class="dc-dial-hub" cx="160" cy="160" r="9" />
+      <circle cx="160" cy="160" r="3" fill="var(--accent-2)" />
+    </svg>
+  </div>
+
+  <p class="dc-count-days" aria-live="off">
+    <span class="dc-count-num" data-unit="days">–</span>
+    <span class="dc-count-cap" data-cap="days">дней</span>
+  </p>
+
+  <div class="dc-count-tiles">
+    <div><span data-unit="hours">–</span><small data-cap="hours">часов</small></div>
+    <div><span data-unit="minutes">–</span><small data-cap="minutes">минут</small></div>
+    <div><span data-unit="seconds">–</span><small data-cap="seconds">секунд</small></div>
+  </div>
+</div>
+
+<script>
+  const forms = {
+    days: ['день', 'дня', 'дней'],
+    hours: ['час', 'часа', 'часов'],
+    minutes: ['минута', 'минуты', 'минут'],
+    seconds: ['секунда', 'секунды', 'секунд'],
+  } as const;
+  type Unit = keyof typeof forms;
+  const plural = (n: number, [one, few, many]: readonly string[]) => {
+    const m10 = n % 10;
+    const m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return one;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+    return many;
+  };
+
+  document.querySelectorAll<HTMLElement>('#content .dc-count').forEach((el) => {
+    const target = new Date(el.dataset.target ?? '').getTime();
+    if (Number.isNaN(target)) return;
+    const units = Object.keys(forms) as Unit[];
+    const nums = Object.fromEntries(units.map((u) => [u, el.querySelector(`[data-unit="${u}"]`)]));
+    const caps = Object.fromEntries(units.map((u) => [u, el.querySelector(`[data-cap="${u}"]`)]));
+
+    // шкала подстраивается под срок: до 100 дней — 0…100, дальше — кратно сотне
+    const daysNow = Math.floor(Math.max(0, target - Date.now()) / 864e5);
+    const max = daysNow <= 100 ? 100 : Math.ceil(daysNow / 100) * 100;
+    el.querySelectorAll<SVGTextElement>('[data-label]').forEach((t) => {
+      t.textContent = String((Number(t.dataset.label) * max) / 4);
+    });
+
+    const tick = () => {
+      const diff = Math.max(0, target - Date.now());
+      const values: Record<Unit, number> = {
+        days: Math.floor(diff / 864e5),
+        hours: Math.floor(diff / 36e5) % 24,
+        minutes: Math.floor(diff / 6e4) % 60,
+        seconds: Math.floor(diff / 1e3) % 60,
+      };
+      units.forEach((u) => {
+        const node = nums[u];
+        if (node) node.textContent = u === 'days' ? String(values[u]) : String(values[u]).padStart(2, '0');
+        const cap = caps[u];
+        if (cap) cap.textContent = plural(values[u], forms[u]);
+      });
+      el.style.setProperty('--dc-angle', `${(Math.min(values.days, max) / max) * 180}deg`);
+    };
+    tick();
+    setInterval(tick, 1000);
+  });
+</script>
+
+<style>
+  .dc-count { display: grid; justify-items: center; }
+  .dc-dial { width: min(100%, 420px); }
+  .dc-dial svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .dc-dial-rays line { stroke: var(--accent); stroke-width: 0.6; opacity: 0.28; }
+  .dc-dial-ring { fill: none; stroke: var(--accent); stroke-width: 1.2; }
+  .dc-dial-ring--thin { stroke-width: 0.6; }
+  .dc-dial-ticks line { stroke: var(--accent); stroke-width: 0.8; opacity: 0.7; }
+  .dc-dial-ticks line.major { stroke: var(--accent-2); stroke-width: 1.4; opacity: 1; }
+  .dc-dial-labels text {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    fill: var(--accent-2);
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .dc-dial-hub { fill: var(--bg); stroke: var(--accent); stroke-width: 1.2; }
+  /* стрелка стартует с нуля и доезжает до своего деления, когда секция появилась */
+  .dc-dial-needle {
+    fill: var(--accent-2);
+    transform-box: view-box;
+    transform-origin: 160px 160px;
+    transform: rotate(0deg);
+    transition: transform 2.4s cubic-bezier(0.3, 1.35, 0.5, 1) 0.3s;
+    filter: drop-shadow(0 0 6px rgba(230, 205, 127, 0.35));
+  }
+  :global(.visible) .dc-dial-needle { transform: rotate(var(--dc-angle, 0deg)); }
+
+  .dc-count-days {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    margin-top: 18px;
+  }
+  .dc-count-num {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 20vw, 6.5rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    background: var(--dc-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dc-count-cap,
+  .dc-count-tiles small {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.66rem;
+    letter-spacing: 0.4em;
+    margin-right: -0.4em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+
+  /* окошки часов/минут/секунд — как таблички этажей в латунной рамке */
+  .dc-count-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 92px));
+    gap: 12px;
+    margin-top: 30px;
+  }
+  .dc-count-tiles div {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 14px 4px 12px;
+    border: 1px solid var(--accent);
+    background: var(--surface);
+  }
+  .dc-count-tiles div::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    pointer-events: none;
+  }
+  .dc-count-tiles span {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 7vw, 2.1rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .dc-count-tiles small { font-size: 0.56rem; letter-spacing: 0.24em; margin-right: -0.24em; color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dc-dial-needle { transition: none; }
+  }
+</style>

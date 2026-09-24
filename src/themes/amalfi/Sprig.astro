@@ -1,0 +1,39 @@
+---
+// маленькие акценты побережья: ветка лимона (в цвете) и оливковая веточка (золотая линия)
+interface Props {
+  kind?: 'lemon' | 'olive';
+  class?: string;
+}
+const { kind = 'lemon', class: cls } = Astro.props;
+---
+
+{kind === 'lemon' ? (
+  <svg class:list={['am-sprig', 'am-sprig--lemon', cls]} viewBox="0 0 96 64" aria-hidden="true">
+    <path d="M6 22c14-4 30-4 44 4" fill="none" stroke="#8a7a3c" stroke-width="1.4" stroke-linecap="round" />
+    <path d="M20 20c-6-10 2-17 12-16-1 9-5 14-12 16Z" fill="#5f7a3f" />
+    <path d="M20 20c4-5 8-10 12-16" fill="none" stroke="#9fb36a" stroke-width="0.8" opacity="0.7" />
+    <path d="M36 23c8-9 18-8 23-1-8 5-16 5-23 1Z" fill="#6f8a47" />
+    <path d="M36 23c7-1 15-1 23-1" fill="none" stroke="#a9bd74" stroke-width="0.8" opacity="0.7" />
+    <path d="M12 21c-4 9 1 16 8 18 2-8-1-14-8-18Z" fill="#4f6a36" />
+    <!-- лимон: овал с «носиками» на концах, блик сверху -->
+    <path d="M52 30c7-5 20-4 28 3 3 2 5 5 6 8l4 1-4 2c-2 7-10 12-20 12-9 0-16-4-19-10l-4-1 3-3c0-5 2-9 6-12Z" fill="#efcf4f" />
+    <path d="M56 50c6 4 18 5 26-2" fill="none" stroke="#c99a27" stroke-width="1.6" stroke-linecap="round" opacity="0.7" />
+    <path d="M58 36c5-3 12-3 17-1" fill="none" stroke="#fff6c9" stroke-width="2" stroke-linecap="round" opacity="0.75" />
+  </svg>
+) : (
+  <svg class:list={['am-sprig', 'am-sprig--olive', cls]} viewBox="0 0 120 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true">
+    <path d="M4 12c30-3 80-3 112 0" />
+    <path d="M22 11c3-6 9-8 14-8-3 5-8 8-14 8Z" /><path d="M22 13c3 6 9 8 14 8-3-5-8-8-14-8Z" />
+    <path d="M44 11c3-6 9-8 14-8-3 5-8 8-14 8Z" /><path d="M44 13c3 6 9 8 14 8-3-5-8-8-14-8Z" />
+    <path d="M76 11c-3-6-9-8-14-8 3 5 8 8 14 8Z" /><path d="M76 13c-3 6-9 8-14 8 3-5 8-8 14-8Z" />
+    <path d="M98 11c-3-6-9-8-14-8 3 5 8 8 14 8Z" /><path d="M98 13c-3 6-9 8-14 8 3-5 8-8 14-8Z" />
+    <circle cx="60" cy="12" r="2.6" fill="currentColor" stroke="none" />
+    <circle cx="8" cy="12" r="1.2" fill="currentColor" stroke="none" /><circle cx="112" cy="12" r="1.2" fill="currentColor" stroke="none" />
+  </svg>
+)}
+
+<style>
+  .am-sprig { display: block; }
+  .am-sprig--lemon { width: 84px; height: auto; }
+  .am-sprig--olive { width: 120px; height: 24px; color: var(--accent); }
+</style>

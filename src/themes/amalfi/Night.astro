@@ -1,0 +1,228 @@
+---
+import Stars from './Stars.astro';
+// обратный отсчёт под ночным небом: луна в той фазе, что будет в ночь свадьбы, и лунная дорожка на море
+interface Props {
+  target: string; // ISO-дата
+}
+const { target } = Astro.props;
+
+// фаза Луны от эталонного новолуния 06.01.2000 18:14 UTC; точности «до дня» для картинки хватает
+const synodic = 29.530588853;
+const t = new Date(target).getTime();
+const phase = Number.isNaN(t) ? 0.45 : ((((t - Date.UTC(2000, 0, 6, 18, 14)) / 864e5 / synodic) % 1) + 1) % 1;
+const lit = (1 - Math.cos(2 * Math.PI * phase)) / 2;
+const phaseName =
+  phase < 0.03 || phase > 0.97 ? 'новолуние'
+  : phase < 0.22 ? 'растущий серп'
+  : phase < 0.28 ? 'первая четверть'
+  : phase < 0.47 ? 'растущая луна'
+  : phase < 0.53 ? 'полнолуние'
+  : phase < 0.72 ? 'убывающая луна'
+  : phase < 0.78 ? 'последняя четверть'
+  : 'убывающий серп';
+
+// освещённая часть: полукруг со стороны света + эллипс терминатора
+const r = 40;
+const cx = 50;
+const cy = 50;
+const rx = Math.abs(1 - 2 * lit) * r;
+const waxing = phase < 0.5;
+const crescent = lit < 0.5;
+const outerSweep = waxing ? 1 : 0;
+const innerSweep = waxing ? (crescent ? 0 : 1) : crescent ? 1 : 0;
+const litPath = `M${cx} ${cy - r}A${r} ${r} 0 0 ${outerSweep} ${cx} ${cy + r}A${rx.toFixed(2)} ${r} 0 0 ${innerSweep} ${cx} ${cy - r}Z`;
+
+// блики лунной дорожки: чем ближе к берегу, тем шире
+const glints = Array.from({ length: 16 }, (_, i) => {
+  const row = Math.floor(i / 2);
+  const w = (6 + row * row * 1.1) * (i % 2 ? 0.55 : 1);
+  const shift = (i % 2 ? 1 : -1) * (row * 2.2 + 2);
+  return { x: 200 + shift - w / 2, y: 13 + row * 13 + (i % 2) * 5, w, delay: ((i * 0.53) % 3).toFixed(2) };
+});
+---
+
+<section class="am-night fade-up" data-target={target} aria-labelledby="am-night-title">
+  <Stars count={44} seed={3} top={62} />
+
+  <figure class="am-moon" aria-hidden="true">
+    <svg viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="am-moon-lit" cx="40%" cy="38%" r="70%">
+          <stop offset="0" stop-color="#fbf3dc" />
+          <stop offset="0.7" stop-color="#ecd9a8" />
+          <stop offset="1" stop-color="#cfb173" />
+        </radialGradient>
+        <clipPath id="am-moon-clip"><path d={litPath} /></clipPath>
+      </defs>
+      <circle cx={cx} cy={cy} r={r} fill="#18283a" />
+      <path d={litPath} fill="url(#am-moon-lit)" />
+      <g clip-path="url(#am-moon-clip)" fill="#b89a5c" opacity="0.35">
+        <circle cx="38" cy="36" r="7" /><circle cx="60" cy="58" r="9" /><circle cx="44" cy="66" r="4" /><circle cx="66" cy="34" r="3.5" /><circle cx="28" cy="56" r="5" />
+      </g>
+    </svg>
+  </figure>
+  <p class="am-moon-note">луна в ночь свадьбы · {phaseName}</p>
+
+  <div class="am-night-body">
+    <p class="am-night-it" lang="it">Mancano ancora…</p>
+    <h2 id="am-night-title" class="am-night-title">до нашего вечера у моря</h2>
+    <div class="am-cd" role="timer" aria-live="off">
+      <div><span data-unit="days">–</span><small>дней</small></div>
+      <div><span data-unit="hours">–</span><small>часов</small></div>
+      <div><span data-unit="minutes">–</span><small>минут</small></div>
+      <div><span data-unit="seconds">–</span><small>секунд</small></div>
+    </div>
+    {Astro.slots.has('default') && <div class="am-night-cal"><slot /></div>}
+  </div>
+
+  <!-- море: линия горизонта, волны и лунная дорожка -->
+  <svg class="am-sea" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="am-sea-fill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#132a40" />
+        <stop offset="1" stop-color="#0c1520" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="8" width="400" height="112" fill="url(#am-sea-fill)" />
+    <path d="M0 8H400" stroke="rgba(232,201,135,.45)" stroke-width="1" vector-effect="non-scaling-stroke" />
+    {glints.map((g) => (
+      <rect class="am-glint" x={g.x.toFixed(1)} y={g.y} width={g.w.toFixed(1)} height="1.3" rx="0.65" style={`animation-delay:${g.delay}s`} />
+    ))}
+    <g fill="none" stroke="rgba(236,229,216,.12)" stroke-width="1" vector-effect="non-scaling-stroke">
+      <path d="M0 40c40-6 80 6 120 0s80-6 120 0 80 6 160 0" />
+      <path d="M0 72c50-8 100 8 150 0s100-8 150 0 60 6 100 0" />
+      <path d="M0 104c60-8 120 8 180 0s120-8 220 0" />
+    </g>
+  </svg>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.am-night').forEach((el) => {
+    const target = new Date(el.dataset.target ?? '').getTime();
+    if (Number.isNaN(target)) return;
+    const q = (u: string) => el.querySelector<HTMLElement>(`[data-unit="${u}"]`)!;
+    const units = { days: q('days'), hours: q('hours'), minutes: q('minutes'), seconds: q('seconds') };
+    const tick = () => {
+      const diff = Math.max(0, target - Date.now());
+      units.days.textContent = String(Math.floor(diff / 864e5));
+      units.hours.textContent = String(Math.floor(diff / 36e5) % 24).padStart(2, '0');
+      units.minutes.textContent = String(Math.floor(diff / 6e4) % 60).padStart(2, '0');
+      units.seconds.textContent = String(Math.floor(diff / 1e3) % 60).padStart(2, '0');
+    };
+    tick();
+    setInterval(tick, 1000);
+  });
+</script>
+
+<style>
+  .am-night {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    padding: clamp(40px, 7vw, 80px) 20px 0;
+    background: linear-gradient(180deg, var(--bg) 0%, #070e17 30%, #0a1624 70%, #10243a 100%);
+  }
+  .am-moon {
+    position: relative;
+    width: clamp(88px, 22vw, 128px);
+    margin: 0;
+  }
+  /* мягкий ореол градиентом, без blur-фильтра */
+  .am-moon::before {
+    content: '';
+    position: absolute;
+    inset: -70%;
+    z-index: -1;
+    background: radial-gradient(circle closest-side, rgba(236, 217, 168, 0.22) 0%, rgba(236, 217, 168, 0.06) 45%, transparent 100%);
+  }
+  .am-moon svg { display: block; width: 100%; height: auto; }
+  .am-moon-note {
+    margin-top: 14px;
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 0.98rem;
+    color: var(--muted);
+  }
+
+  .am-night-body { display: grid; justify-items: center; gap: 6px; margin-top: clamp(28px, 5vw, 44px); }
+  .am-night-it {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: clamp(1.4rem, 4.6vw, 1.8rem);
+    color: var(--accent-2);
+    line-height: 1.2;
+  }
+  .am-night-title {
+    font-family: var(--font-label);
+    font-size: 0.72rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+
+  .am-cd {
+    --cd-size: clamp(2.2rem, 10vw, 4.6rem);
+    --cd-gap: clamp(10px, 3vw, 36px);
+    display: grid;
+    /* ромбики стоят в середине зазора — трёхзначные дни не наезжают на них */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: var(--cd-gap);
+    width: min(100%, 680px);
+    margin-top: clamp(24px, 5vw, 40px);
+  }
+  .am-cd div { position: relative; display: grid; gap: 4px; justify-items: center; }
+  /* золотые ромбики-разделители вместо линий */
+  .am-cd div + div::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--cd-gap) / -2);
+    top: calc(var(--cd-size) * 0.5);
+    width: 5px;
+    height: 5px;
+    translate: -50% -50%;
+    rotate: 45deg;
+    background: var(--accent);
+    opacity: 0.7;
+  }
+  .am-cd span {
+    font-family: var(--font-display);
+    font-size: var(--cd-size);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(180deg, #f6e3b4 10%, var(--accent-2) 45%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .am-cd small {
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .am-night-cal { margin-top: clamp(32px, 6vw, 44px); }
+  .am-night-cal :global(.cal-caption) { color: var(--muted); }
+  .am-night-cal :global(.cal-link) {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    color: var(--accent-2);
+    background: rgba(12, 21, 32, 0.5);
+  }
+  .am-night-cal :global(.cal-link:hover) { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: var(--accent); }
+
+  .am-sea {
+    display: block;
+    width: calc(100% + 40px);
+    height: clamp(110px, 18vw, 180px);
+    margin: clamp(40px, 7vw, 64px) -20px 0;
+  }
+  .am-glint { fill: #f3dfa6; opacity: 0.55; animation: am-glint 3.2s ease-in-out infinite; }
+  @keyframes am-glint { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.8; } }
+  @media (prefers-reduced-motion: reduce) {
+    .am-glint { animation: none; }
+  }
+</style>

@@ -1,0 +1,213 @@
+---
+// дресс-код — таможенная декларация: пункты бланка, палитра наклейками на чемодан, штамп «досмотрено»
+import Sign from './Sign.astro';
+interface Props {
+  text: string;
+  colors?: string[];
+  code: string;
+}
+const { text, colors, code } = Astro.props;
+const tilts = [-6, 4, -2, 7, -4, 3];
+---
+
+<section class="tk-sec cu-sec fade-up">
+  <div class="tk-wrap">
+    <Sign code={code} label="Таможня" en="Customs" title="Декларация гостя" />
+
+    <div class="cu-form">
+      <div class="cu-head">
+        <b>Таможенная декларация</b>
+        <span>Форма WD-01 · Дресс-код</span>
+      </div>
+
+      <div class="cu-rows">
+      <div class="cu-row">
+        <span class="cu-n">1</span>
+        <div>
+          <p class="cu-label">Предъявляемая одежда</p>
+          <p class="cu-text">{text}</p>
+        </div>
+      </div>
+
+      {colors && colors.length > 0 && (
+        <div class="cu-row">
+          <span class="cu-n">2</span>
+          <div>
+            <p class="cu-label">Цвета, разрешённые к ввозу</p>
+            <ul class="cu-stickers" aria-label="Палитра дресс-кода">
+              {colors.map((c, i) => (
+                <li style={`--c:${c};--t:${tilts[i % tilts.length]}deg`}>
+                  <span class="sticker" aria-hidden="true"></span>
+                  <small>{c.replace('#', '').toUpperCase()}</small>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      <div class="cu-row">
+        <span class="cu-n">{colors && colors.length > 0 ? 3 : 2}</span>
+        <div>
+          <p class="cu-label">Декларирую</p>
+          <p class="cu-check"><span class="box" aria-hidden="true">✓</span> Хорошее настроение, удобную обувь и&nbsp;любовь без ограничений</p>
+        </div>
+      </div>
+
+      </div>
+
+      <div class="cu-foot">
+        <span class="cu-signline">Подпись пассажира</span>
+        <span class="cu-stamp" aria-hidden="true">Досмотрено<small>Cleared ♥</small></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cu-form {
+    position: relative;
+    display: grid;
+    background: #fbf7ec;
+    border: 1.5px solid var(--text);
+    border-radius: 4px;
+    box-shadow: 6px 6px 0 color-mix(in srgb, var(--text) 12%, transparent);
+  }
+  .cu-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 16px;
+    padding: 14px clamp(16px, 4vw, 28px);
+    border-bottom: 1.5px solid var(--text);
+    font-family: var(--font-label);
+    text-transform: uppercase;
+  }
+  .cu-head b { font-size: 0.78rem; letter-spacing: 0.12em; }
+  .cu-head span { font-size: 0.62rem; letter-spacing: 0.16em; color: var(--muted); align-self: center; }
+  .cu-row {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 16px;
+    padding: clamp(18px, 4vw, 26px) clamp(16px, 4vw, 28px);
+    border-bottom: 1px dashed var(--line-strong);
+  }
+  .cu-n {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid var(--text);
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .cu-label {
+    font-family: var(--font-label);
+    font-size: 0.64rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted) !important;
+    margin-bottom: 8px;
+  }
+  .cu-text {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.2rem, 4.4vw, 1.55rem);
+    line-height: 1.4;
+    color: var(--text) !important;
+    max-width: 32ch;
+  }
+
+  /* палитра — виниловые наклейки на чемодан */
+  .cu-stickers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 16px;
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+  }
+  .cu-stickers li { display: grid; justify-items: center; gap: 8px; }
+  .sticker {
+    width: clamp(46px, 13vw, 64px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.35), transparent 42%),
+      var(--c);
+    border: 4px solid #fffdf8;
+    box-shadow: 0 0 0 1px var(--line), 0 6px 10px -4px rgba(37, 48, 60, 0.35);
+    rotate: var(--t);
+    transition: rotate 0.5s var(--ease), transform 0.5s var(--ease);
+  }
+  .cu-stickers li:hover .sticker { rotate: 0deg; transform: translateY(-3px); }
+  .cu-stickers small {
+    font-family: var(--font-label);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .cu-check { display: flex; gap: 12px; align-items: flex-start; color: var(--text) !important; }
+  .cu-check .box {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin-top: 1px;
+    border: 1.5px solid var(--text);
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.95rem;
+  }
+
+  @media (min-width: 860px) {
+    /* бланк в две колонки: текст слева, палитра справа, декларация во всю ширину */
+    .cu-rows { display: grid; grid-template-columns: 1fr 1fr; }
+    .sticker { width: 54px; }
+    .cu-stickers { gap: 14px 12px; }
+    .cu-row:nth-child(2) { border-left: 1px dashed var(--line-strong); }
+    .cu-row:nth-child(3), .cu-row:only-child { grid-column: 1 / -1; }
+  }
+  .cu-foot {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    min-height: 92px;
+    padding: 18px clamp(16px, 4vw, 28px) 20px;
+  }
+  .cu-signline {
+    width: min(220px, 55%);
+    padding-top: 8px;
+    border-top: 1px solid var(--text);
+    font-family: var(--font-label);
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .cu-stamp {
+    position: absolute;
+    right: clamp(14px, 5vw, 40px);
+    bottom: 22px;
+    display: grid;
+    justify-items: center;
+    padding: 8px 16px;
+    border: 3px double var(--accent);
+    border-radius: 999px;
+    color: var(--accent);
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.84rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    rotate: -12deg;
+    opacity: 0.85;
+    mix-blend-mode: multiply;
+  }
+  .cu-stamp small { font-size: 0.56rem; letter-spacing: 0.24em; font-weight: 400; }
+  .cu-sec:global(.visible) .cu-stamp { animation: cu-stamp 0.5s 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+  @keyframes cu-stamp { from { opacity: 0; transform: scale(1.8); } }
+</style>

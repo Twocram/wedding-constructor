@@ -1,0 +1,49 @@
+---
+// фриз из майоликовой плитки во всю ширину: svg-плитка в data-URI повторяется по X — без id и лишнего DOM
+interface Props {
+  variant?: 'fiore' | 'limoni';
+  class?: string;
+}
+const { variant = 'fiore', class: cls } = Astro.props;
+
+const cobalt = '#1f4f94';
+const cream = '#efe6d2';
+const lemon = '#e9c24a';
+const leaf = '#5f7a3f';
+const petal = (r: number) =>
+  `<path transform='rotate(${r} 24 24)' d='M24 21C19.5 15.5 20 9.5 24 5.5c4 4 4.5 10 0 15.5Z' fill='${cobalt}'/>`;
+const leafAt = (r: number) =>
+  `<path transform='rotate(${r} 24 24)' d='M26 22c1-5 4-8 9-9-1 4.5-4 7.5-9 9Z' fill='${leaf}'/>`;
+
+const tiles = {
+  // «цветок»: лепестки + четверти кругов по углам складываются в круги на стыках
+  fiore: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' fill='${cream}'/>${[0, 90, 180, 270].map(petal).join('')}${[0, 90, 180, 270].map(leafAt).join('')}<g fill='${cobalt}'><path d='M0 0h9A9 9 0 0 1 0 9Z'/><path d='M48 0v9A9 9 0 0 1 39 0Z'/><path d='M48 48h-9a9 9 0 0 1 9-9Z'/><path d='M0 48v-9a9 9 0 0 1 9 9Z'/></g><g fill='${lemon}'><circle cx='24' cy='24' r='3.2'/><circle cx='0' cy='0' r='3'/><circle cx='48' cy='0' r='3'/><circle cx='48' cy='48' r='3'/><circle cx='0' cy='48' r='3'/></g><rect x='.5' y='.5' width='47' height='47' fill='none' stroke='${cobalt}' stroke-opacity='.18'/></svg>`,
+  // «лимоны»: лимон с листьями на кобальте, через плитку — зеркально
+  limoni: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 48'><rect width='96' height='48' fill='${cobalt}'/><path d='M0 5.5h96M0 42.5h96' stroke='${lemon}' stroke-width='1' stroke-opacity='.85'/>${[0, 1].map((k) => `<g transform='translate(${k * 48 + 24} 24) scale(${k ? -1 : 1} 1)'><path d='M-15-6c-6-6-2-11 4-11 0 6-2 9-4 11Z' fill='${leaf}'/><path d='M-15-6c4-2 9-2 12 1-4 3-9 3-12-1Z' fill='#7d9a52'/><path d='M-9 3c0-6 5-10 11-10 7 0 12 4 13 9l3 1-3 1c-1 6-6 9-12 9-7 0-12-4-12-9l-3-1Z' fill='${lemon}'/><path d='M-3-3c3-2 7-2 10 0' stroke='#fff6c9' stroke-width='1.6' stroke-linecap='round' fill='none' opacity='.8'/></g>`).join('')}<circle cx='48' cy='24' r='2' fill='${cream}'/><circle cx='0' cy='24' r='2' fill='${cream}'/><circle cx='96' cy='24' r='2' fill='${cream}'/></svg>`,
+};
+const bg = `url("data:image/svg+xml,${encodeURIComponent(tiles[variant])}")`;
+---
+
+<div class:list={['am-frieze', `am-frieze--${variant}`, cls]} style={`--tile:${bg}`} aria-hidden="true"></div>
+
+<style>
+  .am-frieze {
+    position: relative;
+    height: 34px;
+    background: var(--tile) repeat-x center / auto 100%;
+    border-block: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+    /* глазурь: лёгкий блик и тень по краям, чтобы плитка не выглядела «плоской картинкой» */
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 -1px 0 rgba(0, 0, 0, 0.4);
+  }
+  .am-frieze::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 45%, rgba(0, 0, 0, 0.18));
+  }
+  .am-frieze--limoni { height: 30px; }
+  @media (min-width: 900px) {
+    .am-frieze { height: 44px; }
+    .am-frieze--limoni { height: 40px; }
+  }
+</style>

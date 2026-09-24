@@ -1,0 +1,153 @@
+---
+// дресс-код как «заметки о стиле»: колонки текста и карточки-выкраски с названием оттенка
+interface Props {
+  text: string;
+  colors?: string[];
+  headingId: string;
+}
+const { text, colors = [], headingId } = Astro.props;
+
+// небольшой словарь оттенков: карточке нужно имя, ближайшее по цвету к hex пары
+const shades: [string, string][] = [
+  ['#000000', 'Чёрный'], ['#1e1c1a', 'Уголь'], ['#3d3d3d', 'Графит'], ['#7d7f7c', 'Сталь'], ['#b5b5b0', 'Туман'],
+  ['#ffffff', 'Белый'], ['#f6f1ea', 'Молоко'], ['#e8dcc8', 'Экрю'], ['#d9cfc0', 'Лён'], ['#c8b89c', 'Овёс'],
+  ['#a89a86', 'Тауп'], ['#c4a484', 'Кэмел'], ['#d4af7a', 'Карамель'], ['#8b6f4e', 'Табак'], ['#6b5d4f', 'Какао'],
+  ['#4a3b30', 'Эспрессо'], ['#c9a227', 'Золото'], ['#e6d3a3', 'Шампань'], ['#8a9a5b', 'Олива'], ['#9caf88', 'Шалфей'],
+  ['#556b2f', 'Мох'], ['#2f4f3e', 'Хвоя'], ['#7fa99b', 'Эвкалипт'], ['#1f2a44', 'Полночь'], ['#4a6a8a', 'Деним'],
+  ['#9fb6cd', 'Небо'], ['#b85c38', 'Терракота'], ['#7b2d26', 'Бордо'], ['#c97c7c', 'Роза'], ['#e3b7a0', 'Пудра'],
+  ['#d8a7b1', 'Пион'], ['#b89bb5', 'Лаванда'], ['#5e3a50', 'Слива'], ['#e07a5f', 'Коралл'],
+];
+const toRgb = (hex: string) => {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? [...h].map((c) => c + c).join('') : h.padEnd(6, '0');
+  return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) || 0);
+};
+// «redmean» — простая взвешенная дистанция, заметно ближе к восприятию, чем голый RGB
+const distance = (a: number[], b: number[]) => {
+  const r = (a[0] + b[0]) / 2;
+  const [dr, dg, db] = [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  return (2 + r / 256) * dr * dr + 4 * dg * dg + (2 + (255 - r) / 256) * db * db;
+};
+const shadeName = (hex: string) => {
+  const rgb = toRgb(hex);
+  return shades.reduce((best, s) => (distance(rgb, toRgb(s[0])) < distance(rgb, toRgb(best[0])) ? s : best))[1];
+};
+const swatches = colors.map((hex) => ({ hex: hex.toUpperCase(), name: shadeName(hex) }));
+---
+
+<div class="sn">
+  <div class="sn-head">
+    <p class="sn-kicker fade-up">Style notes</p>
+    <h2 id={headingId} class="sn-h2 fade-up">Заметки <i>о стиле</i></h2>
+  </div>
+  <p class="sn-text fade-up" style="--i:1">{text}</p>
+
+  {swatches.length > 0 && (
+    <>
+      <p class="sn-caption fade-up">Палитра вечера</p>
+      <ul class="sn-chips">
+        {swatches.map((s, i) => (
+          <li class="sn-chip fade-up" style={`--i:${i}`}>
+            <span class="sn-swatch" style={`background:${s.hex}`}></span>
+            <span class="sn-label">
+              <span class="sn-num">№ {String(i + 1).padStart(2, '0')}</span>
+              <span class="sn-name">{s.name}</span>
+              <span class="sn-hex">{s.hex}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</div>
+
+<style>
+  .sn { display: grid; gap: 0; }
+  .sn-kicker {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.3rem;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .sn-h2 {
+    font-weight: 300;
+    font-size: clamp(2.7rem, 11vw, 5.4rem);
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+  }
+  .sn-h2 i { color: var(--accent); }
+  .sn-text {
+    margin-top: clamp(28px, 5vw, 44px);
+    color: var(--text-2);
+    max-width: 40ch;
+  }
+  .sn-text::first-line { font-variant-caps: all-small-caps; letter-spacing: 0.06em; color: var(--text); }
+  .sn-caption {
+    margin: clamp(40px, 7vw, 64px) 0 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sn-chips {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 14px 12px;
+  }
+  /* карточка-выкраска: цвет сверху, подпись на белой полосе снизу */
+  .sn-chip {
+    display: grid;
+    background: color-mix(in srgb, #fff 70%, var(--bg));
+    padding: 6px 6px 0;
+    box-shadow: 0 1px 0 var(--line), 0 14px 26px -18px rgba(31, 28, 24, 0.45);
+    transition: transform 0.6s var(--ease);
+  }
+  .sn-chip:hover { transform: translateY(-4px) rotate(-0.6deg); }
+  .sn-swatch {
+    display: block;
+    aspect-ratio: 1 / 1.05;
+    outline: 1px solid rgba(31, 28, 24, 0.08);
+    outline-offset: -1px;
+  }
+  .sn-label { display: grid; gap: 1px; padding: 10px 4px 12px; }
+  .sn-num {
+    font-family: var(--font-label);
+    font-size: 0.56rem;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+  }
+  .sn-name { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.15; color: var(--text); }
+  .sn-hex {
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--text-2);
+  }
+
+  /* журнальный набор в две колонки — только там, где колонка не уже ~30 знаков */
+  @media (min-width: 900px) {
+    .sn { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; }
+    .sn-head { grid-column: 1 / -1; }
+    .sn-text {
+      grid-column: 4 / -1;
+      max-width: none;
+      column-count: 2;
+      column-gap: 48px;
+      column-rule: 1px solid var(--line);
+      hyphens: auto;
+      text-align: justify;
+    }
+    .sn-caption, .sn-chips { grid-column: 1 / -1; }
+    .sn-chips { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sn-chip { transition: none; }
+    .sn-chip:hover { transform: none; }
+  }
+</style>

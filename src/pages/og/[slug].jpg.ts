@@ -20,6 +20,7 @@ const looks: Record<Theme, Look> = {
   amalfi: { bg: '#0c1520', text: '#ece5d8', muted: '#7f8a96', accent: '#d2a552', font: 'Prata' },
   deco: { bg: '#141311', text: '#efe9da', muted: '#878072', accent: '#c9a227', font: 'Prata', upper: true },
   ticket: { bg: '#f3efe6', text: '#25303c', muted: '#77808c', accent: '#c2452d', font: 'Playfair Display', italic: true },
+  stories: { bg: '#1b1a1d', text: '#ffffff', muted: '#a9a5ae', accent: '#f19a7e', font: 'Playfair Display', italic: true },
   cinema: { bg: '#0b0a09', text: '#f2ece1', muted: '#91887b', accent: '#e0b36a', font: 'Oswald', upper: true },
 };
 

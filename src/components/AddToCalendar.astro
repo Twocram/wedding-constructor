@@ -1,0 +1,40 @@
+---
+interface Props {
+  slug: string;
+  google: string;
+}
+const { slug, google } = Astro.props;
+const icon = 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4';
+---
+
+<div class="cal">
+  <p class="cal-caption">Добавить в календарь</p>
+  <a class="cal-link" href={`/ics/${slug}.ics`}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d={icon} /></svg>
+    Apple / Outlook
+  </a>
+  <a class="cal-link" href={google} target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d={icon} /></svg>
+    Google
+  </a>
+</div>
+
+<style>
+  .cal { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .cal-caption { flex-basis: 100%; margin: 0 0 2px; font-family: var(--font-label); font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+  .cal a { display: inline-flex; align-items: center; gap: 8px; }
+  .cal svg { width: 15px; height: 15px; flex: none; }
+  .cal-link {
+    padding: 11px 18px;
+    border-radius: 99px;
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--font-label);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  .cal-link:hover { background: color-mix(in srgb, var(--text) 5%, transparent); border-color: var(--text); }
+</style>

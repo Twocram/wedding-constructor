@@ -1,0 +1,64 @@
+---
+// amalfi — «вечер на итальянском побережье»: арки, майолика, ночное море и золото
+import type { Props } from '../../components/ClassicBody.astro';
+import AddToCalendar from '../../components/AddToCalendar.astro';
+import Letter from './Letter.astro';
+import Night from './Night.astro';
+import Colonnade from './Colonnade.astro';
+import Postcard from './Postcard.astro';
+import Voyage from './Voyage.astro';
+import Tiles from './Tiles.astro';
+import Menu from './Menu.astro';
+import Info from './Info.astro';
+import Reply from './Reply.astro';
+import Maiolica from './Maiolica.astro';
+
+const { inv, slug, cal } = Astro.props as Props;
+// фото для открытки: последний кадр галереи (обычно пейзаж), иначе главное фото
+const postcardPhoto = inv.gallery?.at(-1) ?? inv.heroPhoto;
+const hasInfo = Boolean(inv.transfer || inv.telegramChat || inv.organizer);
+---
+
+<main id="content" class="am-body">
+  {inv.welcome && <Letter text={inv.welcome} groom={inv.groom} bride={inv.bride} />}
+
+  {inv.countdown && (
+    <Night target={inv.countdown}>
+      {cal && <AddToCalendar slug={slug} google={cal.google} />}
+    </Night>
+  )}
+
+  {inv.gallery && inv.gallery.length > 0 && <Colonnade photos={inv.gallery} />}
+
+  {inv.venue && (
+    <Postcard
+      name={inv.venue.name}
+      address={inv.venue.address}
+      mapIframe={inv.venue.mapIframe || undefined}
+      photo={postcardPhoto}
+      city={inv.city}
+      date={inv.date}
+      when={inv.countdown}
+    />
+  )}
+
+  {inv.timeline && inv.timeline.length > 0 && <Voyage items={inv.timeline} />}
+
+  {inv.dressCode && (
+    <>
+      <Maiolica variant="limoni" />
+      <Tiles text={inv.dressCode.text} colors={inv.dressCode.colors} />
+    </>
+  )}
+
+  {inv.wishes && inv.wishes.length > 0 && <Menu items={inv.wishes} />}
+
+  {hasInfo && <Info transfer={inv.transfer} telegram={inv.telegramChat} organizer={inv.organizer} />}
+
+  {inv.rsvp && <Reply deadline={inv.rsvp.deadline} groom={inv.groom} bride={inv.bride} />}
+</main>
+
+<style>
+  /* секции темы сами задают фон и отступы; main — просто вертикальный поток */
+  .am-body { display: block; overflow-x: clip; }
+</style>

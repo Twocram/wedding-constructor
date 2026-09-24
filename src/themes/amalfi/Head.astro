@@ -1,0 +1,43 @@
+---
+// заголовок секции под аркой: итальянская строка курсивом + русский заголовок капителью
+interface Props {
+  it: string;
+  title: string;
+  id?: string;
+}
+const { it, title, id } = Astro.props;
+---
+
+<header class="am-head fade-up">
+  <svg class="am-head-arch" viewBox="0 0 56 44" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+    <path d="M6 44V22a22 22 0 0 1 44 0v22" />
+    <path d="M12 44V22a16 16 0 0 1 32 0v22" opacity="0.5" />
+    <path d="M28 12.5l1.6 3.4 3.4 1.6-3.4 1.6L28 22.5l-1.6-3.4-3.4-1.6 3.4-1.6Z" fill="currentColor" stroke="none" />
+  </svg>
+  <p class="am-head-it" lang="it">{it}</p>
+  <h2 id={id}>{title}</h2>
+</header>
+
+<style>
+  .am-head {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 6px;
+    margin-bottom: clamp(40px, 7vw, 64px);
+  }
+  .am-head-arch { width: 44px; height: 35px; color: var(--accent); margin-bottom: 10px; }
+  .am-head-it {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: clamp(1.3rem, 4.4vw, 1.7rem);
+    line-height: 1.2;
+    color: var(--accent-2);
+  }
+  .am-head h2 {
+    font-size: clamp(1.45rem, 5.4vw, 2.2rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+</style>

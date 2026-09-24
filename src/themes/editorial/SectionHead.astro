@@ -1,0 +1,46 @@
+---
+// колонтитул рубрики: номер полосы, название, справа — «бегущая строка» номера
+interface Props {
+  num: string;
+  label: string;
+  running?: string;
+}
+const { num, label, running } = Astro.props;
+---
+
+<p class="ed-folio fade-up">
+  <span class="ed-folio-num">{num}</span>
+  <span class="ed-folio-dash" aria-hidden="true">—</span>
+  <span class="ed-folio-label">{label}</span>
+  <span class="ed-folio-rule" aria-hidden="true"></span>
+  {running && <span class="ed-folio-running">{running}</span>}
+</p>
+
+<style>
+  .ed-folio {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: clamp(28px, 5vw, 48px);
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .ed-folio-num {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.5rem;
+    letter-spacing: 0;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .ed-folio-dash { color: var(--muted); letter-spacing: 0; }
+  .ed-folio-rule { flex: 1; height: 1px; background: var(--line-strong); align-self: center; }
+  .ed-folio-running { display: none; color: var(--muted); letter-spacing: 0.22em; }
+  @media (min-width: 900px) {
+    .ed-folio-running { display: inline; }
+  }
+</style>

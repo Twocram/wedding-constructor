@@ -13,6 +13,7 @@ export const orderUrl = (themeName?: string) => {
 export type ThemeInfo = { name: string; tagline: string; tags: string[] };
 
 export const themes: Record<string, ThemeInfo> = {
+  stories: { name: 'Stories', tagline: 'Как сторис в Instagram: тапы, стикеры, опрос «Придёте?»', tags: ['Новинка', 'Одним экраном'] },
   cover: { name: 'Cover', tagline: 'Классика с конвертом и сургучной печатью', tags: ['Светлая', 'Конверт'] },
   editorial: { name: 'Editorial', tagline: 'Журнальная вёрстка, воздух и тонкая типографика', tags: ['Светлая', 'Минимализм'] },
   amalfi: { name: 'Amalfi', tagline: 'Вечер у моря: ночное небо, золото и арки', tags: ['Тёмная', 'Destination'] },

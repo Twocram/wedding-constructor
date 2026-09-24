@@ -1,0 +1,200 @@
+---
+// приветствие — письмо авиапочтой: полосатая кайма, марка с фото, почтовый штемпель
+interface Props {
+  text: string;
+  groom: string;
+  bride: string;
+  city?: string;
+  date: string;
+  photo?: string;
+}
+const { text, groom, bride, city, date, photo } = Astro.props;
+const markText = `${(city ?? 'Wedding Airlines').toUpperCase()} · ${date.toUpperCase()} · `;
+---
+
+<section class="tk-sec letter-sec fade-up" aria-labelledby="letter-greet">
+  <div class="tk-wrap">
+    <article class="letter">
+      <div class="letter-sheet">
+        <div class="letter-top">
+          <p class="par-avion" aria-hidden="true"><b>Par avion</b><span>Авиапочта</span></p>
+
+          <div class="stamp" aria-hidden="true">
+            <div class="stamp-face">
+              {photo ? <img src={photo} alt="" loading="lazy" decoding="async" /> : <span class="stamp-mono">{groom[0]}&{bride[0]}</span>}
+              <small>Почта любви · 2 ♥</small>
+            </div>
+          </div>
+
+          {/* штемпель гасит марку — текст по кругу, волны уходят влево */}
+          <svg class="postmark" viewBox="0 0 220 120" aria-hidden="true">
+            <defs><path id="pm-circle" d="M160 60 m-40 0 a40 40 0 1 1 80 0 a40 40 0 1 1 -80 0" /></defs>
+            <g fill="none" stroke="currentColor" stroke-width="1.6">
+              <circle cx="160" cy="60" r="52" />
+              <circle cx="160" cy="60" r="30" />
+              <path d="M0 42 q12 -8 24 0 t24 0 t24 0 t24 0" />
+              <path d="M0 60 q12 -8 24 0 t24 0 t24 0 t24 0" />
+              <path d="M0 78 q12 -8 24 0 t24 0 t24 0 t24 0" />
+            </g>
+            <text font-size="9.5" letter-spacing="1.6" fill="currentColor"><textPath href="#pm-circle">{markText}</textPath></text>
+            <text x="160" y="57" font-size="11" font-weight="700" text-anchor="middle" fill="currentColor">WD</text>
+            <text x="160" y="70" font-size="8" text-anchor="middle" fill="currentColor" letter-spacing="1">♥ ♥ ♥</text>
+          </svg>
+        </div>
+
+        <p id="letter-greet" class="letter-greet" data-guest="{g}, ждём вас">Дорогие гости</p>
+        <p class="letter-text">{text}</p>
+        <p class="letter-sign">
+          <span>С любовью и&nbsp;местами у&nbsp;окна,</span>
+          <b>{groom} <i>&</i> {bride}</b>
+        </p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .letter {
+    --airmail-red: var(--accent);
+    --airmail-blue: #2c4f8c;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 10px;
+    border-radius: 6px;
+    /* классическая кайма авиаконверта */
+    background: repeating-linear-gradient(-45deg,
+      var(--airmail-red) 0 14px, #fbf7ec 14px 22px,
+      var(--airmail-blue) 22px 36px, #fbf7ec 36px 44px);
+    box-shadow: var(--shadow);
+    rotate: 0.6deg;
+  }
+  .letter-sheet {
+    position: relative;
+    display: grid;
+    gap: 22px;
+    padding: clamp(22px, 5vw, 48px);
+    background:
+      /* тонкая линовка почтовой бумаги */
+      repeating-linear-gradient(to bottom, transparent 0 33px, color-mix(in srgb, var(--airmail-blue) 9%, transparent) 33px 34px),
+      #fbf7ec;
+    border-radius: 2px;
+  }
+  .letter-top {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    min-height: 132px;
+  }
+  .par-avion {
+    display: grid;
+    gap: 2px;
+    padding: 8px 12px;
+    border: 2px solid var(--airmail-blue);
+    border-radius: 3px;
+    color: var(--airmail-blue);
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    line-height: 1.1;
+    rotate: -3deg;
+  }
+  .par-avion b { font-size: 0.95rem; letter-spacing: 0.08em; }
+  .par-avion span { font-size: 0.6rem; letter-spacing: 0.26em; }
+
+  /* зубчатый край марки: маска из кружков по периметру */
+  .stamp {
+    position: relative;
+    width: clamp(96px, 26vw, 128px);
+    aspect-ratio: 4 / 5;
+    padding: 7px;
+    background: #fffdf6;
+    filter: drop-shadow(0 6px 10px rgba(37, 48, 60, 0.22));
+    /* дырочки только по краю: сетка кружков ∪ сплошной центр */
+    -webkit-mask:
+      linear-gradient(#000 0 0) center / calc(100% - 10px) calc(100% - 10px) no-repeat,
+      radial-gradient(circle 3.5px, transparent 97%, #000) -5.5px -5.5px / 11px 11px;
+    mask:
+      linear-gradient(#000 0 0) center / calc(100% - 10px) calc(100% - 10px) no-repeat,
+      radial-gradient(circle 3.5px, transparent 97%, #000) -5.5px -5.5px / 11px 11px;
+    rotate: 4deg;
+    z-index: 1;
+  }
+  .stamp-face {
+    position: relative;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: var(--surface-2);
+    outline: 1px solid color-mix(in srgb, var(--text) 25%, transparent);
+    outline-offset: -1px;
+  }
+  .stamp-face img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: sepia(0.25) saturate(0.85) contrast(1.05);
+  }
+  .stamp-mono { font-family: var(--font-display); font-style: italic; font-size: 1.8rem; color: var(--accent); }
+  .stamp-face small {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px 4px 4px;
+    font-family: var(--font-label);
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    color: #fffdf6;
+    background: linear-gradient(transparent, rgba(20, 26, 34, 0.75));
+  }
+  .postmark {
+    position: absolute;
+    right: clamp(30px, 5vw, 48px);
+    top: 30px;
+    width: clamp(170px, 46vw, 220px);
+    color: color-mix(in srgb, var(--text) 72%, transparent);
+    font-family: var(--font-label);
+    rotate: -12deg;
+    z-index: 2;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  .letter-greet {
+    font-family: var(--font-label);
+    font-size: 0.74rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-top: 6px;
+  }
+  .letter-text {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.45rem, 5.4vw, 2.2rem);
+    line-height: 1.32;
+    color: var(--text);
+    max-width: 26ch;
+    text-wrap: pretty;
+  }
+  .letter-sign {
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    text-align: right;
+    margin-top: 8px;
+  }
+  .letter-sign span { font-size: 0.9rem; color: var(--text-2); }
+  .letter-sign b { font-family: var(--font-display); font-weight: 500; font-style: italic; font-size: 1.5rem; color: var(--text); }
+  .letter-sign i { color: var(--accent); }
+
+  @media (max-width: 420px) {
+    .letter { rotate: 0deg; padding: 8px; }
+    .postmark { right: 30px; top: 40px; }
+  }
+</style>

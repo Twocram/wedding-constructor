@@ -1,0 +1,870 @@
+---
+// тема deco — «Великий Гэтсби, 1925»: чёрное с золотом, ступенчатые рамки, веера и лучи.
+// шрифты: Forum — цифры, имена и «&»; Poiret One — русские заголовки в разрядку; Jost — текст
+import type { Props } from '../../components/ClassicBody.astro';
+import RsvpFields from '../../components/RsvpFields.astro';
+import Frame from './Frame.astro';
+import Heading from './Heading.astro';
+import Dial from './Dial.astro';
+
+const { inv, slug, cal } = Astro.props;
+
+const roman = (n: number) => {
+  const map: [number, string][] = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+  let out = '';
+  for (const [v, s] of map) while (n >= v) { out += s; n -= v; }
+  return out;
+};
+
+// дата гравировкой: V · XII · MMXXVI; без ISO-даты — только год из строки
+const iso = inv.countdown ? new Date(inv.countdown.slice(0, 19)) : null;
+const validIso = iso && !Number.isNaN(iso.getTime()) ? iso : null;
+const yearMatch = inv.date.match(/\d{4}/);
+const engraved = validIso
+  ? `${roman(validIso.getDate())} · ${roman(validIso.getMonth() + 1)} · ${roman(validIso.getFullYear())}`
+  : yearMatch ? roman(Number(yearMatch[0])) : '';
+
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+
+// веер дресс-кода: каждый цвет — сегмент полукруга, раскрываются по очереди
+const fanColors = inv.dressCode?.colors ?? [];
+const fanPt = (deg: number, r: number) => {
+  const a = (deg * Math.PI) / 180;
+  return `${(150 + r * Math.cos(a)).toFixed(2)} ${(150 + r * Math.sin(a)).toFixed(2)}`;
+};
+const fanStep = fanColors.length ? 180 / fanColors.length : 0;
+const fanBlades = fanColors.map((color, i) => {
+  const a0 = 180 + i * fanStep;
+  const a1 = a0 + fanStep;
+  return {
+    color,
+    angle: i * fanStep,
+    d: `M${fanPt(a0, 30)}L${fanPt(a0, 138)}A138 138 0 0 1 ${fanPt(a1, 138)}L${fanPt(a1, 30)}A30 30 0 0 0 ${fanPt(a0, 30)}Z`,
+  };
+});
+
+const arrowIcon = 'M4 12 12 4M6 4h6v6';
+const calIcon = 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4';
+---
+
+<main id="content" class="deco">
+  {inv.countdown && (
+    <section class="dc-sec dc-sec--rays dc-countdown fade-up">
+      <div class="dc-wrap">
+        <Heading kicker="Обратный отсчёт" title="До свадьбы" />
+        <Dial target={inv.countdown} />
+        {cal && (
+          <div class="dc-cal">
+            <p class="dc-cal-caption">Добавить в календарь</p>
+            <div class="dc-cal-links">
+              <a class="dc-btn" href={`/ics/${slug}.ics`}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d={calIcon} /></svg>
+                Apple / Outlook
+              </a>
+              <a class="dc-btn" href={cal.google} target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d={calIcon} /></svg>
+                Google
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.welcome && (
+    <section class="dc-sec dc-welcome">
+      <div class="dc-wrap dc-wrap--card">
+        <Frame class="dc-card fade-up">
+          <svg class="dc-sunburst" viewBox="0 0 160 80" fill="none" stroke="currentColor" aria-hidden="true">
+            {Array.from({ length: 19 }, (_, i) => {
+              const a = Math.PI + (i * Math.PI) / 18;
+              const r = i % 2 ? 58 : 76;
+              return <line x1={80 + 16 * Math.cos(a)} y1={78 + 16 * Math.sin(a)} x2={80 + r * Math.cos(a)} y2={78 + r * Math.sin(a)} stroke-width={i % 2 ? 0.6 : 1} />;
+            })}
+            <path d="M68 78a12 12 0 0 1 24 0" stroke-width="1" />
+            <path d="M2 78.5h156" stroke-width="1" />
+          </svg>
+          <p class="dc-kicker dc-welcome-kicker" data-guest="{g}, ждём вас">Дорогие гости</p>
+          <p class="dc-welcome-text">{inv.welcome}</p>
+          <p class="dc-welcome-sign">
+            <span>{inv.groom}</span><i>&</i><span>{inv.bride}</span>
+          </p>
+          {engraved && <p class="dc-engraved">{engraved}</p>}
+        </Frame>
+      </div>
+    </section>
+  )}
+
+  {inv.gallery && inv.gallery.length > 0 && (
+    <section class="dc-sec dc-gallery">
+      <div class="dc-wrap dc-wrap--wide">
+        <Heading kicker="Галерея" title="Портреты" />
+        <ul class="dc-portraits" role="list">
+          {inv.gallery.map((src, i) => (
+            <li class="dc-portrait fade-up" style={`--i:${i % 4}`}>
+              <figure>
+                <div class="dc-portrait-arch">
+                  <img src={src} alt={`${inv.groom} и ${inv.bride}, портрет ${i + 1}`} loading="lazy" decoding="async" />
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M0 100V13.5H10V9H20V4.5H30V0H70V4.5H80V9H90V13.5H100V100Z" />
+                    <path class="inner" d="M3 97.75V15.75H13V11.25H23V6.75H33V2.25H67V6.75H77V11.25H87V15.75H97V97.75Z" />
+                  </svg>
+                </div>
+                <figcaption><span>{roman(i + 1)}</span></figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {inv.venue && (
+    <section class="dc-sec dc-venue">
+      <div class="dc-wrap dc-wrap--card">
+        <div class="dc-marquee fade-up">
+          <span class="dc-bulbs" aria-hidden="true"></span>
+          <Frame class="dc-marquee-board">
+            <p class="dc-kicker">Место торжества</p>
+            <h2 class="dc-venue-name">{inv.venue.name}</h2>
+            <span class="dc-chevrons" aria-hidden="true"></span>
+            <p class="dc-venue-address">{inv.venue.address}</p>
+            <a class="dc-btn" href={routeUrl} target="_blank" rel="noopener">
+              Проложить маршрут
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d={arrowIcon} /></svg>
+            </a>
+          </Frame>
+          <span class="dc-bulbs" aria-hidden="true"></span>
+        </div>
+        {inv.venue.mapIframe && (
+          <Frame class="dc-map fade-up">
+            <iframe src={inv.venue.mapIframe} loading="lazy" title={`Карта: ${inv.venue.name}`}></iframe>
+          </Frame>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.timeline && inv.timeline.length > 0 && (
+    <section class="dc-sec dc-sec--rays dc-programme">
+      <div class="dc-wrap dc-wrap--card">
+        <Frame class="dc-card fade-up">
+          <p class="dc-latin-label">Programme</p>
+          <Heading kicker="В этот вечер" title="Программа" />
+          <ol class="dc-menu" role="list">
+            {inv.timeline.map((item, i) => (
+              <li class="fade-up" style={`--i:${i}`}>
+                <time class="dc-menu-time">{item.time}</time>
+                <h3 class="dc-menu-title">{item.title}</h3>
+                {item.text && <p class="dc-menu-text">{item.text}</p>}
+              </li>
+            ))}
+          </ol>
+        </Frame>
+      </div>
+    </section>
+  )}
+
+  {inv.dressCode && (
+    <section class="dc-sec dc-dress">
+      <div class="dc-wrap">
+        <Heading kicker="Форма одежды" title="Дресс-код" />
+        {fanBlades.length > 0 && (
+          <div class="dc-fan fade-up">
+            <svg viewBox="0 0 300 172" role="img" aria-label={`Палитра вечера: ${fanColors.join(', ')}`}>
+              {fanBlades.map((b, i) => (
+                <path class="dc-fan-blade" d={b.d} fill={b.color} style={`--a:${b.angle}deg;--i:${i}`} />
+              ))}
+              <path class="dc-fan-rim" d="M4 150A146 146 0 0 1 296 150" />
+              <path class="dc-fan-rim" d="M4 150H296M132 150V158H168V150M140 158V166H160V158" />
+              <circle class="dc-fan-hub" cx="150" cy="150" r="10" />
+              <circle cx="150" cy="150" r="3" fill="var(--accent-2)" />
+            </svg>
+          </div>
+        )}
+        <p class="dc-dress-text fade-up">{inv.dressCode.text}</p>
+      </div>
+    </section>
+  )}
+
+  {inv.wishes && inv.wishes.length > 0 && (
+    <section class="dc-sec dc-wishes">
+      <div class="dc-wrap dc-wrap--wide">
+        <Heading kicker="Маленькие просьбы" title="Пожелания" />
+        <ol class="dc-medals" role="list">
+          {inv.wishes.map((w, i) => (
+            <li class="fade-up" style={`--i:${i}`}>
+              <span class="dc-medal" aria-hidden="true">
+                <svg viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="38" />
+                  <circle cx="40" cy="40" r="33" class="thin" />
+                  <path class="rays" d={Array.from({ length: 24 }, (_, k) => {
+                    const a = (k * Math.PI) / 12;
+                    return `M${(40 + 33 * Math.cos(a)).toFixed(2)} ${(40 + 33 * Math.sin(a)).toFixed(2)}L${(40 + 38 * Math.cos(a)).toFixed(2)} ${(40 + 38 * Math.sin(a)).toFixed(2)}`;
+                  }).join('')} />
+                </svg>
+                <b>{roman(i + 1)}</b>
+              </span>
+              <p>{w}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.transfer && (
+    <section class="dc-sec dc-transfer">
+      <div class="dc-wrap dc-wrap--card">
+        <Frame class="dc-card dc-coupon fade-up">
+          <svg class="dc-car" viewBox="0 0 120 44" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round" aria-hidden="true">
+            {/* силуэт лимузина 1920-х: длинный капот, открытые крылья, запаска */}
+            <path d="M6 32h4m20 0h52m20 0h8v-6l-6-2-10-2-6-9H50l-2 11H18l-6 2-6 3z" />
+            <path d="M50 13v11M64 13l4 11M50 24h26" opacity=".6" />
+            <path d="M8 29c4-7 12-7 16-1M84 29c4-7 12-7 16-1" />
+            <circle cx="20" cy="33" r="6" /><circle cx="20" cy="33" r="1.5" />
+            <circle cx="92" cy="33" r="6" /><circle cx="92" cy="33" r="1.5" />
+            <path d="M104 22h6M2 38h116" opacity=".5" />
+          </svg>
+          <Heading kicker="Motor car" title="Трансфер" />
+          <p class="dc-coupon-text">{inv.transfer}</p>
+        </Frame>
+      </div>
+    </section>
+  )}
+
+  {inv.rsvp && (
+    <section class="dc-sec dc-sec--rays dc-rsvp" id="rsvp">
+      <div class="dc-wrap dc-wrap--card">
+        <Frame class="dc-card fade-up">
+          <p class="dc-kicker">Ответ на приглашение</p>
+          <h2 class="dc-rsvp-title">R.S.V.P.</h2>
+          <p class="dc-rsvp-deadline">
+            Просим ответить до <span>{inv.rsvp.deadline}</span>
+          </p>
+          <span class="dc-chevrons" aria-hidden="true"></span>
+          <div class="dc-rsvp-form">
+            <RsvpFields />
+          </div>
+        </Frame>
+      </div>
+    </section>
+  )}
+
+  {(inv.telegramChat || inv.organizer) && (
+    <section class="dc-sec dc-contacts">
+      <div class="dc-wrap dc-wrap--wide">
+        <Heading kicker="На связи" title="Визитные карточки" />
+        <div class="dc-cards">
+          {inv.telegramChat && (
+            <Frame tag="article" class="dc-calling fade-up">
+              <span class="dc-calling-gem" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M21 3 3 10.5l6.5 2.2L12 20l9-17Z" /><path d="M9.5 12.7 21 3" /></svg>
+              </span>
+              <p class="dc-kicker">Чат гостей</p>
+              <p class="dc-calling-text">{inv.telegramChat.text}</p>
+              <a class="dc-btn" href={inv.telegramChat.url} target="_blank" rel="noopener">
+                Вступить в чат
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d={arrowIcon} /></svg>
+              </a>
+            </Frame>
+          )}
+          {inv.organizer && (
+            <Frame tag="article" class="dc-calling fade-up" style="--i:1">
+              <span class="dc-calling-gem" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1" /></svg>
+              </span>
+              <p class="dc-kicker">Организатор</p>
+              <p class="dc-calling-name">{inv.organizer.name}</p>
+              <a class="dc-calling-phone" href={`tel:${inv.organizer.phone.replace(/[^\d+]/g, '')}`}>{inv.organizer.phone}</a>
+            </Frame>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+</main>
+
+<style>
+  .deco {
+    /* русские заголовки — Poiret One (--font-accent темы deco в Base) */
+    --dc-display: var(--font-accent);
+    --dc-gold: linear-gradient(178deg, #f6e7b0 0%, var(--accent-2) 38%, var(--accent) 72%, #8f6f14 100%);
+    overflow-x: clip;
+  }
+
+  /* ── каркас ── */
+  .dc-sec {
+    position: relative;
+    padding: clamp(84px, 14vw, 144px) 0;
+    text-align: center;
+    isolation: isolate;
+  }
+  /* тонкая золотая черта-«шов» между секциями с ромбом посередине */
+  .dc-sec + .dc-sec::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(62%, 420px);
+    height: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 55%, transparent), transparent);
+  }
+  .dc-sec + .dc-sec::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: calc(50% - 4px);
+    width: 7px;
+    height: 7px;
+    transform: rotate(45deg);
+    background: var(--bg);
+    border: 1px solid var(--accent);
+  }
+  /* солнечные лучи из верхнего центра — фон «парадных» секций */
+  .dc-sec--rays {
+    background:
+      radial-gradient(90% 70% at 50% 0%, rgba(201, 162, 39, 0.08), transparent 70%),
+      repeating-conic-gradient(from 180deg at 50% -10%, rgba(201, 162, 39, 0.055) 0deg 1.2deg, transparent 1.2deg 6deg);
+    background-color: var(--bg);
+  }
+  .dc-wrap {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .dc-wrap--card { max-width: 600px; }
+  .dc-wrap--wide { max-width: 1120px; }
+
+  .dc-kicker {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.68rem;
+    letter-spacing: 0.42em;
+    margin-right: -0.42em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .dc-latin-label {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.5em;
+    margin-right: -0.5em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 22px;
+  }
+  /* шеврон-разделитель: три «ёлочки» ар-деко */
+  .dc-chevrons {
+    display: block;
+    width: 64px;
+    height: 10px;
+    margin: 0 auto;
+    background:
+      linear-gradient(135deg, transparent 45%, var(--accent) 45% 55%, transparent 55%) 0 0 / 10px 10px repeat-x;
+    -webkit-mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+    mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+  }
+
+  /* кнопка-контур: двойная золотая линия, заливка при наведении */
+  .dc-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 12px 24px;
+    border: 1px solid var(--accent);
+    color: var(--accent-2);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.7rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    transition: background-color 0.5s var(--ease), color 0.5s var(--ease);
+  }
+  .dc-btn::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+    pointer-events: none;
+    transition: border-color 0.5s var(--ease);
+  }
+  .dc-btn svg { width: 15px; height: 15px; flex: none; }
+  .dc-btn:hover { background: var(--accent); color: var(--accent-ink); }
+  .dc-btn:hover::before { border-color: color-mix(in srgb, var(--accent-ink) 35%, transparent); }
+
+  /* карточка на рамке: центрированный текст */
+  .deco :global(.dc-card) { display: grid; justify-items: center; gap: 18px; text-align: center; }
+
+  /* ── обратный отсчёт ── */
+  .dc-countdown :global(.dc-head) { margin-bottom: clamp(24px, 5vw, 40px); }
+  .dc-cal { margin-top: 44px; display: grid; gap: 14px; justify-items: center; }
+  .dc-cal-caption {
+    font-size: 0.64rem;
+    font-weight: 400;
+    letter-spacing: 0.36em;
+    margin-right: -0.36em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .dc-cal-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+  /* ── приветствие ── */
+  .dc-sunburst { width: 150px; color: var(--accent); margin-bottom: 4px; }
+  .dc-welcome-text {
+    font-weight: 300;
+    font-size: clamp(1.02rem, 4.2vw, 1.3rem);
+    line-height: 1.85;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+    max-width: 30ch;
+  }
+  .dc-welcome-sign {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0 14px;
+    margin-top: 6px;
+    font-weight: 400;
+    font-size: 0.82rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .dc-welcome-sign i {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: 0;
+    background: var(--dc-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dc-engraved {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 0.34em;
+    margin-right: -0.34em;
+    color: var(--accent);
+  }
+
+  /* ── портреты: ступенчатые арки, на десктопе — силуэт зиккурата ── */
+  .dc-portraits {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 28px 16px;
+  }
+  .dc-portrait { width: calc(50% - 8px); max-width: 300px; }
+  .dc-portrait figure { display: grid; gap: 14px; }
+  .dc-portrait-arch { position: relative; aspect-ratio: 3 / 4; }
+  .dc-portrait-arch img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    clip-path: polygon(0 13.5%, 10% 13.5%, 10% 9%, 20% 9%, 20% 4.5%, 30% 4.5%, 30% 0, 70% 0, 70% 4.5%, 80% 4.5%, 80% 9%, 90% 9%, 90% 13.5%, 100% 13.5%, 100% 100%, 0 100%);
+    /* лёгкая «тонировка» под старую фотографию, цвет возвращается при наведении */
+    filter: sepia(0.28) saturate(0.85) contrast(1.05);
+    transition: filter 0.8s var(--ease);
+  }
+  .dc-portrait:hover img { filter: none; }
+  .dc-portrait-arch svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .dc-portrait-arch path { fill: none; stroke: var(--accent); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .dc-portrait-arch path.inner { stroke: rgba(246, 231, 176, 0.55); }
+  .dc-portrait figcaption { display: grid; justify-items: center; }
+  .dc-portrait figcaption span {
+    display: grid;
+    place-items: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--accent-2);
+    border-top: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+  }
+
+  /* ── вывеска отеля: бегущие огни сверху и снизу ── */
+  .dc-marquee { display: grid; gap: 10px; }
+  .dc-bulbs {
+    position: relative;
+    display: block;
+    height: 10px;
+    margin: 0 8px;
+  }
+  .dc-bulbs::before,
+  .dc-bulbs::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, #fff4cf 0 1.6px, rgba(230, 205, 127, 0.55) 2.4px, transparent 4.5px) 0 50% / 20px 10px repeat-x;
+    animation: dc-chase 1.6s steps(1) infinite;
+  }
+  .dc-bulbs::after { background-position: 10px 50%; animation-delay: -0.8s; }
+  @keyframes dc-chase {
+    0% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+  .deco :global(.dc-marquee-board) { display: grid; justify-items: center; gap: 16px; }
+  .dc-venue-name {
+    font-family: var(--dc-display);
+    font-weight: 400;
+    font-size: clamp(1.5rem, 6.8vw, 2.5rem);
+    line-height: 1.3;
+    letter-spacing: 0.2em;
+    margin-right: -0.2em;
+    text-transform: uppercase;
+    background: var(--dc-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dc-venue-address {
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+    margin-bottom: 8px;
+  }
+  .deco :global(.dc-map) { margin-top: 28px; padding: 12px; }
+  .deco :global(.dc-map) iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border: 0;
+    /* карту — в тон: сепия и приглушённая яркость */
+    filter: grayscale(1) sepia(0.45) brightness(0.78) contrast(1.1);
+  }
+
+  /* ── программа вечера — меню гала-ужина ── */
+  .dc-programme :global(.dc-head) { margin-bottom: 8px; }
+  .dc-menu {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    display: grid;
+  }
+  .dc-menu li {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 26px 0;
+  }
+  /* ромб с точечным пунктиром между пунктами */
+  .dc-menu li + li { position: relative; }
+  .dc-menu li + li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(70%, 260px);
+    height: 1px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, var(--accent) 0.8px, transparent 1.2px) 0 0 / 7px 1px repeat-x;
+    opacity: 0.8;
+  }
+  .dc-menu li + li::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: calc(50% - 4px);
+    width: 7px;
+    height: 7px;
+    transform: rotate(45deg);
+    background: var(--surface);
+    border: 1px solid var(--accent);
+  }
+  .dc-menu-time {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 8vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+    background: var(--dc-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dc-menu-title {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.92rem;
+    letter-spacing: 0.32em;
+    margin-right: -0.32em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .dc-menu-text { font-size: 0.95rem; color: var(--text-2); max-width: 32ch; }
+
+  /* ── дресс-код: веер-палитра раскрывается ── */
+  .dc-fan { width: min(100%, 380px); margin: 0 auto 36px; }
+  .dc-fan svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .dc-fan-blade {
+    stroke: var(--accent);
+    stroke-width: 1;
+    stroke-linejoin: round;
+    transform-box: view-box;
+    transform-origin: 150px 150px;
+    transform: rotate(calc(var(--a) * -1));
+    transition: transform 1.4s var(--ease) calc(0.25s + var(--i) * 0.12s);
+  }
+  .dc-fan.visible .dc-fan-blade { transform: none; }
+  .dc-fan-rim { fill: none; stroke: var(--accent); stroke-width: 1; }
+  .dc-fan-hub { fill: var(--bg); stroke: var(--accent); stroke-width: 1.2; }
+  .dc-dress-text {
+    max-width: 36ch;
+    margin: 0 auto;
+    font-size: clamp(1.02rem, 3.8vw, 1.15rem);
+    line-height: 1.8;
+    color: var(--text-2);
+  }
+
+  /* ── пожелания: римские цифры в медальонах ── */
+  .dc-medals {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 44px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .dc-medals li { display: grid; justify-items: center; gap: 18px; }
+  .dc-medals p { max-width: 28ch; font-size: 1.02rem; line-height: 1.75; color: var(--text-2); }
+  .dc-medal { position: relative; display: grid; place-items: center; width: 80px; height: 80px; }
+  .dc-medal svg { position: absolute; inset: 0; fill: none; stroke: var(--accent); }
+  .dc-medal circle { stroke-width: 1; }
+  .dc-medal circle.thin { stroke-width: 0.6; opacity: 0.7; }
+  .dc-medal .rays { stroke-width: 0.8; }
+  .dc-medal b {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.4rem;
+    letter-spacing: 0.04em;
+    background: var(--dc-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ── трансфер: купон на автомобиль ── */
+  .dc-car { width: 132px; color: var(--accent); }
+  /* у купона свой пиктограф — веер шапки прячем */
+  .deco :global(.dc-coupon .dc-head) { margin-bottom: 0; }
+  .deco :global(.dc-coupon .dc-head-fan) { display: none; }
+  .dc-coupon-text { max-width: 34ch; color: var(--text-2); }
+
+  /* ── R.S.V.P. ── */
+  .dc-rsvp-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 13vw, 4.2rem);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    margin-right: -0.1em;
+    background: var(--dc-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dc-rsvp-deadline {
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    margin-right: -0.3em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .dc-rsvp-deadline span {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    letter-spacing: 0.14em;
+    color: var(--accent-2);
+    white-space: nowrap;
+  }
+  .dc-rsvp-form { width: 100%; margin-top: 8px; }
+
+  /* анкета из общего RsvpFields: снимаем «подносы», поля — золотые линейки */
+  .dc-rsvp-form :global(.plate) { padding: 0; background: none; border: 0; }
+  .dc-rsvp-form :global(.plate > .plate-inner) { padding: 0; background: none; box-shadow: none; }
+  .dc-rsvp-form :global(form) { gap: 30px; }
+  .dc-rsvp-form :global(.field > span) {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.64rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+  }
+  .dc-rsvp-form :global(.field input),
+  .dc-rsvp-form :global(.field textarea) {
+    padding: 10px 2px 12px;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: 0;
+    font-weight: 300;
+    color: var(--text);
+  }
+  .dc-rsvp-form :global(.field textarea) { min-height: 92px; }
+  .dc-rsvp-form :global(.field input::placeholder),
+  .dc-rsvp-form :global(.field textarea::placeholder) { color: color-mix(in srgb, var(--text-2) 55%, transparent); }
+  .dc-rsvp-form :global(.field input:focus),
+  .dc-rsvp-form :global(.field textarea:focus) {
+    background: transparent;
+    border-bottom-color: var(--accent-2);
+    box-shadow: 0 1px 0 var(--accent-2);
+  }
+  .dc-rsvp-form :global(.choice) {
+    padding: 18px 44px 18px 18px;
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: 0;
+  }
+  .dc-rsvp-form :global(.choice strong) {
+    font-weight: 400;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  /* индикатор выбора — ромб вместо кружка */
+  .dc-rsvp-form :global(.choice::after) {
+    top: 20px;
+    right: 18px;
+    width: 11px;
+    height: 11px;
+    border-radius: 0;
+    border-color: var(--accent);
+    transform: rotate(45deg);
+  }
+  .dc-rsvp-form :global(.choice:hover) { border-color: var(--accent); }
+  .dc-rsvp-form :global(.choice:has(:checked)) {
+    border-color: var(--accent);
+    background: rgba(201, 162, 39, 0.08);
+    box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .dc-rsvp-form :global(.choice:has(:checked)::after) {
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+    box-shadow: 0 0 10px rgba(230, 205, 127, 0.5);
+  }
+  .dc-rsvp-form :global(.btn) {
+    min-height: 56px;
+    padding: 8px 8px 8px 26px;
+    border-radius: 0;
+    background: var(--dc-gold);
+    color: var(--accent-ink);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.74rem;
+    letter-spacing: 0.3em;
+    box-shadow: 0 18px 40px -20px rgba(201, 162, 39, 0.6);
+    outline: 1px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .dc-rsvp-form :global(.btn:hover) { box-shadow: 0 22px 44px -18px rgba(201, 162, 39, 0.75); }
+  .dc-rsvp-form :global(.btn .btn-icon) {
+    width: 34px;
+    height: 34px;
+    border-radius: 0;
+    transform: rotate(45deg) scale(0.82);
+    background: rgba(20, 19, 17, 0.14);
+  }
+  .dc-rsvp-form :global(.btn .btn-icon svg) { transform: rotate(-45deg); }
+  .dc-rsvp-form :global(.btn:hover .btn-icon) { transform: rotate(45deg) scale(0.9); background: rgba(20, 19, 17, 0.22); }
+  .dc-rsvp-form :global(.form-status) { font-size: 0.85rem; letter-spacing: 0.04em; color: var(--accent-2); }
+
+  /* ── визитные карточки ── */
+  .dc-cards {
+    display: grid;
+    gap: 20px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  /* визитка на той же ступенчатой рамке, что и остальные карточки */
+  .deco :global(.dc-calling) {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 12px;
+    padding: 44px 24px 36px;
+  }
+  .dc-calling-gem {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 6px;
+    color: var(--accent-2);
+    border: 1px solid var(--accent);
+    transform: rotate(45deg);
+  }
+  .dc-calling-gem svg { width: 18px; height: 18px; transform: rotate(-45deg); }
+  .dc-calling-text { max-width: 30ch; color: var(--text-2); margin-bottom: 8px; }
+  .dc-calling-name {
+    font-family: var(--dc-display);
+    font-size: 1.35rem;
+    letter-spacing: 0.24em;
+    margin-right: -0.24em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .dc-calling-phone {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    color: var(--accent-2);
+    text-decoration: none;
+    padding: 8px 4px;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    transition: border-color 0.4s var(--ease);
+  }
+  .dc-calling-phone:hover { border-color: var(--accent-2); }
+
+  @media (min-width: 720px) {
+    .dc-wrap { padding: 0 32px; }
+    .dc-medals { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .dc-cards { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .deco :global(.dc-calling) { min-height: 300px; }
+  }
+  @media (min-width: 960px) {
+    .dc-portraits { gap: 40px 20px; }
+    .dc-portrait { width: calc(25% - 15px); }
+    /* крайние портреты ряда ниже центральных — силуэт ступенчатой башни */
+    .dc-portrait:nth-child(4n + 1):not(:last-child),
+    .dc-portrait:nth-child(4n) { margin-top: 72px; }
+  }
+  /* подвал общий для всех тем: у Forum и Poiret One нет курсива — ставим прямо, в разрядку */
+  :global(body[data-theme='deco'] footer.foot .foot-names i) { font-family: var(--font-display); font-style: normal; }
+  :global(body[data-theme='deco'] .foot-note) {
+    font-family: var(--font-accent);
+    font-style: normal;
+    font-size: 0.95rem;
+    letter-spacing: 0.3em;
+    margin-right: -0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dc-bulbs::before, .dc-bulbs::after { animation: none; }
+    .dc-fan-blade { transition: none; transform: none; }
+  }
+</style>

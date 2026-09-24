@@ -1,0 +1,77 @@
+---
+import Head from './Head.astro';
+import Sprig from './Sprig.astro';
+// пожелания — меню ужина на террасе: арочная карточка, «блюда» разделены оливковыми веточками
+interface Props {
+  items: string[];
+}
+const { items } = Astro.props;
+---
+
+<section class="am-menu" aria-labelledby="am-menu-title">
+  <Head it="Con amore" title="Пожелания" id="am-menu-title" />
+  <div class="am-menu-card fade-up">
+    <Sprig kind="lemon" class="am-menu-lemon" />
+    <p class="am-menu-kicker" lang="it">Menù dei desideri</p>
+    <ol class="am-menu-list">
+      {items.map((w, i) => (
+        <li>
+          {i > 0 && <Sprig kind="olive" class="am-menu-olive" />}
+          <p>{w}</p>
+        </li>
+      ))}
+    </ol>
+    <p class="am-menu-foot" lang="it">Grazie di cuore</p>
+  </div>
+</section>
+
+<style>
+  .am-menu { padding: clamp(80px, 12vw, 120px) 20px clamp(24px, 4vw, 40px); }
+  .am-menu-card {
+    position: relative;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 76px clamp(24px, 7vw, 56px) 44px;
+    text-align: center;
+    border-radius: 999px 999px 10px 10px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface) 40%);
+    box-shadow: var(--shadow);
+  }
+  /* двойная золотая рамка меню */
+  .am-menu-card::before,
+  .am-menu-card::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    border-radius: 999px 999px 6px 6px;
+  }
+  .am-menu-card::before { inset: 8px; }
+  .am-menu-card::after { inset: 13px; border-color: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .am-menu-card :global(.am-menu-lemon) { width: 76px; margin: 0 auto 10px; }
+  .am-menu-kicker {
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .am-menu-list { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 22px; }
+  .am-menu-list li { display: grid; justify-items: center; gap: 22px; }
+  .am-menu-list :global(.am-menu-olive) { width: 96px; opacity: 0.8; }
+  .am-menu-list p {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: clamp(1.22rem, 4.4vw, 1.42rem);
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .am-menu-foot {
+    margin-top: 32px;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+</style>

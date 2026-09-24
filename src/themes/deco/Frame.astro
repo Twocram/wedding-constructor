@@ -1,0 +1,75 @@
+---
+// двойная золотая рамка со ступенчатыми («зиккурат») углами — главный повтор темы
+interface Props {
+  class?: string;
+  style?: string;
+  tag?: 'div' | 'article' | 'figure' | 'aside';
+}
+const { class: cls, style, tag: Tag = 'div' } = Astro.props;
+const corners = ['tl', 'tr', 'br', 'bl'];
+---
+
+<Tag class:list={['dc-frame', cls]} style={style}>
+  {corners.map((c) => (
+    <svg class={`dc-corner dc-corner--${c}`} viewBox="0 0 28 28" aria-hidden="true">
+      {/* прячем прямые углы внутренней рамки, внешние срезает clip-path, поверх рисуем ступени */}
+      <rect class="dc-corner-card" x="1.5" y="1.5" width="21" height="21" />
+      <path class="dc-corner-line" d="M.5 28V14H7V7H14V.5H28" />
+      <path class="dc-corner-line dc-corner-line--inner" d="M5.5 28V19H12V12H19V5.5H28" />
+      <path class="dc-corner-gem" d="M16 14.5 17.5 16 16 17.5 14.5 16Z" />
+    </svg>
+  ))}
+  <slot />
+</Tag>
+
+<style>
+  .dc-frame {
+    --dc-card: var(--surface);
+    /* непрозрачные оттенки: иначе на стыке ступеней и рамки линия удваивает яркость */
+    --dc-line: var(--accent);
+    --dc-line-2: color-mix(in srgb, var(--accent) 36%, var(--dc-card));
+    position: relative;
+    background: var(--dc-card);
+    border: 1px solid var(--dc-line);
+    padding: clamp(36px, 8vw, 60px) clamp(24px, 7vw, 56px);
+    /* ступенчатый срез углов: фон секции (лучи, градиенты) виден сквозь уступы.
+       Поля 6.5/13.5px оставляют целиком линии ступеней на 7/14px */
+    --s1: 6.5px;
+    --s2: 13.5px;
+    clip-path: polygon(
+      0 var(--s2), var(--s1) var(--s2), var(--s1) var(--s1), var(--s2) var(--s1), var(--s2) 0,
+      calc(100% - var(--s2)) 0, calc(100% - var(--s2)) var(--s1), calc(100% - var(--s1)) var(--s1), calc(100% - var(--s1)) var(--s2), 100% var(--s2),
+      100% calc(100% - var(--s2)), calc(100% - var(--s1)) calc(100% - var(--s2)), calc(100% - var(--s1)) calc(100% - var(--s1)), calc(100% - var(--s2)) calc(100% - var(--s1)), calc(100% - var(--s2)) 100%,
+      var(--s2) 100%, var(--s2) calc(100% - var(--s1)), var(--s1) calc(100% - var(--s1)), var(--s1) calc(100% - var(--s2)), 0 calc(100% - var(--s2))
+    );
+  }
+  /* внутренняя волосяная линия — вторая рамка */
+  .dc-frame::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid var(--dc-line-2);
+    pointer-events: none;
+  }
+  .dc-corner {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 28px;
+    height: 28px;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .dc-corner--tr { left: auto; right: -1px; transform: scaleX(-1); }
+  .dc-corner--br { top: auto; bottom: -1px; left: auto; right: -1px; transform: scale(-1); }
+  .dc-corner--bl { top: auto; bottom: -1px; transform: scaleY(-1); }
+  .dc-corner-card { fill: var(--dc-card); }
+  .dc-corner-line {
+    fill: none;
+    stroke: var(--dc-line);
+    stroke-width: 1;
+  }
+  .dc-corner-line--inner { stroke: var(--dc-line-2); }
+  .dc-corner-gem { fill: var(--accent); }
+</style>

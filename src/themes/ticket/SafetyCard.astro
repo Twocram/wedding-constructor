@@ -1,0 +1,125 @@
+---
+// пожелания — карточка безопасности из кармана кресла: пронумерованные пункты с пиктограммами
+import Sign from './Sign.astro';
+interface Props {
+  items: string[];
+  code: string;
+}
+const { items, code } = Astro.props;
+// простые линейные пиктограммы по кругу: чемодан-сердце, бутылка, авиарежим, нота, камера, бокалы
+const icons = [
+  'M10 18h28v20H10zM18 18v-5h12v5M24 33l-5-5a3 3 0 0 1 5-3 3 3 0 0 1 5 3z',
+  'M21 6h6v8l3 5v23H18V19l3-5zM18 26h12M21 6h6',
+  'M16 6h16v36H16zM21 38h6M24 14l-6 6h4v6l-2 2h8l-2-2v-6h4z',
+  'M20 34V10l16-4v24M20 34a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM36 30a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM20 16l16-4',
+  'M8 16h8l3-4h10l3 4h8v22H8zM24 34a7 7 0 1 0 0-14 7 7 0 0 0 0 14z',
+  'M14 8h8l-1 12a3 3 0 0 1-6 0zM18 23v15M14 38h8M26 8h8l-1 12a3 3 0 0 1-6 0zM30 23v15M26 38h8',
+];
+---
+
+<section class="tk-sec sf-sec fade-up">
+  <div class="tk-wrap">
+    <Sign code={code} label="Безопасность" en="Safety card" title="Правила на борту" />
+
+    <div class="sf-card">
+      <div class="sf-band" aria-hidden="true">
+        <span>Wedding Airlines</span>
+        <span>Please read · Прочтите перед взлётом</span>
+      </div>
+      <ol class="sf-list">
+        {items.map((w, i) => (
+          <li class="sf-item fade-up" style={`--i:${i}`}>
+            <span class="sf-pic" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d={icons[i % icons.length]} /></svg>
+              <b>{i + 1}</b>
+            </span>
+            <p>{w}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sf-card {
+    background: #fbf7ec;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--shadow);
+  }
+  .sf-band {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 12px clamp(16px, 4vw, 28px);
+    /* жёлто-чёрная «аварийная» кромка */
+    background:
+      repeating-linear-gradient(-45deg, #f2b84b 0 10px, var(--text) 10px 20px) bottom / 100% 6px no-repeat,
+      var(--text);
+    padding-bottom: 18px;
+    color: var(--bg);
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .sf-band span:first-child { color: #f2b84b; font-weight: 700; }
+  .sf-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+  }
+  .sf-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 18px;
+    padding: 20px clamp(16px, 4vw, 28px);
+    border-top: 1px dashed var(--line-strong);
+  }
+  .sf-item:first-child { border-top: 0; }
+  .sf-pic {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    background: #dde3e8;
+    color: var(--text);
+  }
+  .sf-pic svg { width: 44px; height: 44px; }
+  .sf-pic b {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-label);
+    font-size: 0.74rem;
+    box-shadow: 0 0 0 3px #fbf7ec;
+  }
+  .sf-item p {
+    color: var(--text) !important;
+    font-size: 1.02rem;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 760px) {
+    .sf-list { grid-template-columns: 1fr 1fr; }
+    .sf-item { border-top: 1px dashed var(--line-strong); padding: 28px; }
+    .sf-item:nth-child(-n + 2) { border-top: 0; }
+    .sf-item:nth-child(even) { border-left: 1px dashed var(--line-strong); }
+    .sf-item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  }
+</style>

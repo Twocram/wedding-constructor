@@ -1,0 +1,233 @@
+---
+// программа дня как табло вылетов (Solari): буквы перещёлкиваются, когда табло попадает в кадр
+import Sign from './Sign.astro';
+interface Props {
+  items: { time: string; title: string; text?: string }[];
+  code: string;
+  date: string;
+}
+const { items, code, date } = Astro.props;
+const rows = items.map((it, i) => ({
+  ...it,
+  flight: `WD${101 + i * 2}`,
+  dest: it.title.toUpperCase(),
+}));
+// слова отдельно, чтобы длинное направление переносилось по словам, а не по буквам
+const words = (s: string) => s.split(/\s+/).filter(Boolean).map((w) => [...w]);
+---
+
+<section class="tk-sec board-sec fade-up">
+  <div class="tk-wrap">
+    <Sign code={code} label="Расписание" en="Departures" title="Программа дня" />
+
+    <div class="board">
+      <div class="board-top" aria-hidden="true">
+        <span class="board-title">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5Z" /></svg>
+          Вылеты <em>Departures</em>
+        </span>
+        <span class="board-date">{date}</span>
+      </div>
+
+      <div class="board-head" aria-hidden="true">
+        <span>Время</span><span>Рейс</span><span>Направление</span><span>Статус</span>
+      </div>
+
+      <ol class="board-rows">
+        {rows.map((r) => (
+          <li class="board-row">
+            <span class="tk-sr">{r.time} — {r.title}{r.text ? `. ${r.text}` : ''}. Рейс {r.flight}, по расписанию.</span>
+            <div class="row-vis" aria-hidden="true">
+              <span class="cell c-time">{[...r.time].map((c) => <span class="ch">{c}</span>)}</span>
+              <span class="cell c-flight">{[...r.flight].map((c) => <span class="ch">{c}</span>)}</span>
+              <span class="cell c-dest">
+                {words(r.dest).map((w) => <span class="word">{w.map((c) => <span class="ch">{c}</span>)}</span>)}
+              </span>
+              <span class="cell c-status"><i class="lamp"></i><span class="st-full">По расписанию</span><span class="st-short">Вовремя</span></span>
+              {r.text && <span class="cell c-note">{r.text}</span>}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script>
+  // ponytail: один таймер на всё табло; буквы крутятся до своего «времени оседания», текст из SSR — финальный
+  const glyphs = 'АБВГДЕЖЗИКЛМНОПРСТУФХЭЮЯ0123456789';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('.board').forEach((board) => {
+    if (reduce) return;
+    const tiles = [...board.querySelectorAll<HTMLElement>('.ch')].map((el) => {
+      const row = [...board.querySelectorAll('.board-row')].indexOf(el.closest('.board-row')!);
+      const col = [...el.closest('.board-row')!.querySelectorAll('.ch')].indexOf(el);
+      return { el, final: el.textContent ?? '', settle: 250 + row * 140 + col * 55 + Math.random() * 260 };
+    });
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      const start = performance.now();
+      const timer = setInterval(() => {
+        const t = performance.now() - start;
+        let busy = false;
+        for (const tile of tiles) {
+          if (tile.final === ':') continue;
+          if (t >= tile.settle) {
+            if (tile.el.textContent !== tile.final) {
+              tile.el.textContent = tile.final;
+              tile.el.classList.remove('rolling');
+            }
+            continue;
+          }
+          busy = true;
+          tile.el.classList.add('rolling');
+          tile.el.textContent = glyphs[(Math.random() * glyphs.length) | 0];
+        }
+        if (!busy) clearInterval(timer);
+      }, 60);
+    }, { threshold: 0.35 });
+    io.observe(board);
+  });
+</script>
+
+<style>
+  .board {
+    --tile: clamp(13px, 3.6vw, 20px);
+    background: #161c23;
+    color: #f3efe6;
+    border-radius: 14px;
+    padding: clamp(14px, 3vw, 28px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 30px 60px -40px rgba(255, 255, 255, 0.08), var(--shadow);
+    font-family: var(--font-label);
+  }
+  .board-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .board-title { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: #f2b84b; }
+  .board-title svg { width: 18px; height: 18px; rotate: 45deg; }
+  .board-title em { font-style: normal; font-weight: 400; color: rgba(243, 239, 230, 0.45); }
+  .board-date { color: rgba(243, 239, 230, 0.55); white-space: nowrap; }
+  @media (max-width: 480px) { .board-title em { display: none; } }
+
+  .board-head, .row-vis {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      'time flight status'
+      'dest dest dest'
+      'note note note';
+    align-items: center;
+    gap: 10px 14px;
+  }
+  /* на телефоне шапка столбцов лишняя: строки двухэтажные */
+  .board-head { display: none; }
+  .board-rows { list-style: none; margin: 0; padding: 0; }
+  .board-row {
+    padding: 16px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+  }
+  .board-row:last-child { border-bottom: 0; padding-bottom: 4px; }
+
+  .cell { display: flex; flex-wrap: wrap; gap: 2px; min-width: 0; }
+  .c-time { grid-area: time; }
+  .c-flight { grid-area: flight; }
+  .c-dest { grid-area: dest; gap: 2px calc(var(--tile) * 0.7); }
+  .c-status { grid-area: status; justify-self: end; }
+  .c-note { grid-area: note; }
+  .word { display: inline-flex; gap: 2px; }
+
+  /* ── плашка-флажок одного символа ── */
+  .ch {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: calc(var(--tile) * 1.3);
+    height: calc(var(--tile) * 1.75);
+    font-size: var(--tile);
+    font-weight: 700;
+    line-height: 1;
+    color: #f7f3ea;
+    background: linear-gradient(#2b3540 0 50%, #232c36 50% 100%);
+    border-radius: 3px;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  }
+  .ch::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.55);
+  }
+  .c-flight .ch { color: #f2b84b; }
+  /* во время перебора — лёгкое «мерцание» верхнего флажка */
+  .ch.rolling { color: rgba(247, 243, 234, 0.75); background: linear-gradient(#222b35 0 50%, #232c36 50% 100%); }
+
+  .c-status {
+    align-items: center;
+    gap: 8px;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9fe0b0;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
+  .lamp {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #6fd08c;
+    box-shadow: 0 0 8px #6fd08c;
+    animation: lamp 2.4s ease-in-out infinite;
+  }
+  @keyframes lamp { 50% { opacity: 0.35; } }
+  /* на телефоне время, рейс и статус делят одну строку — статус короче */
+  .st-full { display: none; }
+  /* на самых узких экранах от статуса остаётся только зелёная лампа */
+  @media (max-width: 379px) {
+    .st-short { display: none; }
+    .board-head, .row-vis { column-gap: 10px; }
+  }
+  @media (min-width: 760px) {
+    .st-full { display: inline; }
+    .st-short { display: none; }
+  }
+  .c-note {
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    color: rgba(243, 239, 230, 0.6);
+    line-height: 1.45;
+  }
+
+  @media (min-width: 760px) {
+    .board-head, .row-vis {
+      grid-template-columns: calc(var(--tile) * 7.5) calc(var(--tile) * 7.5) 1fr 170px;
+      grid-template-areas:
+        'time flight dest status'
+        '. . note note';
+      column-gap: 20px;
+    }
+    .board-head {
+      display: grid;
+      padding: 14px 0 6px;
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(243, 239, 230, 0.4);
+    }
+    .board-head span:last-child { justify-self: end; }
+    .c-note { margin-top: -2px; }
+  }
+</style>

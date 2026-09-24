@@ -1,0 +1,182 @@
+---
+import RsvpFields from '../../components/RsvpFields.astro';
+import Stars from './Stars.astro';
+// анкета — открытка-ответ «Risposta» на кремовой бумаге посреди ночного неба; логика отправки — в RsvpFields
+interface Props {
+  deadline: string;
+  groom: string;
+  bride: string;
+}
+const { deadline, groom, bride } = Astro.props;
+---
+
+<section class="am-reply" id="rsvp" aria-labelledby="am-reply-title">
+  <Stars count={30} seed={7} top={100} />
+  <div class="am-reply-card fade-up">
+    <header class="am-reply-head">
+      <div>
+        <p class="am-reply-it" lang="it" aria-hidden="true">Risposta</p>
+        <h2 id="am-reply-title">Ответ на приглашение</h2>
+        <p class="am-reply-deadline">Пожалуйста, ответьте до <b>{deadline}</b></p>
+      </div>
+      <!-- место для марки: пунктирный квадрат с монограммой -->
+      <div class="am-reply-stamp" aria-hidden="true">
+        <span>{groom[0]}<i>&</i>{bride[0]}</span>
+      </div>
+    </header>
+    <RsvpFields />
+  </div>
+</section>
+
+<style>
+  .am-reply {
+    --paper: #f1e9d8;
+    --ink: #1c2b3d;
+    --ink-2: #5a6574;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(88px, 13vw, 140px) 20px;
+    background: radial-gradient(90% 60% at 50% 50%, #13263b, transparent 70%), linear-gradient(180deg, var(--bg), #08111b 50%, var(--bg));
+  }
+  .am-reply-card {
+    position: relative;
+    max-width: 620px;
+    margin: 0 auto;
+    padding: clamp(28px, 7vw, 52px) clamp(20px, 6vw, 52px) clamp(24px, 6vw, 44px);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.12) 22%, transparent 55%), var(--paper);
+    color: var(--ink);
+    border-radius: 6px;
+    rotate: 0.4deg;
+    box-shadow: 0 50px 90px -30px rgba(0, 0, 0, 0.9), 0 16px 30px -16px rgba(0, 0, 0, 0.6);
+  }
+  /* «авиапочтовая» кайма: диагональные сине-золотые штрихи по периметру; середину вырезает маска */
+  .am-reply-card::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    padding: 5px;
+    border-radius: 3px;
+    background: repeating-linear-gradient(135deg, #1f4f94 0 9px, transparent 9px 14px, #d2a552 14px 23px, transparent 23px 28px);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  @media (min-width: 760px) {
+    .am-reply-card { rotate: 0.8deg; }
+  }
+  .am-reply-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 16px;
+    margin-bottom: 26px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(28, 43, 61, 0.18);
+  }
+  .am-reply-it {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: clamp(2.6rem, 11vw, 3.8rem);
+    line-height: 1;
+    color: #1f4f94;
+  }
+  .am-reply h2 {
+    margin-top: 8px;
+    line-height: 1.6;
+    font-family: var(--font-label);
+    font-size: 0.74rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .am-reply-deadline {
+    margin-top: 10px;
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 1.12rem;
+    color: var(--ink-2);
+  }
+  .am-reply-deadline b { font-family: var(--font-display); font-style: normal; font-weight: 400; font-size: 0.98rem; color: var(--ink); }
+  .am-reply-stamp {
+    width: 66px;
+    height: 80px;
+    display: grid;
+    place-items: center;
+    border: 1.5px dashed rgba(28, 43, 61, 0.35);
+    border-radius: 3px;
+    rotate: 3deg;
+  }
+  .am-reply-stamp span { font-family: var(--font-display); font-size: 1.05rem; color: #1f4f94; letter-spacing: 0.04em; }
+  .am-reply-stamp i { font-family: var(--font-accent); color: #b88a36; margin: 0 1px; }
+
+  /* ── поля анкеты «чернилами по бумаге» ── */
+  .am-reply :global(.plate) { padding: 0; background: none; border: 0; border-radius: 0; }
+  .am-reply :global(.plate > .plate-inner) { padding: 0; background: none; box-shadow: none; border-radius: 0; }
+  .am-reply :global(.field > span) { color: var(--ink-2); letter-spacing: 0.24em; font-size: 0.66rem; }
+  .am-reply :global(.field input),
+  .am-reply :global(.field textarea) {
+    padding: 10px 2px;
+    border: 0;
+    border-bottom: 1px solid rgba(28, 43, 61, 0.35);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 1.25rem;
+  }
+  /* линовка в textarea — как строки на открытке */
+  .am-reply :global(.field textarea) {
+    min-height: 104px;
+    line-height: 34px;
+    padding-top: 0;
+    border-bottom: 0;
+    background: repeating-linear-gradient(180deg, transparent 0 33px, rgba(28, 43, 61, 0.3) 33px 34px);
+  }
+  .am-reply :global(.field input::placeholder),
+  .am-reply :global(.field textarea::placeholder) { color: rgba(28, 43, 61, 0.4); }
+  .am-reply :global(.field input:focus),
+  .am-reply :global(.field textarea:focus) {
+    background-color: transparent;
+    box-shadow: none;
+    border-color: #1f4f94;
+  }
+  .am-reply :global(.field input:focus) { box-shadow: 0 1px 0 #1f4f94; }
+  .am-reply :global(.field input:focus-visible),
+  .am-reply :global(.field textarea:focus-visible) { outline: none; }
+
+  .am-reply :global(.choice) {
+    border: 1px solid rgba(28, 43, 61, 0.22);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.35);
+    color: var(--ink);
+  }
+  .am-reply :global(.choice strong) { font-family: var(--font-display); font-weight: 400; font-size: 1rem; }
+  .am-reply :global(.choice small) { color: var(--ink-2); font-family: var(--font-accent); font-style: italic; font-size: 1rem; }
+  .am-reply :global(.choice::after) { border-color: rgba(28, 43, 61, 0.4); border-radius: 2px; }
+  .am-reply :global(.choice:hover) { border-color: rgba(28, 43, 61, 0.45); }
+  .am-reply :global(.choice:has(:checked)) { border-color: #1f4f94; background: rgba(31, 79, 148, 0.08); }
+  .am-reply :global(.choice:has(:checked)::after) {
+    background: #1f4f94;
+    border-color: #1f4f94;
+    box-shadow: inset 0 0 0 3px var(--paper);
+  }
+  .am-reply :global(.choice:has(:focus-visible)) { outline-color: #1f4f94; }
+
+  .am-reply :global(.btn) {
+    background: var(--ink);
+    color: var(--accent-2);
+    font-family: var(--font-label);
+    font-weight: 400;
+    letter-spacing: 0.24em;
+    border-radius: 999px;
+    box-shadow: 0 16px 30px -16px rgba(12, 21, 32, 0.9);
+  }
+  .am-reply :global(.btn:hover) { background: #24384f; }
+  .am-reply :global(.btn .btn-icon) { background: rgba(232, 201, 135, 0.16); }
+  .am-reply :global(.btn:focus-visible) { outline-color: #1f4f94; }
+  .am-reply :global(.form-status) { color: var(--ink); font-family: var(--font-accent); font-style: italic; font-size: 1.1rem; }
+</style>

@@ -1,0 +1,189 @@
+---
+import Head from './Head.astro';
+// полезное для гостей: трансфер — корешок билета на паром, чат и организатор — маленькие карточки
+interface Props {
+  transfer?: string;
+  telegram?: { url: string; text: string };
+  organizer?: { name: string; phone: string };
+}
+const { transfer, telegram, organizer } = Astro.props;
+// время отправления вытаскиваем из текста, чтобы вынести его на корешок
+const departure = transfer?.match(/\b([01]?\d|2[0-3])[:.][0-5]\d\b/)?.[0]?.replace('.', ':');
+const tel = organizer?.phone.replace(/[^+\d]/g, '');
+---
+
+<section class="am-info" aria-labelledby="am-info-title">
+  <Head it="Per gli ospiti" title="Для гостей" id="am-info-title" />
+
+  <div class="am-info-grid">
+    {transfer && (
+      <article class="am-ferry fade-up" aria-label="Трансфер">
+        <div class="am-ferry-main">
+          <p class="am-ferry-kicker"><span lang="it">Traghetto</span> · трансфер</p>
+          <svg class="am-ferry-boat" viewBox="0 0 120 36" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 22h96l-10 9H20Z" /><path d="M28 22v-8h52l8 8M40 14V8h24v6" /><path d="M46 18h4M56 18h4M66 18h4" />
+            <path d="M0 33c10-3 20 3 30 0s20-3 30 0 20 3 30 0 20-3 30 0" opacity="0.6" />
+          </svg>
+          <p class="am-ferry-text">{transfer}</p>
+        </div>
+        <div class="am-ferry-stub">
+          {departure ? (
+            <>
+              <span class="am-ferry-label">отплытие</span>
+              <strong>{departure}</strong>
+            </>
+          ) : (
+            <span class="am-ferry-label">посадка по приглашению</span>
+          )}
+          <span class="am-ferry-no" aria-hidden="true">posto libero</span>
+        </div>
+      </article>
+    )}
+
+    {telegram && (
+      <article class="am-note fade-up" style="--i:1">
+        <span class="am-note-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M21 3 3 10.5l6.5 2.2L12 20l9-17Z" /><path d="M9.5 12.7 21 3" /></svg>
+        </span>
+        <h3>Чат праздника</h3>
+        <p>{telegram.text}</p>
+        <a class="am-note-link" href={telegram.url} target="_blank" rel="noopener">Вступить в чат <span aria-hidden="true">→</span></a>
+      </article>
+    )}
+
+    {organizer && (
+      <article class="am-note fade-up" style="--i:2">
+        <span class="am-note-badge am-note-badge--letter" aria-hidden="true">{organizer.name[0]}</span>
+        <h3>{organizer.name}</h3>
+        <p>свадебный организатор — поможет с дорогой, отелем и любыми вопросами</p>
+        <a class="am-note-link" href={`tel:${tel}`}>{organizer.phone}</a>
+      </article>
+    )}
+  </div>
+</section>
+
+<style>
+  .am-info { padding: clamp(80px, 12vw, 120px) 20px clamp(24px, 4vw, 40px); }
+  .am-info-grid {
+    max-width: 980px;
+    margin: 0 auto;
+    display: grid;
+    gap: 20px;
+  }
+
+  /* билет на паром: основная часть + корешок, между ними линия отрыва с вырезами */
+  .am-ferry {
+    --notch: 11px;
+    --stub: 96px;
+    display: grid;
+    grid-template-columns: 1fr var(--stub);
+    color: var(--text);
+    background: linear-gradient(135deg, #1d4a70, #143652 60%, #10304a);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    -webkit-mask: radial-gradient(circle at calc(100% - var(--stub)) 0, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) top / 100% 51% no-repeat,
+      radial-gradient(circle at calc(100% - var(--stub)) 100%, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) bottom / 100% 51% no-repeat;
+    mask: radial-gradient(circle at calc(100% - var(--stub)) 0, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) top / 100% 51% no-repeat,
+      radial-gradient(circle at calc(100% - var(--stub)) 100%, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) bottom / 100% 51% no-repeat;
+  }
+  .am-ferry-main { padding: 24px 22px 24px; display: grid; gap: 12px; align-content: start; }
+  .am-ferry-kicker {
+    font-family: var(--font-label);
+    font-size: 0.64rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+  }
+  .am-ferry-boat { width: 110px; height: 33px; color: var(--accent-2); }
+  .am-ferry-text { font-size: 0.98rem; line-height: 1.6; color: #d9e0e6; }
+  .am-ferry-stub {
+    position: relative;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 4px;
+    padding: 18px 8px;
+    text-align: center;
+    border-left: 1.5px dashed rgba(232, 201, 135, 0.45);
+  }
+  .am-ferry-label {
+    font-family: var(--font-label);
+    font-size: 0.56rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #b9c6d2;
+    line-height: 1.5;
+  }
+  .am-ferry-stub strong {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.7rem;
+    color: var(--accent-2);
+    line-height: 1.1;
+  }
+  .am-ferry-no {
+    margin-top: 8px;
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 0.9rem;
+    color: rgba(232, 201, 135, 0.7);
+  }
+
+  .am-note {
+    position: relative;
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 10px;
+    padding: 26px 24px 24px;
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(210, 165, 82, 0.06), transparent 60%), var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .am-note::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  .am-note-badge {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    color: var(--accent-2);
+  }
+  .am-note-badge svg { width: 20px; height: 20px; }
+  .am-note-badge--letter { font-family: var(--font-display); font-size: 1.25rem; }
+  .am-note h3 {
+    font-family: var(--font-label);
+    font-size: 0.84rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+  .am-note p { font-size: 0.96rem; line-height: 1.6; color: var(--text-2); }
+  .am-note-link {
+    margin-top: 4px;
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--accent-2);
+    text-decoration: none;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.5s var(--ease);
+  }
+  .am-note-link:hover { background-size: 100% 1px; }
+
+  @media (min-width: 760px) {
+    .am-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .am-ferry { grid-column: 1 / -1; --stub: 150px; }
+    .am-ferry-main { padding: 30px 36px; grid-template-columns: auto 1fr; column-gap: 32px; align-items: center; }
+    .am-ferry-kicker { grid-column: 1 / -1; }
+    .am-ferry-stub strong { font-size: 2.3rem; }
+  }
+</style>

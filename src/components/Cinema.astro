@@ -4,8 +4,10 @@ import RsvpFields from './RsvpFields.astro';
 
 interface Props {
   inv: CollectionEntry<'invitations'>['data'];
+  slug: string;
+  google?: string; // ссылка «Добавить в Google Календарь»; нет — нет и кнопок календаря
 }
-const { inv } = Astro.props;
+const { inv, slug, google } = Astro.props;
 
 // один экран: сцены лежат стопкой, скролл по невидимой ленте шагов переключает активную
 type Scene = { key: string; label: string; photo?: string; frame?: number };
@@ -65,7 +67,7 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
 
           {s.key === 'welcome' && (
             <div class="subs">
-              <p class="kicker rv" style="--d:0">Дорогие гости</p>
+              <p class="kicker rv" style="--d:0" data-guest="{g}, ждём вас">Дорогие гости</p>
               <p class="subs-line rv" style="--d:1">— {inv.welcome}</p>
             </div>
           )}
@@ -89,6 +91,13 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
                   <div><b data-u="h">–</b><small>часов</small></div>
                   <div><b data-u="m">–</b><small>минут</small></div>
                   <div><b data-u="s">–</b><small>секунд</small></div>
+                </div>
+              )}
+              {google && (
+                <div class="cine-cal rv" style="--d:5">
+                  <p class="cine-cal-caption">Добавить в календарь</p>
+                  <a class="cine-btn" href={`/ics/${slug}.ics`}>Apple / Outlook</a>
+                  <a class="cine-btn" href={google} target="_blank" rel="noopener">Google</a>
                 </div>
               )}
             </div>
@@ -568,6 +577,9 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
     transition: background-color 0.3s, border-color 0.3s, transform 0.3s var(--ease);
   }
   .cine-btn svg { width: 14px; height: 14px; }
+  .cine-cal { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+  .cine-cal .cine-btn { padding: 12px 16px; letter-spacing: 0.16em; margin-top: 0; }
+  .cine-cal-caption { flex-basis: 100%; margin: 0; font: 400 0.62rem/1.6 var(--font-label); letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
   .cine-btn:hover { border-color: var(--accent); }
   .cine-btn:active { transform: scale(0.97); }
   .cine-btn--solid { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }

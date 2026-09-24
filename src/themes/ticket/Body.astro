@@ -1,0 +1,134 @@
+---
+// тело темы ticket: свадьба как путешествие — каждая секция оформлена как дорожный документ
+import type { Props } from '../../components/ClassicBody.astro';
+import Letter from './Letter.astro';
+import Boarding from './Boarding.astro';
+import Board from './Board.astro';
+import BagTag from './BagTag.astro';
+import Passport from './Passport.astro';
+import Customs from './Customs.astro';
+import SafetyCard from './SafetyCard.astro';
+import Services from './Services.astro';
+import CheckIn from './CheckIn.astro';
+import Crew from './Crew.astro';
+
+const { inv, slug, cal } = Astro.props;
+
+// «номер рейса» и дата штампов — из ISO-даты отсчёта, иначе нейтральные значения
+const iso = inv.countdown?.match(/^(\d{4})-(\d{2})-(\d{2})/);
+const flight = iso ? `WD${iso[3]}${iso[2]}` : 'WD2026';
+const stampDate = iso ? `${iso[3]}.${iso[2]}.${iso[1].slice(2)}` : inv.date;
+const serial = iso ? `${iso[3]}${iso[2]}${iso[1].slice(2)}` : '000001';
+
+// трёхбуквенный код города как в аэропорту; для незнакомых городов — первые три буквы
+const iataCodes: Record<string, string> = {
+  'лиссабон': 'LIS', 'порту': 'OPO', 'москва': 'MOW', 'санкт-петербург': 'LED', 'петербург': 'LED',
+  'сочи': 'AER', 'казань': 'KZN', 'калининград': 'KGD', 'екатеринбург': 'SVX', 'новосибирск': 'OVB',
+  'тбилиси': 'TBS', 'ереван': 'EVN', 'стамбул': 'IST', 'дубай': 'DXB', 'париж': 'PAR', 'рим': 'ROM',
+  'милан': 'MIL', 'венеция': 'VCE', 'флоренция': 'FLR', 'неаполь': 'NAP', 'барселона': 'BCN',
+  'мадрид': 'MAD', 'прага': 'PRG', 'вена': 'VIE', 'лондон': 'LON', 'афины': 'ATH', 'белград': 'BEG',
+};
+const place = inv.city ?? inv.venue?.address.split(',')[0] ?? inv.venue?.name ?? 'Любовь';
+const iata = iataCodes[place.trim().toLowerCase()] ?? place.replace(/[^\p{L}]/gu, '').slice(0, 3).toUpperCase();
+
+// номера «выходов» для табличек идут подряд по фактически показанным секциям
+let gate = 0;
+const next = () => {
+  gate += 1;
+  return `${String.fromCharCode(65 + Math.floor((gate - 1) / 3))}${gate}`;
+};
+---
+
+<main id="content" class="tk-body">
+  {inv.welcome && (
+    <Letter text={inv.welcome} groom={inv.groom} bride={inv.bride} city={inv.city} date={inv.date} photo={inv.heroPhoto} />
+  )}
+
+  {inv.countdown && (
+    <Boarding target={inv.countdown} code={next()} flight={flight} city={inv.city} slug={slug} google={cal?.google} />
+  )}
+
+  {inv.timeline && <Board items={inv.timeline} code={next()} date={inv.date} />}
+
+  {inv.venue && (
+    <BagTag
+      name={inv.venue.name}
+      address={inv.venue.address}
+      mapIframe={inv.venue.mapIframe || undefined}
+      iata={iata}
+      city={inv.city}
+      flight={flight}
+      date={stampDate}
+      code={next()}
+    />
+  )}
+
+  {inv.gallery && inv.gallery.length > 0 && <Passport photos={inv.gallery} code={next()} iata={iata} stampDate={stampDate} />}
+
+  {inv.dressCode && <Customs text={inv.dressCode.text} colors={inv.dressCode.colors} code={next()} />}
+
+  {inv.wishes && inv.wishes.length > 0 && <SafetyCard items={inv.wishes} code={next()} />}
+
+  {(inv.transfer || inv.telegramChat) && (
+    <Services transfer={inv.transfer} chat={inv.telegramChat} code={next()} serial={serial} />
+  )}
+
+  {inv.rsvp && <CheckIn deadline={inv.rsvp.deadline} flight={flight} iata={iata} code={next()} />}
+
+  {inv.organizer && <Crew name={inv.organizer.name} phone={inv.organizer.phone} code={next()} />}
+</main>
+
+<style>
+  .tk-body {
+    /* «бланочная» точечная сетка продолжает фон hero */
+    background-image: radial-gradient(color-mix(in srgb, var(--text) 9%, transparent) 1px, transparent 1px);
+    background-size: 26px 26px;
+    overflow-x: clip;
+  }
+  .tk-body :global(.tk-sec) {
+    position: relative;
+    min-width: 0; /* main — grid: без этого самый широкий документ растягивает все секции на узком экране */
+    padding: clamp(64px, 10vw, 112px) 0;
+  }
+  .tk-body :global(.tk-wrap) {
+    width: 100%;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  /* письмо сразу под билетом: у hero и так большой нижний отступ */
+  .tk-body > :global(.tk-sec:first-child) { padding-top: clamp(16px, 4vw, 40px); }
+  /* линия отрыва между документами: перфорация с самолётиком посередине */
+  .tk-body :global(.tk-sec ~ .tk-sec)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(1000px, calc(100% - 40px));
+    translate: -50% 0;
+    height: 2px;
+    background: radial-gradient(circle, var(--line-strong) 1px, transparent 1.5px) 0 0 / 10px 2px repeat-x;
+  }
+  .tk-body :global(.tk-sec ~ .tk-sec)::after {
+    content: '✈';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    translate: -50% -52%;
+    padding: 0 12px;
+    background: var(--bg);
+    color: var(--accent);
+    font-size: 0.95rem;
+    line-height: 1;
+    font-variant-emoji: text;
+  }
+  /* текст только для скринридеров (табло, перекидные цифры) */
+  .tk-body :global(.tk-sr) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>

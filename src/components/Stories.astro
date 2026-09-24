@@ -1,0 +1,915 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import RsvpFields from './RsvpFields.astro';
+
+interface Props {
+  inv: CollectionEntry<'invitations'>['data'];
+  slug: string;
+  google?: string; // «Добавить в Google Календарь»; нет — нет и кнопки «Напомнить»
+}
+const { inv, slug, google } = Astro.props;
+
+// приглашение как сторис: тап справа/слева — вперёд/назад, удержание — пауза, полоски сверху — прогресс
+type Story = { key: string; dur: number; photo?: string; grad?: number; n?: number };
+const moments = (inv.gallery ?? []).slice(0, 3);
+// фото для текстовых историй: сначала те, что не попали в «моменты», затем остальные
+const pool = [...(inv.gallery ?? []).slice(3), ...[...moments].reverse(), ...(inv.heroPhoto ? [inv.heroPhoto] : [])];
+let poolIdx = 0;
+let gradIdx = 0;
+let textIdx = 0;
+// текстовые истории чередуют фото и градиентный фон, как это делают в настоящих сторис
+const bg = () =>
+  textIdx++ % 2 === 0 && pool.length ? { photo: pool[poolIdx++ % pool.length] } : { grad: gradIdx++ % 3 };
+
+const stories: Story[] = [{ key: 'cover', dur: 7, photo: inv.heroPhoto ?? pool[0] }];
+if (inv.welcome) stories.push({ key: 'welcome', dur: 8, ...bg() });
+moments.forEach((photo, i) => stories.push({ key: 'moment', dur: 5, photo, n: i + 1 }));
+if (inv.countdown) stories.push({ key: 'countdown', dur: 8, grad: gradIdx++ % 3 });
+if (inv.venue) stories.push({ key: 'venue', dur: 8, ...bg() });
+if (inv.timeline) stories.push({ key: 'timeline', dur: 10, ...bg() });
+if (inv.dressCode) stories.push({ key: 'dress', dur: 9, ...bg() });
+if (inv.wishes || inv.transfer) stories.push({ key: 'notes', dur: 12, ...bg() });
+if (inv.telegramChat) stories.push({ key: 'chat', dur: 7, ...bg() });
+if (inv.rsvp) stories.push({ key: 'rsvp', dur: 12, ...bg() });
+stories.push({ key: 'finale', dur: 8, photo: inv.heroPhoto ?? pool[0] });
+
+const initials = `${inv.groom[0]}${inv.bride[0]}`;
+const time = inv.countdown?.slice(11, 16);
+const shortDate = inv.date.replace(/\s+\d{4}$/, '');
+const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}`;
+const notes = [...(inv.wishes ?? []), ...(inv.transfer ? [`Трансфер: ${inv.transfer}`] : [])];
+const pin = 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z';
+const link = 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1';
+---
+
+<div class="st">
+  <img class="st-backdrop" src={stories[0].photo} alt="" aria-hidden="true" />
+
+  <button class="st-arrow st-arrow--prev" type="button" aria-label="Предыдущая история" data-prev>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+  </button>
+
+  <div class="st-phone">
+    <div class="st-stories">
+      {stories.map((s, i) => (
+        <section
+          class:list={['story', `story--${s.key}`, { 'is-active': i === 0 }]}
+          data-dur={s.dur}
+          data-photo={s.photo}
+          inert={i !== 0}
+          aria-hidden={i !== 0 ? 'true' : undefined}
+        >
+          <div class:list={['story-bg', s.grad !== undefined && `story-bg--g${s.grad}`, { 'story-bg--photo': s.photo }]}>
+            {s.photo && <img src={s.photo} alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" draggable="false" />}
+          </div>
+
+          <div class="story-body">
+            {s.key === 'cover' && (
+              <div class="cover">
+                <p class="hand pop" style="--d:0;--r:-5deg" data-guest="{g}, мы женимся!">Мы женимся!</p>
+                <h1 class="names pop" style="--d:1">
+                  <span>{inv.groom}</span>
+                  <span class="amp">&amp;</span>
+                  <span>{inv.bride}</span>
+                </h1>
+                <p class="pop" style="--d:2"><span class="hl">{inv.date}</span></p>
+                {inv.city && <p class="pop" style="--d:3"><span class="hl hl--glass">{inv.city}</span></p>}
+              </div>
+            )}
+
+            {s.key === 'welcome' && (
+              <div class="center">
+                <p class="hand hand--xl pop" style="--d:0;--r:-3deg" data-guest="{g}, ждём вас!">Дорогие гости!</p>
+                <p class="pop hl-block" style="--d:1"><span class="hl">{inv.welcome}</span></p>
+              </div>
+            )}
+
+            {s.key === 'moment' && (
+              <p class="moment-cap pop" style="--d:0;--r:-4deg">наша история · {s.n}/{moments.length}</p>
+            )}
+
+            {s.key === 'countdown' && (
+              <div class="center">
+                <div class="sticker cd pop" style="--d:0;--r:-2deg" data-target={inv.countdown}>
+                  <p class="cd-title">До свадьбы</p>
+                  <div class="cd-digits">
+                    <div><b data-u="d">–</b><small>дней</small></div>
+                    <div><b data-u="h">–</b><small>часов</small></div>
+                    <div><b data-u="m">–</b><small>минут</small></div>
+                  </div>
+                  <p class="cd-date">{inv.date}{time && `, ${time}`}</p>
+                  {google && (
+                    <a class="cd-remind" href={`/ics/${slug}.ics`}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" /></svg>
+                      Напомнить мне
+                    </a>
+                  )}
+                </div>
+                {google && <a class="small-link pop" style="--d:2" href={google} target="_blank" rel="noopener">или добавить в Google Календарь</a>}
+              </div>
+            )}
+
+            {s.key === 'venue' && inv.venue && (
+              <div class="center">
+                <p class="hand hand--xl pop" style="--d:0;--r:-4deg">Где?</p>
+                <a class="loc pop" style="--d:1;--r:2deg" href={routeUrl} target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d={pin} /></svg>
+                  <span>{inv.venue.name}</span>
+                </a>
+                <p class="pop" style="--d:2"><span class="hl hl--glass">{inv.venue.address}</span></p>
+                <a class="link-sticker pop" style="--d:3;--r:-2deg" href={routeUrl} target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d={link} /></svg>
+                  Построить маршрут
+                </a>
+              </div>
+            )}
+
+            {s.key === 'timeline' && inv.timeline && (
+              <div class="center">
+                <div class="sticker card pop" style="--d:0;--r:-1.5deg">
+                  <p class="card-head">Программа дня</p>
+                  <ol class="tl">
+                    {inv.timeline.map((t) => (
+                      <li><b>{t.time}</b><span>{t.title}{t.text && <small>{t.text}</small>}</span></li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            )}
+
+            {s.key === 'dress' && inv.dressCode && (
+              <div class="center">
+                <p class="hand hand--xl pop" style="--d:0;--r:-3deg">Дресс-код</p>
+                {inv.dressCode.colors && (
+                  <div class="swatches pop" style="--d:1">
+                    {inv.dressCode.colors.map((c) => <span style={`background:${c}`}></span>)}
+                  </div>
+                )}
+                <p class="glass-note pop" style="--d:2">{inv.dressCode.text}</p>
+              </div>
+            )}
+
+            {s.key === 'notes' && (
+              <div class="center">
+                <div class="sticker card pop" style="--d:0;--r:1.5deg">
+                  <p class="card-head card-head--grad">Пара просила передать</p>
+                  <ul class="notes">{notes.map((n) => <li>{n}</li>)}</ul>
+                </div>
+              </div>
+            )}
+
+            {s.key === 'chat' && inv.telegramChat && (
+              <div class="center">
+                <p class="hand hand--xl pop" style="--d:0;--r:-3deg">Наш чат</p>
+                <p class="glass-note pop" style="--d:1">{inv.telegramChat.text}</p>
+                <a class="link-sticker pop" style="--d:2;--r:2deg" href={inv.telegramChat.url} target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d={link} /></svg>
+                  Вступить в чат
+                </a>
+              </div>
+            )}
+
+            {s.key === 'rsvp' && inv.rsvp && (
+              <div class="center">
+                <div class="sticker poll pop" style="--d:0;--r:-1.5deg">
+                  <p class="poll-q">Придёте на нашу свадьбу?</p>
+                  <button type="button" class="poll-opt" data-poll="Приду">Да, буду! 🥂</button>
+                  <button type="button" class="poll-opt" data-poll="Не смогу">К сожалению, нет</button>
+                </div>
+                <p class="pop" style="--d:2"><span class="hl hl--glass">ответьте, пожалуйста, до {inv.rsvp.deadline}</span></p>
+              </div>
+            )}
+
+            {s.key === 'finale' && (
+              <div class="cover">
+                <p class="hand hand--xl pop" style="--d:0;--r:-4deg">До встречи!</p>
+                <p class="pop" style="--d:1"><span class="hl">{inv.groom} &amp; {inv.bride}</span></p>
+                {inv.organizer && (
+                  <a class="link-sticker pop" style="--d:2;--r:-2deg" href={`tel:${inv.organizer.phone.replace(/[^\d+]/g, '')}`}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></svg>
+                    Вопросы — {inv.organizer.name}
+                  </a>
+                )}
+                <button type="button" class="replay pop" style="--d:3" data-replay>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4" /></svg>
+                  Смотреть сначала
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+      ))}
+
+      <p class="tap-hint" aria-hidden="true">
+        <span class="tap-dot"></span>
+        листать
+      </p>
+    </div>
+
+    <header class="st-head">
+      <div class="st-bars" aria-hidden="true">
+        {stories.map((s) => <span style={`--dur:${s.dur}s`}><i></i></span>)}
+      </div>
+      <div class="st-meta">
+        <span class="st-avatar" aria-hidden="true"><span>{initials[0]}&amp;{initials[1]}</span></span>
+        <span class="st-who"><b>{inv.groom} &amp; {inv.bride}</b><small>{shortDate}</small></span>
+        {inv.music && (
+          <button class="st-icon" type="button" data-sound aria-label="Включить звук" aria-pressed="false">
+            <svg class="i-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM17 9l4 6M21 9l-4 6" /></svg>
+            <svg class="i-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" /></svg>
+          </button>
+        )}
+        <button class="st-icon" type="button" data-pause aria-label="Пауза" aria-pressed="false">
+          <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+          <svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" /></svg>
+        </button>
+        <a class="st-icon" href="/" aria-label="Все темы">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </a>
+      </div>
+    </header>
+
+    <footer class="st-foot">
+      {inv.rsvp && <button type="button" class="st-reply" data-reply>Отправить сообщение…</button>}
+      <button type="button" class="st-like" data-like aria-label="Нравится" aria-pressed="false">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20s-7.5-4.6-9.3-9.2C1.4 7.4 3.6 4 7 4c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.6 3.4 4.3 6.8C19.5 15.4 12 20 12 20z" /></svg>
+      </button>
+    </footer>
+    <div class="st-hearts" aria-hidden="true"></div>
+  </div>
+
+  <button class="st-arrow st-arrow--next" type="button" aria-label="Следующая история" data-next>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+  </button>
+
+  {inv.rsvp && (
+    <dialog class="st-sheet" aria-label="Анкета гостя">
+      <button class="sheet-close" type="button" aria-label="Закрыть" data-close-rsvp>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+      </button>
+      <p class="sheet-title">Анкета гостя</p>
+      <RsvpFields />
+    </dialog>
+  )}
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.st');
+  if (root) {
+    const stories = [...root.querySelectorAll<HTMLElement>('.story')];
+    const bars = [...root.querySelectorAll<HTMLElement>('.st-bars > span')];
+    const area = root.querySelector<HTMLElement>('.st-stories')!;
+    const backdrop = root.querySelector<HTMLImageElement>('.st-backdrop')!;
+    const pauseBtn = root.querySelector<HTMLElement>('[data-pause]')!;
+    const sheet = root.querySelector<HTMLDialogElement>('.st-sheet');
+    let current = 0;
+    // причины паузы складываются: удержание пальцем, кнопка, открытая анкета, скрытая вкладка
+    const holds = new Set<string>();
+
+    const syncPause = () => {
+      root.classList.toggle('paused', holds.size > 0);
+      const manual = holds.has('button');
+      pauseBtn.setAttribute('aria-pressed', String(manual));
+      pauseBtn.setAttribute('aria-label', manual ? 'Продолжить' : 'Пауза');
+    };
+    const hold = (why: string, on: boolean) => {
+      on ? holds.add(why) : holds.delete(why);
+      syncPause();
+    };
+
+    const show = (next: number) => {
+      next = Math.max(0, Math.min(stories.length - 1, next));
+      const prev = stories[current];
+      prev.classList.remove('is-active');
+      prev.inert = true;
+      prev.setAttribute('aria-hidden', 'true');
+      const el = stories[next];
+      el.classList.add('is-active');
+      el.inert = false;
+      el.removeAttribute('aria-hidden');
+      current = next;
+
+      bars.forEach((b, i) => {
+        b.classList.toggle('done', i < next);
+        b.classList.remove('active');
+      });
+      void bars[next].offsetWidth; // перезапуск CSS-анимации полоски
+      bars[next].classList.add('active');
+
+      if (el.dataset.photo) backdrop.src = el.dataset.photo;
+      // соседние фото грузим заранее — иначе lazy-картинка мигает при тапе
+      [next + 1, next + 2].forEach((i) => stories[i]?.querySelector('img')?.setAttribute('loading', 'eager'));
+    };
+
+    // полоска дошла до конца → следующая история; на последней просто стоим
+    bars.forEach((b, i) =>
+      b.addEventListener('animationend', () => {
+        if (i !== current) return;
+        if (current < stories.length - 1) show(current + 1);
+        else b.classList.add('done');
+      })
+    );
+    show(0);
+
+    // звук: первый тап — жест пользователя, заодно включаем музыку, если её не выключали вручную
+    const audio = document.getElementById('music') as HTMLAudioElement | null;
+    const soundBtn = root.querySelector<HTMLElement>('[data-sound]');
+    let soundWanted = true;
+    const syncSound = () => {
+      const on = !!audio && !audio.paused;
+      root.classList.toggle('sound-on', on);
+      soundBtn?.setAttribute('aria-pressed', String(on));
+      soundBtn?.setAttribute('aria-label', on ? 'Выключить звук' : 'Включить звук');
+    };
+    audio?.addEventListener('play', syncSound);
+    audio?.addEventListener('pause', syncSound);
+    soundBtn?.addEventListener('click', () => {
+      if (!audio) return;
+      soundWanted = audio.paused;
+      audio.paused ? audio.play().catch(() => {}) : audio.pause();
+    });
+    const firstGesture = () => {
+      root.classList.add('touched');
+      if (audio && soundWanted && audio.paused) audio.play().catch(() => {});
+    };
+
+    // тап: левая треть — назад, остальное — вперёд; удержание — пауза, как в Instagram
+    let downAt = 0;
+    let downX = 0;
+    let holdTimer = 0;
+    area.addEventListener('pointerdown', (e) => {
+      if ((e.target as HTMLElement).closest('a, button')) return;
+      downAt = performance.now();
+      downX = e.clientX;
+      holdTimer = window.setTimeout(() => {
+        hold('finger', true);
+        root.classList.add('holding');
+      }, 180);
+    });
+    const release = (e: PointerEvent) => {
+      if (!downAt) return;
+      clearTimeout(holdTimer);
+      const quick = performance.now() - downAt < 250 && Math.abs(e.clientX - downX) < 12;
+      downAt = 0;
+      hold('finger', false);
+      root.classList.remove('holding');
+      if (!quick || e.type === 'pointercancel') return;
+      firstGesture();
+      const r = area.getBoundingClientRect();
+      show(e.clientX - r.left < r.width / 3 ? current - 1 : current + 1);
+    };
+    area.addEventListener('pointerup', release);
+    area.addEventListener('pointercancel', release);
+    area.addEventListener('contextmenu', (e) => e.preventDefault()); // long-press на iOS/Android
+
+    root.querySelector('[data-prev]')?.addEventListener('click', () => { firstGesture(); show(current - 1); });
+    root.querySelector('[data-next]')?.addEventListener('click', () => { firstGesture(); show(current + 1); });
+    root.querySelector('[data-replay]')?.addEventListener('click', () => show(0));
+    pauseBtn.addEventListener('click', () => hold('button', !holds.has('button')));
+
+    addEventListener('keydown', (e) => {
+      if (sheet?.open) return;
+      if (e.key === 'ArrowRight') show(current + 1);
+      else if (e.key === 'ArrowLeft') show(current - 1);
+      else if (e.key === ' ') {
+        e.preventDefault();
+        hold('button', !holds.has('button'));
+      }
+    });
+    document.addEventListener('visibilitychange', () => hold('hidden', document.hidden));
+
+    // обратный отсчёт в стикере
+    const cd = root.querySelector<HTMLElement>('.cd');
+    const target = cd ? new Date(cd.dataset.target ?? '').getTime() : NaN;
+    if (cd && !Number.isNaN(target)) {
+      const u = (k: string) => cd.querySelector(`[data-u="${k}"]`)!;
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const update = () => {
+        const diff = Math.max(0, target - Date.now());
+        u('d').textContent = String(Math.floor(diff / 864e5));
+        u('h').textContent = pad(Math.floor(diff / 36e5) % 24);
+        u('m').textContent = pad(Math.floor(diff / 6e4) % 60);
+      };
+      update();
+      setInterval(update, 10000);
+    }
+
+    // анкета: опрос и «Отправить сообщение…» открывают лист, ответ из опроса уже выбран
+    const openSheet = (answer?: string, focusNotes = false) => {
+      if (!sheet) return;
+      if (answer) {
+        const radio = sheet.querySelector<HTMLInputElement>(`input[name="attending"][value="${answer}"]`);
+        if (radio) radio.checked = true;
+      }
+      sheet.showModal();
+      hold('sheet', true);
+      if (focusNotes) sheet.querySelector<HTMLTextAreaElement>('textarea[name="notes"]')?.focus();
+    };
+    root.querySelectorAll<HTMLElement>('[data-poll]').forEach((b) =>
+      b.addEventListener('click', () => {
+        b.classList.add('picked');
+        openSheet(b.dataset.poll);
+      })
+    );
+    root.querySelector('[data-reply]')?.addEventListener('click', () => openSheet(undefined, true));
+    root.querySelector('[data-close-rsvp]')?.addEventListener('click', () => sheet?.close());
+    sheet?.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
+    sheet?.addEventListener('close', () => hold('sheet', false));
+
+    // лайк: сердечки всплывают над кнопкой
+    const likeBtn = root.querySelector<HTMLElement>('[data-like]')!;
+    const hearts = root.querySelector<HTMLElement>('.st-hearts')!;
+    likeBtn.addEventListener('click', () => {
+      const liked = likeBtn.getAttribute('aria-pressed') !== 'true';
+      likeBtn.setAttribute('aria-pressed', String(liked));
+      if (!liked || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      for (let i = 0; i < 7; i++) {
+        const h = document.createElement('i');
+        h.style.setProperty('--x', `${(Math.random() - 0.5) * 90}px`);
+        h.style.setProperty('--s', String(0.6 + Math.random() * 0.8));
+        h.style.animationDelay = `${i * 70}ms`;
+        h.addEventListener('animationend', () => h.remove());
+        hearts.append(h);
+      }
+    });
+  }
+</script>
+
+<style>
+  :global(html:has(.st)) { overflow: hidden; overscroll-behavior: none; }
+  /* свои кнопки звука и закрытия в шапке сторис */
+  :global(body:has(.st) .back-home),
+  :global(body:has(.st) #music-btn),
+  :global(body:has(.st) .grain) { display: none; }
+
+  .st {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: #0d0c0e;
+    overflow: hidden;
+  }
+  /* на десктопе телефон «висит» над размытым текущим фото */
+  .st-backdrop {
+    position: absolute;
+    inset: -40px;
+    width: calc(100% + 80px);
+    height: calc(100% + 80px);
+    object-fit: cover;
+    filter: blur(40px) brightness(0.45) saturate(1.2);
+    display: none;
+  }
+
+  .st-phone {
+    position: relative;
+    width: 100%;
+    height: 100svh;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+    isolation: isolate;
+  }
+  @media (min-width: 600px) {
+    .st-backdrop { display: block; }
+    .st-phone {
+      --h: min(92svh, 880px);
+      height: var(--h);
+      width: calc(var(--h) * 9 / 16);
+      border-radius: 18px;
+      box-shadow: 0 40px 100px -30px rgb(0 0 0 / 0.8);
+    }
+  }
+
+  .st-stories {
+    position: absolute;
+    inset: 0;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* ── история ── */
+  .story { position: absolute; inset: 0; visibility: hidden; }
+  .story.is-active { visibility: visible; }
+  .story-bg { position: absolute; inset: 0; overflow: hidden; }
+  .story-bg img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  .story.is-active .story-bg img { animation: kenburns 9s ease-out both; }
+  @keyframes kenburns { from { transform: scale(1.08); } to { transform: scale(1); } }
+  /* тень под шапку и подвал + приглушение под текст */
+  .story-bg--photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.45), transparent 22%, transparent 55%, rgb(0 0 0 / 0.6));
+  }
+  .story:not(.story--moment):not(.story--cover):not(.story--finale) .story-bg--photo::after {
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0.35) 30%, rgb(0 0 0 / 0.55));
+  }
+  .story-bg--g0 { background: radial-gradient(120% 70% at 15% 5%, #f9c9a4, transparent 60%), radial-gradient(90% 60% at 95% 95%, #b4527a, transparent 65%), linear-gradient(165deg, #ee9a7c, #9b4a6e); }
+  .story-bg--g1 { background: radial-gradient(110% 70% at 85% 0%, #d9c3f0, transparent 60%), radial-gradient(90% 70% at 0% 100%, #5b3c7d, transparent 65%), linear-gradient(170deg, #a88bd1, #4c3566); }
+  .story-bg--g2 { background: radial-gradient(120% 70% at 10% 0%, #efe2b8, transparent 60%), radial-gradient(90% 60% at 100% 100%, #52684a, transparent 65%), linear-gradient(165deg, #c2b27a, #4f6147); }
+
+  .story-body {
+    position: absolute;
+    inset: calc(env(safe-area-inset-top) + 76px) 0 calc(env(safe-area-inset-bottom) + 80px);
+    padding: 0 24px;
+    display: grid;
+  }
+  .center { display: grid; gap: 18px; align-content: center; justify-items: center; text-align: center; }
+  .cover { display: grid; gap: 12px; align-content: end; justify-items: center; text-align: center; padding-bottom: 16px; }
+
+  /* стикеры «вылетают» с пружинкой, когда история становится активной */
+  .pop { opacity: 0; transform: scale(0.6) rotate(var(--r, 0deg)); }
+  .story.is-active .pop { animation: pop 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) both; animation-delay: calc(var(--d, 0) * 110ms + 120ms); }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.6) rotate(calc(var(--r, 0deg) - 6deg)); }
+    to { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); }
+  }
+
+  .names {
+    margin: 0;
+    display: grid;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(3rem, 15vw, 4.2rem);
+    line-height: 0.98;
+    text-shadow: 0 4px 30px rgb(0 0 0 / 0.35);
+  }
+  .names .amp { font-size: 0.6em; color: #ffd9c7; margin: 2px 0; }
+  .hand {
+    margin: 0;
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 2.1rem;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 3px 18px rgb(0 0 0 / 0.35);
+  }
+  .hand--xl { font-size: clamp(2.6rem, 12vw, 3.4rem); }
+
+  /* классический текст сторис: плашка под каждой строкой */
+  .hl {
+    background: #fff;
+    color: #1b1a1d;
+    padding: 0.2em 0.55em;
+    border-radius: 0.45em;
+    font-weight: 700;
+    font-size: 0.98rem;
+    line-height: 2;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .hl--glass { background: rgb(0 0 0 / 0.45); color: #fff; font-weight: 600; }
+  .hl-block { margin: 0; max-width: 30ch; }
+  .hl-block .hl { font-size: 1.02rem; }
+  .cover p, .center > p { margin: 0; }
+
+  .glass-note {
+    max-width: 32ch;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: rgb(0 0 0 / 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+
+  .moment-cap {
+    align-self: end;
+    justify-self: start;
+    margin: 0 0 8px;
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 1.7rem;
+    text-shadow: 0 2px 14px rgb(0 0 0 / 0.5);
+  }
+
+  /* ── стикеры ── */
+  .sticker {
+    width: min(100%, 320px);
+    background: #fff;
+    color: #1b1a1d;
+    border-radius: 22px;
+    box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.55);
+    text-align: left;
+  }
+  .cd { padding: 20px 18px 16px; text-align: center; display: grid; gap: 12px; }
+  .cd-title { margin: 0; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.02em; }
+  .cd-digits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cd-digits div { display: grid; gap: 2px; padding: 10px 0 8px; border-radius: 12px; background: linear-gradient(160deg, #f19a7e, #b24f78); color: #fff; }
+  .cd-digits b { font-size: 2rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .cd-digits small { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.85; }
+  .cd-date { margin: 0; color: #6b6870; font-weight: 600; font-size: 0.85rem; }
+  .cd-remind {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f1eff3;
+    color: #1b1a1d;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  .cd-remind svg { width: 18px; height: 18px; }
+  .small-link { color: #fff; font-size: 0.82rem; font-weight: 600; text-underline-offset: 3px; }
+
+  .loc {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 10px 16px;
+    border-radius: 12px;
+    background: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    box-shadow: 0 14px 30px -14px rgb(0 0 0 / 0.5);
+  }
+  .loc svg { width: 20px; height: 20px; flex: none; color: #c2477a; }
+  .loc span {
+    background: linear-gradient(90deg, #7c3aed, #c2477a 55%, #f08a4b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: left;
+  }
+  .link-sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 12px;
+    background: #fff;
+    color: #2f6fe4;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: 0 14px 30px -14px rgb(0 0 0 / 0.5);
+  }
+  .link-sticker svg { width: 18px; height: 18px; }
+
+  .card { overflow: hidden; }
+  .card-head { margin: 0; padding: 14px 18px 12px; font-weight: 800; font-size: 1.05rem; border-bottom: 1px solid #ecebef; }
+  .card-head--grad { background: linear-gradient(120deg, #f19a7e, #b24f78); color: #fff; border: 0; }
+  .tl { list-style: none; margin: 0; padding: 6px 18px 14px; display: grid; }
+  .tl li { display: grid; grid-template-columns: 58px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px dashed #e3e1e7; }
+  .tl li:last-child { border-bottom: 0; }
+  .tl b { font-weight: 800; color: #b24f78; font-variant-numeric: tabular-nums; }
+  .tl span { font-weight: 700; display: grid; gap: 2px; }
+  .tl small { font-weight: 500; color: #6b6870; font-size: 0.82rem; line-height: 1.4; }
+  .notes { list-style: none; margin: 0; padding: 4px 18px 10px; }
+  .notes li { padding: 11px 0; border-bottom: 1px solid #efedf1; font-size: 0.88rem; line-height: 1.5; font-weight: 500; }
+  .notes li:last-child { border-bottom: 0; }
+
+  .swatches { display: flex; gap: 10px; padding: 10px 14px; border-radius: 99px; background: #fff; box-shadow: 0 14px 30px -14px rgb(0 0 0 / 0.5); }
+  .swatches span { width: 34px; height: 34px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1); }
+
+  .poll { padding: 20px 16px 16px; display: grid; gap: 10px; }
+  .poll-q { margin: 0 0 6px; text-align: center; font-weight: 800; font-size: 1.15rem; line-height: 1.3; }
+  .poll-opt {
+    padding: 15px;
+    border-radius: 14px;
+    border: 0;
+    background: #f1eff3;
+    color: #1b1a1d;
+    font: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s, color 0.3s;
+  }
+  .poll-opt:active { transform: scale(0.97); }
+  .poll-opt.picked { background: linear-gradient(120deg, #f19a7e, #b24f78); color: #fff; }
+
+  .replay {
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 99px;
+    border: 1px solid rgb(255 255 255 / 0.5);
+    background: rgb(0 0 0 / 0.25);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .replay svg { width: 16px; height: 16px; }
+
+  .tap-hint {
+    position: absolute;
+    /* середина правого края — туда и нужно тапать */
+    right: 14px;
+    top: 50%;
+    margin: 0;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgb(255 255 255 / 0.85);
+    pointer-events: none;
+    transform: translateY(-50%);
+    animation: hint-in 0.6s 1.6s both;
+    transition: opacity 0.4s;
+  }
+  /* подсказка только на обложке и до первого тапа */
+  .st.touched .tap-hint,
+  .st-stories:not(:has(.story--cover.is-active)) .tap-hint { opacity: 0; }
+  .tap-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; animation: tap 1.6s ease-in-out infinite; }
+  @keyframes tap { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(0.75); opacity: 0.5; background: rgb(255 255 255 / 0.3); } }
+  @keyframes hint-in { from { opacity: 0; transform: translate(8px, -50%); } to { transform: translateY(-50%); } }
+
+  /* ── шапка ── */
+  .st-head {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    padding: calc(env(safe-area-inset-top) + 10px) 10px 0;
+    display: grid;
+    gap: 10px;
+    transition: opacity 0.3s;
+  }
+  .st-bars { display: flex; gap: 4px; }
+  .st-bars span { flex: 1; height: 2.5px; border-radius: 2px; background: rgb(255 255 255 / 0.35); overflow: hidden; }
+  .st-bars i { display: block; height: 100%; background: #fff; transform: scaleX(0); transform-origin: left; }
+  .st-bars span.done i { transform: scaleX(1); }
+  .st-bars span.active i { animation: fill var(--dur) linear forwards; }
+  .st.paused .st-bars span.active i { animation-play-state: paused; }
+  @keyframes fill { to { transform: scaleX(1); } }
+
+  .st-meta { display: flex; align-items: center; gap: 10px; padding-left: 4px; }
+  .st-avatar {
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border-radius: 50%;
+    padding: 2px;
+    background: conic-gradient(from 200deg, #f9c9a4, #f08a4b, #c2477a, #7c3aed, #f9c9a4);
+  }
+  .st-avatar span {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #1b1a1d;
+    border: 2px solid #000;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 0.8rem;
+    color: #fff;
+  }
+  .st-who { display: flex; align-items: baseline; gap: 8px; min-width: 0; flex: 1; text-shadow: 0 1px 6px rgb(0 0 0 / 0.35); }
+  .st-who b { font-weight: 700; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .st-who small { font-size: 0.8rem; opacity: 0.75; white-space: nowrap; }
+  .st-icon {
+    width: 38px;
+    height: 38px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: none;
+    color: #fff;
+    cursor: pointer;
+    filter: drop-shadow(0 1px 4px rgb(0 0 0 / 0.4));
+  }
+  .st-icon svg { width: 22px; height: 22px; grid-area: 1 / 1; }
+  .st-icon .i-on, .st-icon .i-play { display: none; }
+  .st.sound-on .i-on { display: block; }
+  .st.sound-on .i-off { display: none; }
+  [data-pause][aria-pressed='true'] .i-play { display: block; }
+  [data-pause][aria-pressed='true'] .i-pause { display: none; }
+
+  /* ── подвал ── */
+  .st-foot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px calc(env(safe-area-inset-bottom) + 14px);
+    justify-content: flex-end;
+    transition: opacity 0.3s;
+  }
+  .st.holding .st-head, .st.holding .st-foot, .st.holding .tap-hint { opacity: 0; }
+  .st-reply {
+    flex: 1;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 99px;
+    border: 1px solid rgb(255 255 255 / 0.6);
+    background: rgb(0 0 0 / 0.15);
+    color: rgb(255 255 255 / 0.9);
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .st-like { width: 46px; height: 46px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; }
+  .st-like svg { width: 28px; height: 28px; fill: none; transition: transform 0.3s cubic-bezier(0.3, 1.6, 0.5, 1), fill 0.2s, color 0.2s; }
+  .st-like[aria-pressed='true'] { color: #ff3b5c; }
+  .st-like[aria-pressed='true'] svg { fill: currentColor; transform: scale(1.15); }
+  .st-hearts { position: absolute; right: 22px; bottom: calc(env(safe-area-inset-bottom) + 60px); z-index: 6; pointer-events: none; }
+  .st-hearts :global(i) {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 26px;
+    height: 26px;
+    background: #ff3b5c;
+    clip-path: path('M13 24S3 17.8 1 12C-.6 7.6 2.2 3 6.6 3 9 3 11 4.4 13 7c2-2.6 4-4 6.4-4C23.8 3 26.6 7.6 25 12 23 17.8 13 24 13 24z');
+    animation: float-heart 1.4s ease-out forwards;
+  }
+  @keyframes float-heart {
+    from { opacity: 1; transform: translate(0, 0) scale(var(--s)); }
+    to { opacity: 0; transform: translate(var(--x), -220px) scale(calc(var(--s) * 1.3)); }
+  }
+
+  /* стрелки по бокам — только на десктопе */
+  .st-arrow {
+    display: none;
+    position: relative;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 0;
+    background: rgb(255 255 255 / 0.9);
+    color: #1b1a1d;
+    cursor: pointer;
+    place-items: center;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  .st-arrow:hover { transform: scale(1.06); background: #fff; }
+  .st-arrow svg { width: 22px; height: 22px; }
+  @media (min-width: 600px) {
+    .st { grid-template-columns: 1fr auto 1fr; gap: 28px; }
+    .st-arrow { display: grid; }
+    .st-arrow--prev { justify-self: end; }
+    .st-arrow--next { justify-self: start; }
+  }
+
+  /* ── анкета ── */
+  :global(html:has(.st-sheet[open])) { overflow: hidden; }
+  .st-sheet {
+    width: min(100%, 480px);
+    max-width: 100%;
+    max-height: 88dvh;
+    margin: auto auto 0;
+    padding: 26px 20px calc(env(safe-area-inset-bottom) + 20px);
+    border: 0;
+    border-radius: 24px 24px 0 0;
+    background: var(--surface);
+    color: var(--text);
+    overscroll-behavior: contain;
+  }
+  @media (min-width: 600px) { .st-sheet { margin: auto; border-radius: 24px; } }
+  .st-sheet::backdrop { background: rgb(0 0 0 / 0.6); }
+  .st-sheet[open] { animation: sheet-up 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @keyframes sheet-up { from { transform: translateY(40px); opacity: 0; } }
+  .sheet-title { margin: 0 0 18px; text-align: center; font-weight: 800; font-size: 1.1rem; }
+  .st-sheet :global(.plate) { padding: 0; border: 0; background: none; }
+  .st-sheet :global(.plate > .plate-inner) { padding: 0; background: none; box-shadow: none; }
+  .sheet-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .sheet-close svg { width: 18px; height: 18px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .story.is-active .pop { animation: none; opacity: 1; transform: rotate(var(--r, 0deg)); }
+    .story.is-active .story-bg img { animation: none; }
+  }
+</style>

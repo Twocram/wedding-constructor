@@ -1,0 +1,164 @@
+---
+import Head from './Head.astro';
+// программа — маршрут лодки вдоль побережья: пунктирная волна от «порта» к «порту»
+interface Props {
+  items: { time: string; title: string; text?: string }[];
+}
+const { items } = Astro.props;
+const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+// на десктопе маршрут идёт горизонтально, если остановок немного; иначе — вертикально, как на телефоне
+const across = items.length >= 2 && items.length <= 5;
+const icon = (i: number) => (i === 0 ? 'boat' : i === items.length - 1 ? 'moon' : 'anchor');
+---
+
+<section class="am-voyage" aria-labelledby="am-voyage-title">
+  <Head it="Il viaggio della sera" title="Программа вечера" id="am-voyage-title" />
+
+  <ol class:list={['am-route', { 'am-route--across': across }]} style={`--n:${items.length}`}>
+    {items.map((item, i) => (
+      <li class="am-stop fade-up" style={`--i:${i}`}>
+        {i < items.length - 1 && (
+          <svg class:list={['am-leg', { flip: i % 2 === 1 }]} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path class="am-leg-v" d="M50 0C90 30 10 70 50 100" />
+            <path class="am-leg-h" d="M0 50C30 10 70 90 100 50" />
+          </svg>
+        )}
+        <span class="am-port" aria-hidden="true">
+          {icon(i) === 'boat' && (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M3 15h18l-2.5 4h-13Z" /><path d="M12 3v11M12 4l6 9h-6M11 6l-5 7h5" /></svg>
+          )}
+          {icon(i) === 'anchor' && (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><circle cx="12" cy="5" r="2" /><path d="M12 7v13M8 10h8M4 13c0 4 4 7 8 7s8-3 8-7M4 13l-1.5 1.5M20 13l1.5 1.5" /></svg>
+          )}
+          {icon(i) === 'moon' && (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M15.5 3.5a8.5 8.5 0 1 0 5 12 7 7 0 0 1-5-12Z" /><path d="M6 5.5l.6 1.3 1.3.6-1.3.6L6 9.3l-.6-1.3-1.3-.6 1.3-.6Z" fill="currentColor" stroke="none" /></svg>
+          )}
+        </span>
+        <div class="am-stop-body">
+          <p class="am-stop-leg" lang="it">Tappa {roman[i] ?? i + 1}</p>
+          <p class="am-stop-time">{item.time}</p>
+          <h3 class="am-stop-title">{item.title}</h3>
+          {item.text && <p class="am-stop-text">{item.text}</p>}
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .am-voyage {
+    position: relative;
+    padding: clamp(80px, 12vw, 128px) 20px clamp(88px, 12vw, 128px);
+    /* «море» под маршрутом: секция чуть синее ночного фона */
+    background: linear-gradient(180deg, var(--bg), #0f2438 50%, var(--bg));
+  }
+  .am-route {
+    list-style: none;
+    padding: 0;
+    max-width: 440px;
+    margin: 0 auto;
+    display: grid;
+  }
+  .am-stop {
+    --port: 52px;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--port) 1fr;
+    gap: 20px;
+    padding-bottom: 44px;
+  }
+  .am-stop:last-child { padding-bottom: 0; }
+
+  /* отрезок маршрута: от центра этого порта до центра следующего */
+  .am-leg {
+    position: absolute;
+    left: 0;
+    top: calc(var(--port) / 2);
+    width: var(--port);
+    height: 100%;
+    overflow: visible;
+  }
+  .am-leg path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.2;
+    stroke-dasharray: 2 6;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.75;
+  }
+  .am-leg.flip { transform: scaleX(-1); }
+  .am-leg-h { display: none; }
+
+  .am-port {
+    position: relative;
+    z-index: 1;
+    width: var(--port);
+    height: var(--port);
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 35%, #1b3149, #0c1826);
+    border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+    box-shadow: 0 0 0 5px var(--bg), 0 0 0 6px color-mix(in srgb, var(--accent) 22%, transparent);
+    color: var(--accent-2);
+  }
+  .am-port svg { width: 24px; height: 24px; }
+
+  .am-stop-body { padding-top: 2px; }
+  .am-stop-leg {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.2;
+  }
+  .am-stop-time {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 7vw, 2.4rem);
+    line-height: 1.1;
+    color: var(--accent-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .am-stop-title {
+    margin-top: 6px;
+    font-family: var(--font-label);
+    font-size: 0.86rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .am-stop-text {
+    margin-top: 6px;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    color: var(--text-2);
+    max-width: 32ch;
+  }
+
+  @media (min-width: 900px) {
+    .am-route--across {
+      max-width: min(1100px, calc(var(--n) * 280px));
+      grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    }
+    .am-route--across .am-stop {
+      --port: 64px;
+      grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
+      gap: 26px;
+      padding: 0 12px;
+    }
+    .am-route--across .am-port svg { width: 28px; height: 28px; }
+    .am-route--across .am-leg {
+      left: 50%;
+      top: 0;
+      width: 100%;
+      height: var(--port);
+    }
+    .am-route--across .am-leg.flip { transform: scaleY(-1); }
+    .am-route--across .am-leg-v { display: none; }
+    .am-route--across .am-leg-h { display: inline; }
+    .am-route--across .am-stop-text { margin-inline: auto; max-width: 26ch; }
+  }
+</style>

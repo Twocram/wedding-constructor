@@ -1,0 +1,63 @@
+---
+// общий набор секций листающегося приглашения (тема cover); остальные темы собирают тело сами в src/themes/<theme>/Body.astro
+import type { CollectionEntry } from 'astro:content';
+import Section from './Section.astro';
+import Timeline from './Timeline.astro';
+import DressCode from './DressCode.astro';
+import RsvpForm from './RsvpForm.astro';
+import Countdown from './Countdown.astro';
+import Gallery from './Gallery.astro';
+import Venue from './Venue.astro';
+import Wishes from './Wishes.astro';
+import Telegram from './Telegram.astro';
+import Organizer from './Organizer.astro';
+import AddToCalendar from './AddToCalendar.astro';
+import type { calendarEvent } from '../lib/calendar';
+
+export interface Props {
+  inv: CollectionEntry<'invitations'>['data'];
+  slug: string;
+  cal: ReturnType<typeof calendarEvent>;
+}
+const { inv, slug, cal } = Astro.props;
+---
+
+<main id="content">
+  {inv.countdown && (
+    <Countdown target={inv.countdown}>
+      {cal && <AddToCalendar slug={slug} google={cal.google} />}
+    </Countdown>
+  )}
+
+  {inv.welcome && (
+    <Section eyebrow="Дорогие гости" eyebrowGuest="{g}, ждём вас" narrow>
+      <p class="lead">{inv.welcome}</p>
+    </Section>
+  )}
+
+  {inv.gallery && <Gallery photos={inv.gallery} />}
+
+  {inv.venue && <Venue name={inv.venue.name} address={inv.venue.address} mapIframe={inv.venue.mapIframe || undefined} />}
+
+  {inv.timeline && <Timeline items={inv.timeline} />}
+
+  {inv.dressCode && <DressCode text={inv.dressCode.text} colors={inv.dressCode.colors} />}
+
+  {inv.wishes && <Wishes items={inv.wishes} />}
+
+  {inv.transfer && (
+    <Section eyebrow="Логистика" title="Трансфер" narrow>
+      <p class="transfer">{inv.transfer}</p>
+    </Section>
+  )}
+
+  {inv.telegramChat && <Telegram url={inv.telegramChat.url} text={inv.telegramChat.text} />}
+
+  {inv.rsvp && <RsvpForm deadline={inv.rsvp.deadline} photo={inv.heroPhoto} />}
+
+  {inv.organizer && <Organizer name={inv.organizer.name} phone={inv.organizer.phone} />}
+</main>
+
+<style>
+  .transfer { max-width: 40ch; margin: 0 auto; }
+</style>

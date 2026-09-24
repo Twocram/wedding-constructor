@@ -1,0 +1,165 @@
+---
+// наземные службы: трансфер — корешок билета на шаттл, чат — рация «связь с экипажем»
+import Sign from './Sign.astro';
+interface Props {
+  transfer?: string;
+  chat?: { url: string; text: string };
+  code: string;
+  serial: string;
+}
+const { transfer, chat, code, serial } = Astro.props;
+---
+
+<section class="tk-sec sv-sec fade-up">
+  <div class="tk-wrap">
+    <Sign code={code} label="Наземные службы" en="Ground services" title={transfer ? 'Трансфер и связь' : 'Связь с экипажем'} />
+
+    <div class:list={['sv-grid', { 'sv-grid--two': transfer && chat }]}>
+      {transfer && (
+        <article class="shuttle">
+          <div class="sh-main">
+            <p class="sh-kicker">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H4zM4 11h16M7 16v3M17 16v3M7 13.5h.01M17 13.5h.01M9 5v6M15 5v6" /></svg>
+              Shuttle · Трансфер
+            </p>
+            <h3>Шаттл до борта</h3>
+            <p class="sh-text">{transfer}</p>
+          </div>
+          <div class="sh-stub" aria-hidden="true">
+            <p class="sh-stub-text"><span>Admit one</span><b>№ {serial}</b></p>
+          </div>
+        </article>
+      )}
+
+      {chat && (
+        <article class="radio">
+          <div class="rd-top" aria-hidden="true">
+            <span class="rd-waves"><i></i><i></i><i></i></span>
+            <span class="rd-freq">121.5 <small>MHz</small></span>
+          </div>
+          <h3>Связь с экипажем</h3>
+          <p class="rd-text">{chat.text}</p>
+          <a class="rd-btn" href={chat.url} target="_blank" rel="noopener">
+            Выйти на связь
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M21 3 3 10.5l6.5 2.2L12 20l9-17Z" /><path d="M9.5 12.7 21 3" /></svg>
+          </a>
+        </article>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .sv-grid { display: grid; gap: 22px; }
+  @media (min-width: 860px) {
+    .sv-grid--two { grid-template-columns: 1.15fr 1fr; align-items: stretch; }
+  }
+  .sv-sec h3 { font-style: italic; font-size: clamp(1.5rem, 5vw, 1.9rem); line-height: 1.1; }
+
+  /* ── билет на шаттл с отрывным корешком ── */
+  .shuttle {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    background: #f2b84b;
+    color: var(--text);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    rotate: -0.8deg;
+  }
+  .sh-main { display: grid; gap: 12px; align-content: start; padding: clamp(20px, 4vw, 30px); }
+  .sh-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-label);
+    font-size: 0.64rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .sh-kicker svg { width: 22px; height: 22px; }
+  .sh-text { color: var(--text) !important; line-height: 1.55; max-width: 38ch; }
+  .sh-stub {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 18px 16px;
+    border-left: 2px dashed rgba(37, 48, 60, 0.45);
+  }
+  .sh-stub-text {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    font-family: var(--font-label);
+    text-transform: uppercase;
+    color: var(--text) !important;
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+  }
+  .sh-stub span { font-size: 0.6rem; letter-spacing: 0.24em; }
+  .sh-stub b { font-size: 0.9rem; letter-spacing: 0.1em; }
+  /* полукруглые вырубки по краям линии отрыва */
+  .sh-stub::before, .sh-stub::after {
+    content: '';
+    position: absolute;
+    left: -11px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+  }
+  .sh-stub::before { top: -10px; }
+  .sh-stub::after { bottom: -10px; }
+
+  /* ── рация экипажа ── */
+  .radio {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    padding: clamp(20px, 4vw, 30px);
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+  }
+  .radio h3 { color: var(--bg); }
+  .rd-top { display: flex; justify-content: space-between; align-items: center; }
+  .rd-waves { display: inline-flex; align-items: flex-end; gap: 4px; height: 22px; }
+  .rd-waves i { width: 5px; border-radius: 1px; background: #6fd08c; animation: rd 1.6s ease-in-out infinite; }
+  .rd-waves i:nth-child(1) { height: 8px; }
+  .rd-waves i:nth-child(2) { height: 15px; animation-delay: 0.2s; }
+  .rd-waves i:nth-child(3) { height: 22px; animation-delay: 0.4s; }
+  @keyframes rd { 50% { opacity: 0.3; } }
+  .rd-freq {
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #f2b84b;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: #141a21;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+  .rd-freq small { font-size: 0.6rem; letter-spacing: 0.1em; color: rgba(242, 184, 75, 0.7); }
+  .rd-text { color: rgba(243, 239, 230, 0.75) !important; line-height: 1.55; }
+  .rd-btn {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 12px 18px;
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: background-color 0.3s var(--ease), transform 0.4s var(--ease);
+  }
+  .rd-btn svg { width: 16px; height: 16px; }
+  .rd-btn:hover { background: #f2b84b; transform: translateY(-2px); }
+</style>

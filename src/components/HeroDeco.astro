@@ -34,7 +34,7 @@ const { groom, bride, date, city, heroPhoto } = Astro.props;
       <span class="hero-deco-amp">&</span>
       <span class="hero-deco-name">{bride}</span>
     </h1>
-    <p class="hero-deco-date">· {date}{city && ` · ${city}`} ·</p>
+    <p class="hero-deco-date">· {date}{city && <> · <span class="hero-deco-city">{city}</span></>} ·</p>
     <ScrollHint />
   </div>
 </header>
@@ -134,6 +134,7 @@ const { groom, bride, date, city, heroPhoto } = Astro.props;
     background-clip: text;
     color: transparent;
   }
+  .hero-deco-city { white-space: nowrap; }
   .hero-deco-date {
     font-family: var(--font-label);
     font-size: 0.78rem;

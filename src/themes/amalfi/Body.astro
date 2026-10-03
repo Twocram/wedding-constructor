@@ -55,7 +55,7 @@ const hasInfo = Boolean(inv.transfer || inv.telegramChat || inv.organizer);
 
   {hasInfo && <Info transfer={inv.transfer} telegram={inv.telegramChat} organizer={inv.organizer} />}
 
-  {inv.rsvp && <Reply deadline={inv.rsvp.deadline} groom={inv.groom} bride={inv.bride} />}
+  {inv.rsvp && <Reply deadline={inv.rsvp.deadline} groom={inv.groom} bride={inv.bride} drinks={inv.rsvp.drinks} plusOne={inv.rsvp.plusOne} />}
 </main>
 
 <style>

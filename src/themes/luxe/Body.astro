@@ -4,6 +4,7 @@ import type { Props } from '../../components/ClassicBody.astro';
 import Countdown from '../../components/Countdown.astro';
 import AddToCalendar from '../../components/AddToCalendar.astro';
 import RsvpFields from '../../components/RsvpFields.astro';
+import MonthCal from '../../components/MonthCal.astro';
 
 const { inv, slug, cal } = Astro.props as Props;
 
@@ -30,6 +31,7 @@ const diamond = 'M4 0 8 4 4 8 0 4Z';
         </header>
         <p class="lx-lead fade-up">{inv.welcome}</p>
         <p class="lx-sign fade-up">{inv.groom} <i>&</i> {inv.bride}</p>
+        {inv.countdown && <MonthCal target={inv.countdown} />}
       </div>
     </section>
   )}
@@ -135,7 +137,10 @@ const diamond = 'M4 0 8 4 4 8 0 4Z';
           {inv.wishes.map((w, i) => (
             <li class="fade-up" style={`--i:${i}`}>
               <svg class="lx-diamond" viewBox="0 0 8 8" aria-hidden="true"><path d={diamond} /></svg>
-              <p>{w}</p>
+              <div>
+                {typeof w !== 'string' && w.title && <h3 class="wish-title">{w.title}</h3>}
+                <p>{typeof w === 'string' ? w : w.text}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -201,7 +206,7 @@ const diamond = 'M4 0 8 4 4 8 0 4Z';
           <i class="lx-corner lx-corner--tr" aria-hidden="true"></i>
           <i class="lx-corner lx-corner--bl" aria-hidden="true"></i>
           <i class="lx-corner lx-corner--br" aria-hidden="true"></i>
-          <RsvpFields />
+          <RsvpFields drinks={inv.rsvp.drinks} plusOne={inv.rsvp.plusOne} />
         </div>
       </div>
     </section>

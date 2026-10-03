@@ -7,8 +7,10 @@ interface Props {
   flight: string;
   iata: string;
   code: string;
+  drinks?: string[];
+  plusOne?: boolean;
 }
-const { deadline, flight, iata, code } = Astro.props;
+const { deadline, flight, iata, code, drinks, plusOne } = Astro.props;
 const rand = (seed: number) => {
   const x = Math.sin(seed * 53.3) * 43758.5453;
   return x - Math.floor(x);
@@ -38,7 +40,7 @@ const bars = Array.from({ length: 40 }, (_, i) => 1 + Math.floor(rand(i + 7) * 3
       </aside>
 
       <div class="ci-form">
-        <RsvpFields />
+        <RsvpFields drinks={drinks} plusOne={plusOne} />
       </div>
     </div>
   </div>

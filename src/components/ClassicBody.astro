@@ -9,6 +9,7 @@ import Countdown from './Countdown.astro';
 import Gallery from './Gallery.astro';
 import Venue from './Venue.astro';
 import Wishes from './Wishes.astro';
+import MonthCal from './MonthCal.astro';
 import Telegram from './Telegram.astro';
 import Organizer from './Organizer.astro';
 import AddToCalendar from './AddToCalendar.astro';
@@ -32,6 +33,7 @@ const { inv, slug, cal } = Astro.props;
   {inv.welcome && (
     <Section eyebrow="Дорогие гости" eyebrowGuest="{g}, ждём вас" narrow>
       <p class="lead">{inv.welcome}</p>
+      {inv.countdown && <MonthCal target={inv.countdown} />}
     </Section>
   )}
 
@@ -41,7 +43,7 @@ const { inv, slug, cal } = Astro.props;
 
   {inv.timeline && <Timeline items={inv.timeline} />}
 
-  {inv.dressCode && <DressCode text={inv.dressCode.text} colors={inv.dressCode.colors} />}
+  {inv.dressCode && <DressCode text={inv.dressCode.text} colors={inv.dressCode.colors} lookbook={inv.dressCode.lookbook} />}
 
   {inv.wishes && <Wishes items={inv.wishes} />}
 
@@ -53,7 +55,7 @@ const { inv, slug, cal } = Astro.props;
 
   {inv.telegramChat && <Telegram url={inv.telegramChat.url} text={inv.telegramChat.text} />}
 
-  {inv.rsvp && <RsvpForm deadline={inv.rsvp.deadline} photo={inv.heroPhoto} />}
+  {inv.rsvp && <RsvpForm deadline={inv.rsvp.deadline} photo={inv.heroPhoto} drinks={inv.rsvp.drinks} plusOne={inv.rsvp.plusOne} />}
 
   {inv.organizer && <Organizer name={inv.organizer.name} phone={inv.organizer.phone} />}
 </main>

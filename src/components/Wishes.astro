@@ -1,19 +1,25 @@
 ---
 import Section from './Section.astro';
 interface Props {
-  items: string[];
+  items: (string | { title: string; text: string })[];
 }
 const { items } = Astro.props;
 ---
 
 <Section eyebrow="Детали" title="Несколько пожеланий" narrow>
   <ol class="wishes">
-    {items.map((w, i) => (
-      <li class="fade-up" style={`--i:${i + 1}`}>
-        <span class="wish-num">{String(i + 1).padStart(2, '0')}</span>
-        <p>{w}</p>
-      </li>
-    ))}
+    {items.map((w, i) => {
+      const item = typeof w === 'string' ? { text: w } : w;
+      return (
+        <li class="fade-up" style={`--i:${i + 1}`}>
+          <span class="wish-num">{String(i + 1).padStart(2, '0')}</span>
+          <div>
+            {item.title && <h3>{item.title}</h3>}
+            <p>{item.text}</p>
+          </div>
+        </li>
+      );
+    })}
   </ol>
 </Section>
 
@@ -37,6 +43,15 @@ const { items } = Astro.props;
     padding-top: 4px;
   }
   .wishes p { font-size: 1rem; }
+  .wishes h3 {
+    font-family: var(--font-label);
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
   :global(body[data-theme='editorial']) .wish-num { font-style: italic; font-weight: 300; font-size: 2.4rem; }
   :global(body[data-theme='amalfi']) .wish-num { font-size: 1.5rem; font-family: var(--font-label); padding-top: 8px; }
 </style>

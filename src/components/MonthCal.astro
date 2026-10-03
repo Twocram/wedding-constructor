@@ -1,0 +1,85 @@
+---
+// календарь месяца свадьбы с сердечком на дате — из ISO-даты (countdown)
+interface Props {
+  target: string; // ISO-дата
+}
+const { target } = Astro.props;
+const d = new Date(target);
+const year = d.getFullYear();
+const month = d.getMonth();
+const day = d.getDate();
+const monthName = new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(d);
+const offset = (new Date(year, month, 1).getDay() + 6) % 7; // неделя с понедельника
+const daysInMonth = new Date(year, month + 1, 0).getDate();
+const cells: (number | null)[] = [...Array<null>(offset).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+const weekDays = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
+---
+
+<figure class="month-cal fade-up" aria-label={`Дата свадьбы: ${day} ${monthName} ${year}`}>
+  <figcaption>
+    <span class="mc-month">{monthName}</span>
+    <span class="mc-year">{year}</span>
+  </figcaption>
+  <ol class="mc-grid" aria-hidden="true">
+    {weekDays.map((w) => <li class="mc-wd">{w}</li>)}
+    {cells.map((c) => (
+      <li class:list={[{ 'mc-day': c === day, 'mc-empty': c === null }]}>
+        {c === day ? (
+          <span class="mc-heart">
+            <svg viewBox="0 0 32 30" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M16 27C7 20 2 14.5 2 9.3 2 5.4 5 2.5 8.8 2.5c3 0 5.7 1.9 7.2 4.7 1.5-2.8 4.2-4.7 7.2-4.7C27 2.5 30 5.4 30 9.3c0 5.2-5 10.7-14 17.7Z" />
+            </svg>
+            <i>{c}</i>
+          </span>
+        ) : (
+          c
+        )}
+      </li>
+    ))}
+  </ol>
+</figure>
+
+<style>
+  .month-cal { max-width: 340px; margin: 40px auto 0; }
+  .month-cal figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line-strong);
+    font-family: var(--font-display);
+  }
+  .mc-month { font-size: 1.5rem; font-style: italic; color: var(--text); }
+  .mc-year { font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.28em; color: var(--muted); }
+  .mc-grid {
+    list-style: none;
+    padding: 14px 0 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+  .mc-wd {
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 8px;
+  }
+  .mc-grid li:not(.mc-wd) { padding: 6px 0; font-size: 0.92rem; color: var(--text-2); position: relative; }
+  .mc-heart {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 38px;
+    height: 36px;
+    margin: -5px 0;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .mc-heart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mc-heart i { position: relative; font-style: normal; } /* цифра поверх контурного сердца */
+</style>

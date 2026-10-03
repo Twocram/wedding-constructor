@@ -6,8 +6,10 @@ interface Props {
   deadline: string;
   groom: string;
   bride: string;
+  drinks?: string[];
+  plusOne?: boolean;
 }
-const { deadline, groom, bride } = Astro.props;
+const { deadline, groom, bride, drinks, plusOne } = Astro.props;
 ---
 
 <section class="am-reply" id="rsvp" aria-labelledby="am-reply-title">
@@ -24,7 +26,7 @@ const { deadline, groom, bride } = Astro.props;
         <span>{groom[0]}<i>&</i>{bride[0]}</span>
       </div>
     </header>
-    <RsvpFields />
+    <RsvpFields drinks={drinks} plusOne={plusOne} />
   </div>
 </section>
 

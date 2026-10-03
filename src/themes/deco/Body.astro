@@ -206,7 +206,8 @@ const calIcon = 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4';
                 </svg>
                 <b>{roman(i + 1)}</b>
               </span>
-              <p>{w}</p>
+              {typeof w !== 'string' && w.title && <h3 class="wish-title">{w.title}</h3>}
+              <p>{typeof w === 'string' ? w : w.text}</p>
             </li>
           ))}
         </ol>
@@ -245,7 +246,7 @@ const calIcon = 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4';
           </p>
           <span class="dc-chevrons" aria-hidden="true"></span>
           <div class="dc-rsvp-form">
-            <RsvpFields />
+            <RsvpFields drinks={inv.rsvp.drinks} plusOne={inv.rsvp.plusOne} />
           </div>
         </Frame>
       </div>

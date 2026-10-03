@@ -4,6 +4,7 @@ import type { Props } from '../../components/ClassicBody.astro';
 import Countdown from '../../components/Countdown.astro';
 import AddToCalendar from '../../components/AddToCalendar.astro';
 import RsvpFields from '../../components/RsvpFields.astro';
+import MonthCal from '../../components/MonthCal.astro';
 
 const { inv, slug, cal } = Astro.props as Props;
 
@@ -32,6 +33,7 @@ const captions = ['Этюд первый', 'Набросок', 'Пленэр', '
         <p class="wc-kicker" data-guest="{g}, ждём вас">Дорогие гости</p>
         <p class="wc-letter-text fade-up">{inv.welcome}</p>
         <p class="wc-sign fade-up">{inv.groom} и {inv.bride}</p>
+        {inv.countdown && <MonthCal target={inv.countdown} />}
       </div>
     </section>
   )}
@@ -120,7 +122,10 @@ const captions = ['Этюд первый', 'Набросок', 'Пленэр', '
           {inv.wishes.map((w, i) => (
             <li class="fade-up" style={`--i:${i}`}>
               <span class="wc-wish-n" aria-hidden="true">{i + 1}</span>
-              <p>{w}</p>
+              <div>
+                {typeof w !== 'string' && w.title && <h3 class="wish-title">{w.title}</h3>}
+                <p>{typeof w === 'string' ? w : w.text}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -170,7 +175,7 @@ const captions = ['Этюд первый', 'Набросок', 'Пленэр', '
         <h2 class="wc-h2">Напишите нам</h2>
         <p class="wc-rsvp-deadline fade-up">Просим ответить до <span>{inv.rsvp.deadline}</span></p>
         <div class="wc-rsvp-card fade-up">
-          <RsvpFields />
+          <RsvpFields drinks={inv.rsvp.drinks} plusOne={inv.rsvp.plusOne} />
         </div>
       </div>
     </section>

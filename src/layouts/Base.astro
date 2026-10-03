@@ -794,6 +794,17 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 
   .ornament { color: var(--accent); width: 128px; height: 14px; display: block; }
 
+  /* подзаголовок пожелания: «Цветы», «Подарки»… */
+  .wish-title {
+    font-family: var(--font-label);
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .fade-up { opacity: 1; transform: none; transition: none; }
     html { scroll-behavior: auto; }

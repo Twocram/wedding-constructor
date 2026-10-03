@@ -1,9 +1,11 @@
 ---
 import Section from './Section.astro';
+import TimelineIcon from './TimelineIcon.astro';
 interface Item {
   time: string;
   title: string;
   text?: string;
+  icon?: string;
 }
 interface Props {
   items: Item[];
@@ -16,7 +18,11 @@ const { items } = Astro.props;
     {items.map((item, i) => (
       <li class="fade-up" style={`--i:${i + 1}`}>
         <span class="tl-time">{item.time}</span>
-        <span class="tl-dot" aria-hidden="true"></span>
+        {item.icon ? (
+          <span class="tl-icon" aria-hidden="true"><TimelineIcon name={item.icon} /></span>
+        ) : (
+          <span class="tl-dot" aria-hidden="true"></span>
+        )}
         <div class="tl-body">
           <h3>{item.title}</h3>
           {item.text && <p>{item.text}</p>}
@@ -83,6 +89,23 @@ const { items } = Astro.props;
     border-radius: 50%;
     background: var(--accent);
   }
+  /* маркер с иконкой: чип побольше точки, нить привязана к его центру */
+  .tl-icon {
+    width: 34px;
+    height: 34px;
+    margin: -5px -5px -5px -5px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    color: var(--accent);
+    position: relative;
+    z-index: 1;
+  }
+  .tl-icon svg { width: 17px; height: 17px; }
+  :global(body[data-theme='amalfi']) .tl-icon { background: var(--surface); border-radius: 6px; transform: rotate(45deg); }
+  :global(body[data-theme='amalfi']) .tl-icon svg { transform: rotate(-45deg); }
   .tl-body h3 {
     font-family: var(--font-body);
     font-weight: 500;

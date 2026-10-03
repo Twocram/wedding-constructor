@@ -2,9 +2,10 @@
 import Section from './Section.astro';
 interface Props {
   text: string;
-  colors?: string[];
+  colors?: (string | { image: string })[];
+  lookbook?: string[]; // образы гостей: карусель фото
 }
-const { text, colors } = Astro.props;
+const { text, colors, lookbook } = Astro.props;
 ---
 
 <Section eyebrow="Дресс-код" title="Палитра вечера" variant="surface" narrow>
@@ -12,13 +13,46 @@ const { text, colors } = Astro.props;
   {colors && (
     <ul class="palette" role="list" aria-label="Оттенки дресс-кода">
       {colors.map((c, i) => (
-        <li class="fade-up" style={`--i:${i + 1}; --c:${c}`} title={c}>
-          <span class="swatch"></span>
+        <li class="fade-up" style={`--i:${i + 1}`} title={typeof c === 'string' ? c : 'ткань'}>
+          {typeof c === 'string' ? (
+            <span class="swatch" style={`--c:${c}`}></span>
+          ) : (
+            <span class="swatch swatch--img"><img src={c.image} alt="" loading="lazy" decoding="async" /></span>
+          )}
         </li>
       ))}
     </ul>
   )}
+  {lookbook && lookbook.length > 0 && (
+    <div class="lookbook">
+      <p class="lookbook-cap">Образы для вдохновения</p>
+      <ul class="lookbook-track" role="list">
+        {lookbook.map((src, i) => (
+          <li><img src={src} alt={`Образ ${i + 1}`} loading="lazy" decoding="async" /></li>
+        ))}
+      </ul>
+      <div class="lookbook-dots" aria-hidden="true">
+        {lookbook.map((_, i) => <i class:list={[{ on: i === 0 }]} />)}
+      </div>
+    </div>
+  )}
 </Section>
+
+<script>
+  // точки лукбука следуют за прокруткой карусели
+  document.querySelectorAll('.lookbook').forEach((lb) => {
+    const items = [...lb.querySelectorAll('.lookbook-track li')];
+    const dots = [...lb.querySelectorAll('.lookbook-dots i')];
+    const io = new IntersectionObserver(
+      (es) => es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        dots.forEach((d, j) => d.classList.toggle('on', items[j] === e.target));
+      }),
+      { root: lb.querySelector('.lookbook-track'), threshold: 0.6 }
+    );
+    items.forEach((li) => io.observe(li));
+  });
+</script>
 
 <style>
   .dc-text { max-width: 40ch; margin: 0 auto; }
@@ -49,7 +83,52 @@ const { text, colors } = Astro.props;
     border-radius: var(--r-swatch);
     background: var(--c);
     box-shadow: inset 0 -6px 12px rgba(0, 0, 0, 0.12), inset 0 2px 4px rgba(255, 255, 255, 0.35);
+    overflow: hidden;
   }
+  .swatch--img { padding: 0; }
+  .swatch--img img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* лукбук: свайп-карусель образов с точками */
+  .lookbook { margin-top: 48px; }
+  .lookbook-cap {
+    font-family: var(--font-label);
+    font-size: 0.66rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .lookbook-track {
+    list-style: none;
+    padding: 4px 0 12px;
+    margin: 0 -24px;
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .lookbook-track::-webkit-scrollbar { display: none; }
+  .lookbook-track li {
+    flex: 0 0 68%;
+    max-width: 250px;
+    scroll-snap-align: center;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .lookbook-track img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
+  .lookbook-dots { display: flex; justify-content: center; gap: 7px; margin-top: 6px; }
+  .lookbook-dots i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--line-strong);
+    transition: background-color 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .lookbook-dots i.on { background: var(--accent); transform: scale(1.35); }
   :global(body[data-theme='amalfi']) .palette li {
     background: var(--surface);
     border-color: color-mix(in srgb, var(--accent) 40%, transparent);

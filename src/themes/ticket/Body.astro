@@ -73,7 +73,7 @@ const next = () => {
     <Services transfer={inv.transfer} chat={inv.telegramChat} code={next()} serial={serial} />
   )}
 
-  {inv.rsvp && <CheckIn deadline={inv.rsvp.deadline} flight={flight} iata={iata} code={next()} />}
+  {inv.rsvp && <CheckIn deadline={inv.rsvp.deadline} flight={flight} iata={iata} code={next()} drinks={inv.rsvp.drinks} plusOne={inv.rsvp.plusOne} />}
 
   {inv.organizer && <Crew name={inv.organizer.name} phone={inv.organizer.phone} code={next()} />}
 </main>

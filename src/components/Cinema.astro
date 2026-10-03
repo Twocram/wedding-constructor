@@ -206,7 +206,7 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
       </button>
       <p class="kicker">Анкета гостя</p>
-      <RsvpFields />
+      <RsvpFields drinks={inv.rsvp?.drinks} plusOne={inv.rsvp?.plusOne} />
     </dialog>
   )}
 </div>

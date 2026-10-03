@@ -233,7 +233,8 @@ const arrow = 'M3 8h10M9 4l4 4-4 4';
             <li class="ed-quote fade-up">
               <span class="ed-quote-num">№ {String(i + 1).padStart(2, '0')}</span>
               <span class="ed-quote-mark" aria-hidden="true">“</span>
-              <p>{wish}</p>
+              {typeof wish !== 'string' && wish.title && <h3 class="wish-title">{wish.title}</h3>}
+              <p>{typeof wish === 'string' ? wish : wish.text}</p>
             </li>
           ))}
         </ol>
@@ -296,7 +297,7 @@ const arrow = 'M3 8h10M9 4l4 4-4 4';
               <span>Ответный купон</span>
               <span>до {inv.rsvp.deadline}</span>
             </div>
-            <RsvpFields />
+            <RsvpFields drinks={inv.rsvp.drinks} plusOne={inv.rsvp.plusOne} />
           </div>
         </div>
       </div>

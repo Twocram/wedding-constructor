@@ -43,6 +43,11 @@ const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[i
 // у каждой темы своё тело страницы; cover — базовая классика на общих секциях
 const bodies = { cover: ClassicBody, botanical: BotanicalBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody };
 const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null;
+// день недели к дате на первом экране: «суббота, 3 октября 2026» — из ISO-даты таймера
+const weekday = inv.countdown
+  ? new Intl.DateTimeFormat('ru-RU', { weekday: 'long' }).format(new Date(inv.countdown))
+  : undefined;
+const heroDate = weekday ? `${weekday}, ${inv.date}` : inv.date;
 ---
 
 <Base title={title} theme={inv.theme} image={`/og/${slug}.jpg`} description={`${title} — приглашение на свадьбу, ${inv.date}`}>
@@ -53,7 +58,7 @@ const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null;
   {inv.theme === 'cinema' && <Cinema inv={inv} slug={slug} google={cal?.google} />}
   {inv.theme === 'stories' && <Stories inv={inv} slug={slug} google={cal?.google} />}
 
-  {Hero && <Hero groom={inv.groom} bride={inv.bride} date={inv.date} city={inv.city} heroPhoto={inv.heroPhoto} />}
+  {Hero && <Hero groom={inv.groom} bride={inv.bride} date={heroDate} city={inv.city} heroPhoto={inv.heroPhoto} />}
 
   {Body && <Body inv={inv} slug={slug} cal={cal} />}
 

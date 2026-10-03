@@ -4,13 +4,15 @@ import RsvpFields from './RsvpFields.astro';
 interface Props {
   deadline: string;
   photo?: string;
+  drinks?: string[];
+  plusOne?: boolean;
 }
-const { deadline, photo } = Astro.props;
+const { deadline, photo, drinks, plusOne } = Astro.props;
 ---
 
 <Section id="rsvp" eyebrow="Анкета гостя" title="Будете с нами?" variant={photo ? 'photo' : 'plain'} photo={photo} narrow>
   <p class="rsvp-intro">Пожалуйста, ответьте до <strong>{deadline}</strong> — так нам будет проще всё подготовить.</p>
-  <RsvpFields />
+  <RsvpFields drinks={drinks} plusOne={plusOne} />
 </Section>
 
 <style>

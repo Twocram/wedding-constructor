@@ -139,7 +139,10 @@ const num = (id: string) => String(chapters.indexOf(id) + 1).padStart(2, '0');
           {inv.wishes.map((w, i) => (
             <li class="fade-up" style={`--i:${i}`}>
               <span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-              <p>{w}</p>
+              <div>
+                {typeof w !== 'string' && w.title && <h3 class="wish-title">{w.title}</h3>}
+                <p>{typeof w === 'string' ? w : w.text}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -198,7 +201,7 @@ const num = (id: string) => String(chapters.indexOf(id) + 1).padStart(2, '0');
         <h2 class="vg-h2 fade-up">RSVP</h2>
         <p class="vg-deadline fade-up">Ответьте до <span>{inv.rsvp.deadline}</span></p>
         <div class="vg-rsvp fade-up">
-          <RsvpFields />
+          <RsvpFields drinks={inv.rsvp.drinks} plusOne={inv.rsvp.plusOne} />
         </div>
       </div>
     </section>

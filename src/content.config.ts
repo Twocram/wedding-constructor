@@ -21,12 +21,14 @@ const invitations = defineCollection({
       time: z.string(),
       title: z.string(),
       text: z.string().optional(),
+      icon: z.string().optional(), // ключ иконки из TimelineIcon: rings, glass, camera, cake, heart, car, music, dinner, dress, sunset
     })).optional(),
     dressCode: z.object({
       text: z.string(),
-      colors: z.array(z.string()).optional(), // hex-палитра
+      colors: z.array(z.union([z.string(), z.object({ image: z.string() })])).optional(), // hex-палитра или фото ткани
+      lookbook: z.array(z.string()).optional(), // образы гостей: карусель фото
     }).optional(),
-    wishes: z.array(z.string()).optional(),
+    wishes: z.array(z.union([z.string(), z.object({ title: z.string(), text: z.string() })])).optional(),
     transfer: z.string().optional(),
     telegramChat: z.object({
       url: z.string(),
@@ -34,6 +36,8 @@ const invitations = defineCollection({
     }).optional(),
     rsvp: z.object({
       deadline: z.string(),
+      drinks: z.array(z.string()).optional(), // чекбоксы «что будете пить»
+      plusOne: z.boolean().optional(), // чекбокс «приду с парой»
     }).optional(),
     countdown: z.string().optional(), // ISO-дата, напр. 2026-06-20T18:00:00
     gallery: z.array(z.string()).optional(),

@@ -1,0 +1,344 @@
+---
+// тема watercolor — «альбом акварелиста»: мягкие пятна, картины в рамах, мазки кисти вместо строк
+import type { Props } from '../../components/ClassicBody.astro';
+import Countdown from '../../components/Countdown.astro';
+import AddToCalendar from '../../components/AddToCalendar.astro';
+import RsvpFields from '../../components/RsvpFields.astro';
+
+const { inv, slug, cal } = Astro.props as Props;
+
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+// органические мазки: каждому пункту программы своё «пятно»
+const blobs = [
+  'M45 6 C 70 2, 92 14, 90 34 C 88 54, 66 64, 44 62 C 22 60, 4 48, 6 30 C 8 12, 24 9, 45 6 Z',
+  'M50 4 C 74 6, 90 20, 86 40 C 82 58, 60 66, 40 62 C 20 58, 6 44, 10 26 C 14 10, 30 2, 50 4 Z',
+  'M42 8 C 66 0, 88 12, 90 30 C 92 50, 72 64, 50 64 C 28 64, 8 52, 6 34 C 4 16, 20 14, 42 8 Z',
+];
+const captions = ['Этюд первый', 'Набросок', 'Пленэр', 'Свет и вода', 'Свежая краска', 'Финальный лист'];
+---
+
+<main id="content" class="watercolor">
+  {inv.countdown && (
+    <div class="wc-countdown">
+      <Countdown target={inv.countdown}>
+        {cal && <AddToCalendar slug={slug} google={cal.google} />}
+      </Countdown>
+    </div>
+  )}
+
+  {inv.welcome && (
+    <section class="wc-sec wc-letter">
+      <div class="wc-wrap">
+        <p class="wc-kicker" data-guest="{g}, ждём вас">Дорогие гости</p>
+        <p class="wc-letter-text fade-up">{inv.welcome}</p>
+        <p class="wc-sign fade-up">{inv.groom} и {inv.bride}</p>
+      </div>
+    </section>
+  )}
+
+  {inv.gallery && inv.gallery.length > 0 && (
+    <section class="wc-sec wc-gallery">
+      <div class="wc-wrap wc-wrap--wide">
+        <p class="wc-kicker">Наша история</p>
+        <h2 class="wc-h2">Альбом</h2>
+        <ul class="wc-frames" role="list">
+          {inv.gallery.map((src, i) => (
+            <li class="wc-frame fade-up" style={`--i:${i % 3};--r:${i % 2 ? 1.4 : -1.8}deg`}>
+              <figure>
+                <img src={src} alt={`${inv.groom} и ${inv.bride}, фото ${i + 1}`} loading="lazy" decoding="async" />
+                <figcaption>{captions[i % captions.length]}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {inv.venue && (
+    <section class="wc-sec wc-venue">
+      <div class="wc-wrap">
+        <p class="wc-kicker">Место встречи</p>
+        <h2 class="wc-h2">{inv.venue.name}</h2>
+        <p class="wc-venue-address fade-up">{inv.venue.address}</p>
+        <a class="wc-btn fade-up" href={routeUrl} target="_blank" rel="noopener">Проложить маршрут</a>
+        {inv.venue.mapIframe && (
+          <div class="wc-map fade-up">
+            <iframe src={inv.venue.mapIframe} loading="lazy" title={`Карта: ${inv.venue.name}`}></iframe>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.timeline && inv.timeline.length > 0 && (
+    <section class="wc-sec wc-program">
+      <div class="wc-wrap">
+        <p class="wc-kicker">В этот день</p>
+        <h2 class="wc-h2">Программа</h2>
+        <ol class="wc-strokes" role="list">
+          {inv.timeline.map((item, i) => (
+            <li class="fade-up" style={`--i:${i}`}>
+              <span class="wc-stroke" style={`--blob:${i % blobs.length}`}>
+                <svg viewBox="0 0 96 68" preserveAspectRatio="none" aria-hidden="true"><path d={blobs[i % blobs.length]} /></svg>
+                <time>{item.time}</time>
+              </span>
+              <h3>{item.title}</h3>
+              {item.text && <p>{item.text}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.dressCode && (
+    <section class="wc-sec wc-dress">
+      <div class="wc-wrap">
+        <p class="wc-kicker">Форма одежды</p>
+        <h2 class="wc-h2">Дресс-код</h2>
+        <p class="wc-dress-text fade-up">{inv.dressCode.text}</p>
+        {inv.dressCode.colors && inv.dressCode.colors.length > 0 && (
+          <ul class="wc-palette" role="list" aria-label="Палитра дня">
+            {inv.dressCode.colors.map((c, i) => (
+              <li class="fade-up" style={`--i:${i}`}>
+                <svg viewBox="0 0 96 68" preserveAspectRatio="none" aria-hidden="true"><path d={blobs[i % blobs.length]} fill={c} /></svg>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.wishes && inv.wishes.length > 0 && (
+    <section class="wc-sec wc-wishes">
+      <div class="wc-wrap wc-wrap--wide">
+        <p class="wc-kicker">Маленькие просьбы</p>
+        <h2 class="wc-h2">Пожелания</h2>
+        <ol class="wc-wish-list" role="list">
+          {inv.wishes.map((w, i) => (
+            <li class="fade-up" style={`--i:${i}`}>
+              <span class="wc-wish-n" aria-hidden="true">{i + 1}</span>
+              <p>{w}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.transfer && (
+    <section class="wc-sec wc-transfer">
+      <div class="wc-wrap">
+        <p class="wc-kicker">Логистика</p>
+        <h2 class="wc-h2 wc-h2--small">Трансфер</h2>
+        <p class="wc-transfer-text fade-up">{inv.transfer}</p>
+      </div>
+    </section>
+  )}
+
+  {(inv.telegramChat || inv.organizer) && (
+    <section class="wc-sec wc-contacts">
+      <div class="wc-wrap wc-wrap--wide">
+        <p class="wc-kicker">На связи</p>
+        <h2 class="wc-h2">Контакты</h2>
+        <div class="wc-contact-grid">
+          {inv.telegramChat && (
+            <article class="wc-note fade-up">
+              <h3>Чат праздника</h3>
+              <p>{inv.telegramChat.text}</p>
+              <a class="wc-btn" href={inv.telegramChat.url} target="_blank" rel="noopener">Вступить в чат</a>
+            </article>
+          )}
+          {inv.organizer && (
+            <article class="wc-note fade-up" style="--i:1">
+              <h3>Организатор</h3>
+              <p>{inv.organizer.name}</p>
+              <a class="wc-phone" href={`tel:${inv.organizer.phone.replace(/[^\d+]/g, '')}`}>{inv.organizer.phone}</a>
+            </article>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {inv.rsvp && (
+    <section class="wc-sec wc-rsvp" id="rsvp">
+      <div class="wc-wrap">
+        <p class="wc-kicker">Ответ на приглашение</p>
+        <h2 class="wc-h2">Напишите нам</h2>
+        <p class="wc-rsvp-deadline fade-up">Просим ответить до <span>{inv.rsvp.deadline}</span></p>
+        <div class="wc-rsvp-card fade-up">
+          <RsvpFields />
+        </div>
+      </div>
+    </section>
+  )}
+</main>
+
+<script>
+  // пятна секций распускаются по мере доскролла до них
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => e.isIntersecting && (e.target.classList.add('wc-in'), io.unobserve(e.target))),
+    { threshold: 0.15 }
+  );
+  document.querySelectorAll('.wc-sec').forEach((el) => io.observe(el));
+</script>
+
+<style>
+  .watercolor { overflow-x: clip; }
+  .wc-sec { position: relative; padding: clamp(64px, 11vw, 110px) 0; text-align: center; isolation: isolate; }
+  /* лёгкое пятно-фон за каждой второй секцией; распускается, когда секция доскроллена */
+  .wc-sec::before {
+    content: '';
+    position: absolute;
+    inset: 8% -20%;
+    z-index: -1;
+    background: radial-gradient(45% 55% at 50% 50%, color-mix(in srgb, var(--accent-2) 14%, transparent), transparent 75%);
+    filter: blur(10px);
+    opacity: 0;
+    scale: 0.55;
+    transition: opacity 1.6s var(--ease-out), scale 1.6s var(--ease-out);
+  }
+  .wc-sec:nth-child(odd)::before { opacity: 0; }
+  .wc-sec.wc-in:nth-child(even)::before { opacity: 1; scale: 1; }
+  .wc-wrap { width: 100%; max-width: 640px; margin: 0 auto; padding: 0 22px; }
+  .wc-wrap--wide { max-width: 1000px; }
+
+  .wc-kicker { font-size: 0.64rem; letter-spacing: 0.34em; margin-right: -0.34em; text-transform: uppercase; color: var(--accent); }
+  .wc-h2 { font-weight: 500; font-size: clamp(2rem, 7vw, 3rem); margin: 8px 0 32px; }
+  .wc-h2--small { font-size: 1.7rem; margin-bottom: 12px; }
+
+  .wc-letter-text { font-family: var(--font-display); font-size: clamp(1.4rem, 5vw, 1.8rem); line-height: 1.5; color: var(--text); max-width: 30ch; margin: 18px auto 0; }
+  .wc-sign { font-family: var(--font-accent); font-size: 1.7rem; color: var(--accent); margin-top: 22px; }
+
+  /* картины в рамах, чуть криво на стене */
+  .wc-frames { list-style: none; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 26px 20px; }
+  .wc-frame { width: calc(50% - 10px); max-width: 270px; }
+  .wc-frame figure {
+    background: #fffdfa;
+    padding: 12px 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    border-radius: 6px;
+    rotate: var(--r);
+    box-shadow: 0 22px 40px -24px color-mix(in srgb, var(--accent) 45%, transparent);
+    transition: rotate 0.5s var(--ease), transform 0.5s var(--ease);
+  }
+  .wc-frame:hover figure { rotate: 0deg; transform: translateY(-4px); }
+  .wc-frame img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 3px;
+    /* механика темы: краска растекается из пятна в полный кадр, когда картина появляется */
+    clip-path: inset(16% 18% 20% 12% round 46% 54% 42% 58%);
+    filter: saturate(0.55);
+    transition: clip-path 1.6s var(--ease), filter 1.6s var(--ease);
+  }
+  .wc-frame.visible img { clip-path: inset(0 0 0 0 round 3px); filter: none; }
+  .wc-frame figcaption { margin-top: 10px; font-family: var(--font-accent); font-size: 1.05rem; color: var(--text-2); }
+
+  .wc-venue-address { color: var(--text-2); margin: -14px 0 22px; }
+  .wc-map { margin-top: 26px; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--line); box-shadow: 0 18px 36px -24px color-mix(in srgb, var(--accent) 40%, transparent); }
+  .wc-map iframe { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; filter: saturate(0.75) sepia(0.12); }
+
+  .wc-btn {
+    display: inline-block;
+    padding: 13px 28px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    text-decoration: none;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    box-shadow: 0 14px 28px -16px color-mix(in srgb, var(--accent) 70%, transparent);
+    transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
+  }
+  .wc-btn:hover { transform: translateY(-2px); }
+
+  /* программа: мазки идут зигзагом, как моkup в альбоме */
+  .wc-strokes { list-style: none; padding: 0; display: grid; gap: 34px; max-width: 460px; margin: 0 auto; }
+  .wc-strokes li { display: grid; justify-items: center; gap: 8px; }
+  @media (min-width: 560px) {
+    .wc-strokes li:nth-child(odd) { justify-items: start; text-align: left; padding-left: 12px; }
+    .wc-strokes li:nth-child(even) { justify-items: end; text-align: right; padding-right: 12px; }
+  }
+  .wc-stroke { position: relative; display: grid; place-items: center; width: 132px; height: 94px; }
+  .wc-stroke svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: color-mix(in srgb, var(--accent-2) 30%, transparent); }
+  .wc-stroke time { position: relative; font-family: var(--font-display); font-weight: 500; font-size: 1.5rem; color: var(--text); }
+  .wc-strokes h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.05rem; }
+  .wc-strokes p { color: var(--text-2); font-size: 0.94rem; max-width: 30ch; }
+
+  .wc-dress-text { max-width: 40ch; margin: 0 auto 30px; color: var(--text-2); line-height: 1.75; }
+  .wc-palette { list-style: none; padding: 0; display: flex; justify-content: center; gap: 4px; }
+  .wc-palette li {
+    width: 58px;
+    margin: 0 -6px;
+    /* мазки «прописываются» по очереди, когда до них доскроллили */
+    scale: 0;
+    rotate: -8deg;
+    transition: scale 0.8s var(--ease) calc(var(--i, 0) * 130ms), rotate 0.8s var(--ease) calc(var(--i, 0) * 130ms), transform 0.4s var(--ease);
+  }
+  .wc-palette li.visible { scale: 1; rotate: 0deg; }
+  .wc-palette li:hover { transform: translateY(-6px) scale(1.06); }
+  .wc-palette svg { width: 100%; height: auto; display: block; }
+
+  /* пожелания: строки с рукописными номерами */
+  .wc-wish-list { list-style: none; padding: 0; display: grid; gap: 26px; max-width: 560px; margin: 0 auto; text-align: left; }
+  .wc-wish-list li { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; }
+  .wc-wish-n { font-family: var(--font-accent); font-size: 2rem; line-height: 1; color: var(--accent); }
+  .wc-wish-list p { color: var(--text-2); line-height: 1.7; padding-top: 4px; }
+
+  .wc-transfer-text { color: var(--text-2); max-width: 38ch; margin: 0 auto; line-height: 1.75; }
+
+  .wc-contact-grid { display: grid; gap: 18px; }
+  .wc-note {
+    background: color-mix(in srgb, #ffffff 55%, transparent);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 30px 26px;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    box-shadow: 0 16px 32px -24px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .wc-note h3 { font-size: 1.2rem; font-weight: 500; }
+  .wc-note p { color: var(--text-2); font-size: 0.95rem; line-height: 1.65; }
+  .wc-phone { font-family: var(--font-accent); font-size: 1.5rem; color: var(--accent); text-decoration: none; }
+
+  .wc-rsvp-deadline { color: var(--text-2); font-size: 0.94rem; margin: -14px 0 24px; }
+  .wc-rsvp-deadline span { font-family: var(--font-display); font-size: 1.05rem; color: var(--accent); white-space: nowrap; }
+  .wc-rsvp-card {
+    background: color-mix(in srgb, #ffffff 60%, transparent);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: clamp(24px, 5vw, 36px);
+    text-align: left;
+    box-shadow: 0 20px 40px -26px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .wc-rsvp :global(.plate) { padding: 0; background: none; border: 0; }
+  .wc-rsvp :global(.plate > .plate-inner) { padding: 0; background: none; box-shadow: none; }
+
+  /* countdown: цифра на мазке, а не в сетке */
+  .wc-countdown :global(.countdown-grid) { gap: 8px; }
+  .wc-countdown :global(.countdown-grid div + div)::before { display: none; }
+  .wc-countdown :global(.countdown-grid span) {
+    background: radial-gradient(58% 62% at 50% 48%, color-mix(in srgb, var(--accent-2) 38%, transparent), transparent 75%);
+    padding: 10px 6px;
+  }
+  .wc-countdown :global(.cal-link) { border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wc-sec::before { opacity: 0; scale: 1; transition: none; }
+    .wc-sec:nth-child(even)::before, .wc-sec.wc-in:nth-child(even)::before { opacity: 1; transition: none; }
+    .wc-frame img { clip-path: none; filter: none; transition: none; }
+    .wc-palette li { scale: 1; rotate: 0deg; transition: none; }
+  }
+
+  @media (min-width: 720px) {
+    .wc-frame { width: calc(33.333% - 14px); }
+    .wc-contact-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>

@@ -1,9 +1,9 @@
 theme: amalfi
 groom: Маттео
 bride: София
-date: 20 июня 2027
+date: 20 декабря 2026
 city: Амальфи, Италия
-countdown: "2027-06-20T18:00:00"
+countdown: "2026-12-20T18:00:00"
 heroPhoto: /photos/amalfi.jpg
 gallery:
   - /photos/story/story-8.jpg
@@ -37,7 +37,7 @@ telegramChat:
   url: "https://t.me/example"
   text: Новости, подсказки по дороге и отелям, а после свадьбы — фото и видео от гостей.
 rsvp:
-  deadline: 20.05.2027
+  deadline: 20.11.2026
 organizer:
   name: Джулия
   phone: "+39 333 123 4567"

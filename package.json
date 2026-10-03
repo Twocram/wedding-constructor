@@ -14,7 +14,7 @@
     "@fontsource/oswald": "^5.3.0",
     "@fontsource/playfair-display": "^5.3.0",
     "@fontsource/prata": "^5.3.0",
-    "astro": "^5.13.0",
+    "astro": "^7.3.5",
     "gsap": "^3.15.0",
     "satori": "^0.33.5"
   },

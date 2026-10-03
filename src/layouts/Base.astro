@@ -2,7 +2,7 @@
 interface Props {
   title: string;
   description?: string;
-  theme?: 'cover' | 'editorial' | 'amalfi' | 'deco' | 'ticket' | 'cinema' | 'stories';
+  theme?: 'cover' | 'botanical' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories';
   image?: string;
   noindex?: boolean;
 }
@@ -21,6 +21,14 @@ const fontSets: Record<string, string> = {
     'https://fonts.googleapis.com/css2?family=Forum&family=Poiret+One&family=Jost:wght@300;400;500&display=swap',
   ticket:
     'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,500&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Jost:wght@300;400;500&display=swap',
+  botanical:
+    'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Tenor+Sans&family=Jost:wght@300;400;500&display=swap',
+  watercolor:
+    'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Caveat:wght@700&family=Jost:wght@300;400;500&display=swap',
+  luxe:
+    'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Tenor+Sans&family=Jost:wght@300;400;500&display=swap',
+  vogue:
+    'https://fonts.googleapis.com/css2?family=Prata&family=Oswald:wght@300;400&family=Jost:wght@300;400;500&display=swap',
   stories:
     'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Caveat:wght@700&family=Playfair+Display:ital@1&display=swap',
   cinema:
@@ -34,10 +42,14 @@ const accents: Record<string, [string, string]> = {
   deco: ['%23141311', '%23c9a227'],
   ticket: ['%23f3efe6', '%23c2452d'],
   cinema: ['%230b0a09', '%23e0b36a'],
+  botanical: ['%23f3f1e8', '%236e7f57'],
+  watercolor: ['%23f8f2f0', '%23b07d7d'],
+  luxe: ['%23faf7f1', '%23a9853e'],
+  vogue: ['%23111110', '%23e6e1d4'],
   stories: ['%23b24f78', '%23ffffff'],
 };
 const [favBg, favFg] = accents[theme];
-const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', amalfi: '#0c1520', deco: '#141311', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000' };
+const themeColors: Record<string, string> = { cover: '#f6f2ea', botanical: '#f3f1e8', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000' };
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -214,6 +226,96 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     color-scheme: dark;
   }
 
+  body[data-theme='botanical'] {
+    --bg: #f3f1e8;
+    --surface: #e8e6d8;
+    --surface-2: #dfdcc9;
+    --text: #2f3327;
+    --text-2: #5c614f;
+    --muted: #757a64;
+    --accent: #6e7f57;
+    --accent-2: #a3b18a;
+    --accent-ink: #f7f6ef;
+    --line: rgba(47, 51, 39, 0.12);
+    --line-strong: rgba(47, 51, 39, 0.3);
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-label: 'Tenor Sans', var(--font-body);
+    --font-accent: 'Cormorant Garamond', var(--font-display);
+    --r-lg: 32px;
+    --r-md: 18px;
+    --r-swatch: 6px;
+  }
+  body[data-theme='botanical'] .section h2 { font-weight: 500; }
+
+  body[data-theme='watercolor'] {
+    --bg: #f8f2f0;
+    --surface: #f1e5e2;
+    --surface-2: #e9d8d4;
+    --text: #3c2e2e;
+    --text-2: #6d5855;
+    --muted: #857069;
+    --accent: #b07d7d;
+    --accent-2: #d3a9a2;
+    --accent-ink: #fdf8f6;
+    --line: rgba(60, 46, 46, 0.12);
+    --line-strong: rgba(60, 46, 46, 0.28);
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-accent: 'Caveat', cursive;
+    --r-lg: 36px;
+    --r-md: 20px;
+  }
+  body[data-theme='watercolor'] .section h2 { font-weight: 500; }
+
+  body[data-theme='luxe'] {
+    --bg: #faf7f1;
+    --surface: #f1ebe0;
+    --surface-2: #e8e0d1;
+    --text: #2c2619;
+    --text-2: #615741;
+    --muted: #7d7358;
+    --accent: #a9853e;
+    --accent-2: #c9ab6e;
+    --accent-ink: #fbf8f1;
+    --line: rgba(44, 38, 25, 0.12);
+    --line-strong: rgba(169, 133, 62, 0.45);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-label: 'Tenor Sans', var(--font-body);
+    --r-lg: 22px;
+    --r-md: 12px;
+    --r-swatch: 4px;
+  }
+  body[data-theme='luxe'] .btn {
+    background: linear-gradient(180deg, var(--accent-2), var(--accent));
+  }
+
+  body[data-theme='vogue'] {
+    --bg: #111110;
+    --surface: #1a1917;
+    --surface-2: #232220;
+    --text: #f1eee6;
+    --text-2: #b6b1a5;
+    --muted: #868175;
+    --accent: #e6e1d4;
+    --accent-2: #8f8a7d;
+    --accent-ink: #141312;
+    --line: rgba(241, 238, 230, 0.14);
+    --line-strong: rgba(241, 238, 230, 0.34);
+    --shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.85), 0 10px 24px -14px rgba(0, 0, 0, 0.5);
+    --font-display: 'Prata', Georgia, serif;
+    --font-label: 'Oswald', var(--font-body);
+    --r-lg: 0;
+    --r-md: 0;
+    --r-btn: 0;
+    --r-swatch: 0;
+    --img-outline: rgba(255, 255, 255, 0.12);
+    color-scheme: dark;
+  }
+  body[data-theme='vogue'] .section h2 {
+    font-size: clamp(1.4rem, 4.6vw, 2rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   body[data-theme='deco'] {
     --bg: #141311;
     --surface: #1c1a16;
@@ -366,6 +468,10 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     z-index: var(--z-grain);
     pointer-events: none;
     opacity: var(--grain-opacity);
+    /* изолируем слой: fixed-плёнка иначе перерисовывается при скролле вместе со страницей */
+    contain: strict;
+    will-change: transform;
+    transform: translateZ(0);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 160px 160px;
   }
@@ -379,7 +485,19 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   }
   .wrap--narrow { max-width: 600px; }
 
+  /* пропуск рендера секций за экраном — главный фикс лагов на длинных лендингах; auto = реальный размер запоминается после первого рендера */
+  main > section, main > div {
+    content-visibility: auto;
+    /* только высота: contain-intrinsic-size задал бы и ширину 480px — сетки внутри расползались за край */
+    contain-intrinsic-height: auto 480px;
+  }
+
   main { display: grid; }
+  /* grid-элементы не сжимаются ниже min-content — без этого широкие сетки (таймер в luxe) распирали страницу за вьюпорт */
+  main *,
+  main > * {
+    min-width: 0;
+  }
 
   /* ── секции ── */
   .section {
@@ -397,9 +515,11 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     height: 112%;
     object-fit: cover;
     z-index: -2;
-    filter: blur(28px) saturate(0.9);
+    /* блюр >20px на полноэкранном слое = repaint каждый кадр параллакса на слабых GPU */
+    filter: blur(20px) saturate(0.9);
     opacity: 0.35;
     transform: translateZ(0);
+    will-change: transform;
   }
   .section--photo::before {
     content: '';
@@ -551,7 +671,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   .btn .btn-icon svg { width: 16px; height: 16px; }
   .btn:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -14px color-mix(in srgb, var(--accent) 80%, black 10%); }
   .btn:hover .btn-icon { transform: translate(2px, -1px) scale(1.06); background: color-mix(in srgb, var(--btn-fg) 26%, transparent); }
-  .btn:active { transform: scale(0.98); }
+  .btn:active { transform: scale(0.96); }
   .btn--ghost {
     --btn-bg: transparent;
     --btn-fg: var(--text);

@@ -2,6 +2,10 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import HeroCover from '../components/HeroCover.astro';
+import HeroBotanical from '../components/HeroBotanical.astro';
+import HeroWatercolor from '../components/HeroWatercolor.astro';
+import HeroLuxe from '../components/HeroLuxe.astro';
+import HeroVogue from '../components/HeroVogue.astro';
 import HeroEditorial from '../components/HeroEditorial.astro';
 import HeroAmalfi from '../components/HeroAmalfi.astro';
 import HeroDeco from '../components/HeroDeco.astro';
@@ -9,6 +13,10 @@ import HeroTicket from '../components/HeroTicket.astro';
 import Envelope from '../components/Envelope.astro';
 import ClassicBody from '../components/ClassicBody.astro';
 import EditorialBody from '../themes/editorial/Body.astro';
+import BotanicalBody from '../themes/botanical/Body.astro';
+import WatercolorBody from '../themes/watercolor/Body.astro';
+import LuxeBody from '../themes/luxe/Body.astro';
+import VogueBody from '../themes/vogue/Body.astro';
 import AmalfiBody from '../themes/amalfi/Body.astro';
 import DecoBody from '../themes/deco/Body.astro';
 import TicketBody from '../themes/ticket/Body.astro';
@@ -29,11 +37,11 @@ const { inv } = Astro.props;
 const title = `${inv.groom} & ${inv.bride}`;
 const slug = Astro.params.slug!;
 const cal = calendarEvent(inv, new URL(`/${slug}`, Astro.site).href);
-const heroes = { cover: HeroCover, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket };
+const heroes = { cover: HeroCover, botanical: HeroBotanical, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket };
 // cinema и stories — отдельные одноэкранные форматы, у них нет hero и ленты секций
 const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme];
-// у каждой листающейся темы своё тело страницы; cover — базовая классика
-const bodies = { cover: ClassicBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody };
+// у каждой темы своё тело страницы; cover — базовая классика на общих секциях
+const bodies = { cover: ClassicBody, botanical: BotanicalBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody };
 const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null;
 ---
 

@@ -1,11 +1,10 @@
-groom: Сергей
-bride: Олеся
-date: 12 декабря 2026
-city: Санкт-Петербург
-countdown: "2026-12-12T15:00:00"
-envelope: true
-envelopePhoto: /photos/forest.jpg
-heroPhoto: /photos/hero.jpg
+theme: botanical
+groom: Максим
+bride: Алина
+date: 6 декабря 2026
+city: Москва
+countdown: "2026-12-06T15:00:00"
+heroPhoto: /photos/forest.jpg
 gallery:
   - /photos/hero.jpg
   - /photos/story/story-1.jpg
@@ -28,7 +27,7 @@ timeline:
     text: Еда, музыка и танцы.
 dressCode:
   text: Для мужчин уместным будет классический черный костюм со светлой рубашкой. Девушек просим выбрать вечерние и коктейльные платья предложенных оттенков и избегать белого цвета.
-  colors: ["#8a9a5b", "#c4a484", "#d4af7a", "#e8dcc8", "#3d3d3d"]
+  colors: ["#6e7f57", "#a3b18a", "#e8e6d8", "#c4a484", "#3d4034"]
 wishes:
   - Мы очень ценим Вашу заботу, внимание и будем рады любому подарку! И не важно, в какой конверт Вы его упакуете :)
   - Предлагаем не мучить цветы долгой дорогой и заменить их бутылочкой вина.

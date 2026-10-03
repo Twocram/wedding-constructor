@@ -85,6 +85,13 @@ const { photos } = Astro.props;
     opacity: 1;
     transform: rotate(var(--rot));
   }
+  @media (hover: hover) {
+    /* карточка «выпрямляется» под курсором, как фото в руке; z-index выше соседей стопки */
+    .card.landed:hover {
+      transform: rotate(0deg) scale(1.03);
+      z-index: 20;
+    }
+  }
 
   .card img {
     display: block;

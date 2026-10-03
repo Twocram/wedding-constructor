@@ -41,7 +41,7 @@ const departs = target.slice(11, 16);
               <span class="half top flap"><span>–</span></span>
               <span class="half bottom flap"><span>–</span></span>
             </div>
-            <small>{u.label}</small>
+            <small data-word={u.key}>{u.label}</small>
           </div>
         ))}
       </div>
@@ -64,7 +64,15 @@ const departs = target.slice(11, 16);
 </section>
 
 <script>
+  import { pluralRu } from '../../lib/plural';
+
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const forms: Record<string, [string, string, string]> = {
+    days: ['день', 'дня', 'дней'],
+    hours: ['час', 'часа', 'часов'],
+    minutes: ['минута', 'минуты', 'минут'],
+    seconds: ['секунда', 'секунды', 'секунд'],
+  };
   document.querySelectorAll<HTMLElement>('.boarding').forEach((root) => {
     const target = new Date(root.dataset.target ?? '').getTime();
     if (Number.isNaN(target)) return;
@@ -99,10 +107,17 @@ const departs = target.slice(11, 16);
     });
     const tick = () => {
       const diff = Math.max(0, target - Date.now());
-      set('days', String(Math.floor(diff / 864e5)).padStart(2, '0'));
-      set('hours', String(Math.floor(diff / 36e5) % 24).padStart(2, '0'));
-      set('minutes', String(Math.floor(diff / 6e4) % 60).padStart(2, '0'));
-      set('seconds', String(Math.floor(diff / 1e3) % 60).padStart(2, '0'));
+      const values: Record<string, number> = {
+        days: Math.floor(diff / 864e5),
+        hours: Math.floor(diff / 36e5) % 24,
+        minutes: Math.floor(diff / 6e4) % 60,
+        seconds: Math.floor(diff / 1e3) % 60,
+      };
+      for (const [unit, n] of Object.entries(values)) {
+        set(unit, String(n).padStart(2, '0'));
+        const label = root.querySelector(`[data-word="${unit}"]`);
+        if (label) label.textContent = pluralRu(n, forms[unit]);
+      }
     };
     tick();
     setInterval(tick, 1000);

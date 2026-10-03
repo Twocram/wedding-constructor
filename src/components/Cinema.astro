@@ -87,10 +87,10 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
               {time && <p class="subtitle rv" style="--d:3">начало в {time}</p>}
               {inv.countdown && (
                 <div class="cd rv" style="--d:4" data-target={inv.countdown}>
-                  <div><b data-u="d">–</b><small>дней</small></div>
-                  <div><b data-u="h">–</b><small>часов</small></div>
-                  <div><b data-u="m">–</b><small>минут</small></div>
-                  <div><b data-u="s">–</b><small>секунд</small></div>
+                  <div><b data-u="d">–</b><small data-w="d">дней</small></div>
+                  <div><b data-u="h">–</b><small data-w="h">часов</small></div>
+                  <div><b data-u="m">–</b><small data-w="m">минут</small></div>
+                  <div><b data-u="s">–</b><small data-w="s">секунд</small></div>
                 </div>
               )}
               {google && (
@@ -212,6 +212,8 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
 </div>
 
 <script>
+  import { pluralRu } from '../lib/plural';
+
   const root = document.querySelector<HTMLElement>('.cine');
   if (root) {
     const scenes = [...root.querySelectorAll<HTMLElement>('.scene')];
@@ -288,13 +290,25 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
     const target = cd ? new Date(cd.dataset.target ?? '').getTime() : NaN;
     if (cd && !Number.isNaN(target)) {
       const u = (k: string) => cd.querySelector(`[data-u="${k}"]`)!;
+      const w = (k: string) => cd.querySelector(`[data-w="${k}"]`);
+      const forms: Record<string, [string, string, string]> = {
+        d: ['день', 'дня', 'дней'],
+        h: ['час', 'часа', 'часов'],
+        m: ['минута', 'минуты', 'минут'],
+        s: ['секунда', 'секунды', 'секунд'],
+      };
       const cells = { d: u('d'), h: u('h'), m: u('m'), s: u('s') };
+      const set = (k: string, n: number) => {
+        const label = w(k);
+        if (label) label.textContent = pluralRu(n, forms[k]);
+        return n;
+      };
       const update = () => {
         const diff = Math.max(0, target - Date.now());
-        cells.d.textContent = String(Math.floor(diff / 864e5));
-        cells.h.textContent = pad(Math.floor(diff / 36e5) % 24);
-        cells.m.textContent = pad(Math.floor(diff / 6e4) % 60);
-        cells.s.textContent = pad(Math.floor(diff / 1e3) % 60);
+        cells.d.textContent = String(set('d', Math.floor(diff / 864e5)));
+        cells.h.textContent = pad(set('h', Math.floor(diff / 36e5) % 24));
+        cells.m.textContent = pad(set('m', Math.floor(diff / 6e4) % 60));
+        cells.s.textContent = pad(set('s', Math.floor(diff / 1e3) % 60));
       };
       update();
       setInterval(update, 1000);
@@ -393,8 +407,9 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
     position: absolute;
     inset: 0;
     background:
+      radial-gradient(90% 55% at 50% 82%, rgba(11, 10, 9, 0.55), transparent 100%),
       linear-gradient(to bottom, rgba(11, 10, 9, 0.55), transparent 30%, transparent 55%, rgba(11, 10, 9, 0.85)),
-      rgba(11, 10, 9, 0.6);
+      rgba(11, 10, 9, 0.66);
     transition: background-color 1s;
   }
   .scene--title .scene-photo::after {
@@ -457,6 +472,7 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
     letter-spacing: 0.32em;
     text-transform: uppercase;
     color: var(--accent);
+    text-shadow: 0 1px 14px rgba(0, 0, 0, 0.65);
   }
   .names {
     font-family: var(--font-display);

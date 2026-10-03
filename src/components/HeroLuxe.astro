@@ -1,0 +1,107 @@
+---
+import ScrollHint from './ScrollHint.astro';
+interface Props {
+  groom: string;
+  bride: string;
+  date: string;
+  city?: string;
+  heroPhoto?: string;
+}
+const { groom, bride, date, city, heroPhoto } = Astro.props;
+---
+
+<header class="hero-lx">
+  <div class="lx-frame" aria-hidden="true"></div>
+  <div class="lx-frame lx-frame--inner" aria-hidden="true"></div>
+
+  <div class="lx-content">
+    {heroPhoto && (
+      <div class="lx-arch">
+        <img src={heroPhoto} alt="" fetchpriority="high" />
+      </div>
+    )}
+    <p class="lx-label">Приглашение на свадьбу</p>
+    <h1>
+      <span class="lx-name">{groom}</span>
+      <span class="lx-amp">&</span>
+      <span class="lx-name">{bride}</span>
+    </h1>
+    <p class="lx-date">
+      <svg viewBox="0 0 8 8" aria-hidden="true"><rect x="1.6" y="1.6" width="4.8" height="4.8" transform="rotate(45 4 4)" /></svg>
+      {date}{city && ` · ${city}`}
+      <svg viewBox="0 0 8 8" aria-hidden="true"><rect x="1.6" y="1.6" width="4.8" height="4.8" transform="rotate(45 4 4)" /></svg>
+    </p>
+    <ScrollHint />
+  </div>
+</header>
+
+<style>
+  .hero-lx {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: clamp(40px, 7vh, 64px) 24px;
+    text-align: center;
+    /* мрамор: мягкие прожилки мягкими радиальными градиентами поверх --bg */
+    background:
+      radial-gradient(70% 45% at 18% 12%, color-mix(in srgb, var(--text) 5%, transparent), transparent 60%),
+      radial-gradient(60% 40% at 85% 30%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 65%),
+      radial-gradient(80% 55% at 50% 105%, color-mix(in srgb, var(--text) 4%, transparent), transparent 60%),
+      var(--bg);
+  }
+  /* двойная золотая рамка-паспарту */
+  .lx-frame {
+    position: absolute;
+    inset: 16px;
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    pointer-events: none;
+  }
+  .lx-frame--inner { inset: 22px; border-color: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+  .lx-content { position: relative; display: grid; justify-items: center; gap: 18px; }
+  .lx-content > * { animation: lx-rise 1.1s var(--ease-out) both; }
+  .lx-content > :nth-child(1) { animation-delay: 0.1s; }
+  .lx-content > :nth-child(2) { animation-delay: 0.25s; }
+  .lx-content > :nth-child(3) { animation-delay: 0.4s; }
+  .lx-content > :nth-child(4) { animation-delay: 0.55s; }
+  .lx-content > :nth-child(5) { animation-delay: 0.7s; }
+  @keyframes lx-rise {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .lx-arch {
+    width: min(52vw, 210px);
+    aspect-ratio: 3 / 4;
+    padding: 7px;
+    border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+    border-radius: 999px 999px 6px 6px;
+  }
+  .lx-arch img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+  .lx-label {
+    font-family: var(--font-label);
+    font-size: 0.64rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-left: 0.4em;
+  }
+  h1 { display: grid; justify-items: center; gap: 0.08em; font-size: clamp(2.4rem, 10vw, 4.8rem); line-height: 1.05; }
+  .lx-amp { font-style: italic; font-size: 0.48em; color: var(--accent); }
+  .lx-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--font-label);
+    font-size: 0.74rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .lx-date svg { width: 8px; height: 8px; fill: var(--accent); }
+  @media (prefers-reduced-motion: reduce) {
+    .lx-content > * { animation: none; }
+  }
+</style>

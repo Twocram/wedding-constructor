@@ -1,9 +1,9 @@
 theme: stories
 groom: Даниил
 bride: Вероника
-date: 14 августа 2027
+date: 14 декабря 2026
 city: Казань
-countdown: "2027-08-14T16:00:00"
+countdown: "2026-12-14T16:00:00"
 heroPhoto: /photos/story/story-7.jpg
 gallery:
   - /photos/story/story-6.jpg
@@ -39,7 +39,7 @@ telegramChat:
   url: "https://t.me/example"
   text: Там будут все новости, а после свадьбы — фото и видео от гостей.
 rsvp:
-  deadline: 1 июля 2027
+  deadline: 1 ноября 2026
 organizer:
   name: Алина
   phone: "+7 (900) 123-45-67"

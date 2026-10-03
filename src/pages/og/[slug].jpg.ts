@@ -16,7 +16,11 @@ type Look = { bg: string; text: string; muted: string; accent: string; font: str
 // цвета — те же токены, что в Base.astro; у Marcellus нет кириллицы, для deco берём Prata
 const looks: Record<Theme, Look> = {
   cover: { bg: '#f6f2ea', text: '#2a2823', muted: '#6f6a5f', accent: '#78865a', font: 'Playfair Display', italic: true },
+  botanical: { bg: '#f3f1e8', text: '#2f3327', muted: '#757a64', accent: '#6e7f57', font: 'Cormorant Garamond', italic: true },
   editorial: { bg: '#f4efe6', text: '#1f1c18', muted: '#6e675c', accent: '#7a6a57', font: 'Cormorant Garamond', italic: true },
+  watercolor: { bg: '#f8f2f0', text: '#3c2e2e', muted: '#857069', accent: '#b07d7d', font: 'Cormorant Garamond', italic: true },
+  luxe: { bg: '#faf7f1', text: '#2c2619', muted: '#7d7358', accent: '#a9853e', font: 'Playfair Display', italic: true },
+  vogue: { bg: '#111110', text: '#f1eee6', muted: '#868175', accent: '#e6e1d4', font: 'Prata', upper: true },
   amalfi: { bg: '#0c1520', text: '#ece5d8', muted: '#7f8a96', accent: '#d2a552', font: 'Prata' },
   deco: { bg: '#141311', text: '#efe9da', muted: '#878072', accent: '#c9a227', font: 'Prata', upper: true },
   ticket: { bg: '#f3efe6', text: '#25303c', muted: '#77808c', accent: '#c2452d', font: 'Playfair Display', italic: true },

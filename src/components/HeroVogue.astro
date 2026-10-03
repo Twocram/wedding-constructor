@@ -1,0 +1,123 @@
+---
+import ScrollHint from './ScrollHint.astro';
+interface Props {
+  groom: string;
+  bride: string;
+  date: string;
+  city?: string;
+  heroPhoto?: string;
+}
+const { groom, bride, date, city, heroPhoto } = Astro.props;
+---
+
+<header class="hero-vg">
+  {heroPhoto && <img src={heroPhoto} alt="" class="vg-photo" fetchpriority="high" />}
+  <div class="vg-veil" aria-hidden="true"></div>
+
+  <div class="vg-content">
+    <p class="vg-label">Приглашение на свадьбу</p>
+    <h1>
+      <span class="vg-name">{groom}</span>
+      <span class="vg-amp">&</span>
+      <span class="vg-name">{bride}</span>
+    </h1>
+    <p class="vg-date"><i aria-hidden="true"></i>{date}{city && ` · ${city}`}<i aria-hidden="true"></i></p>
+    <ScrollHint />
+  </div>
+</header>
+
+<style>
+  .hero-vg {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    align-items: end;
+    overflow: hidden;
+    isolation: isolate;
+    color: #f1eee6;
+    background: #111110;
+  }
+  .vg-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    /* глянец = ч/б даже из цветного фото */
+    filter: grayscale(1) contrast(1.08) brightness(0.82);
+    animation: vg-zoom 26s var(--ease-out) infinite alternate;
+  }
+  @keyframes vg-zoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+  }
+  .vg-veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(92% 70% at 50% 74%, rgba(17, 17, 16, 0.72), transparent 100%),
+      linear-gradient(to bottom, rgba(17, 17, 16, 0.35), transparent 30%, rgba(17, 17, 16, 0.5) 56%, rgba(17, 17, 16, 0.92));
+  }
+
+  .vg-content {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 20px;
+    width: 100%;
+    padding: 0 24px clamp(40px, 7vh, 72px);
+    text-align: center;
+  }
+  .vg-content > * { animation: vg-rise 1s var(--ease-out) both; }
+  .vg-content > :nth-child(1) { animation-delay: 0.15s; }
+  .vg-content > :nth-child(2) { animation-delay: 0.35s; }
+  .vg-content > :nth-child(3) { animation-delay: 0.55s; }
+  .vg-content > :nth-child(4) { animation-delay: 0.75s; }
+  @keyframes vg-rise {
+    from { opacity: 0; transform: translateY(22px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .vg-label {
+    font-family: var(--font-label);
+    font-weight: 300;
+    font-size: 0.66rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    opacity: 0.9;
+    padding-left: 0.5em; /* компенсация letter-spacing, чтобы строка была по центру */
+    text-shadow: 0 1px 16px rgba(0, 0, 0, 0.7);
+  }
+  h1 {
+    display: grid;
+    justify-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: clamp(2.2rem, 10.5vw, 5.2rem);
+    line-height: 1.08;
+    text-shadow: 0 8px 34px rgba(0, 0, 0, 0.5);
+  }
+  .vg-amp { font-size: 0.45em; letter-spacing: 0; color: var(--accent); }
+  .vg-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    font-family: var(--font-label);
+    font-weight: 300;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 16px rgba(0, 0, 0, 0.7);
+  }
+  .vg-date i { width: 44px; height: 1px; background: currentColor; opacity: 0.5; }
+  .hero-vg :global(.scroll-hint) { text-shadow: 0 1px 16px rgba(0, 0, 0, 0.7); opacity: 0.9; }
+  @media (min-width: 900px) {
+    /* на широком экране в кадр попадает больше светлых областей фото — приглушаем сильнее */
+    .vg-photo { filter: grayscale(1) contrast(1.08) brightness(0.72); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vg-photo, .vg-content > * { animation: none; }
+  }
+</style>

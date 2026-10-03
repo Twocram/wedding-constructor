@@ -93,9 +93,9 @@ const link = 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-
                 <div class="sticker cd pop" style="--d:0;--r:-2deg" data-target={inv.countdown}>
                   <p class="cd-title">До свадьбы</p>
                   <div class="cd-digits">
-                    <div><b data-u="d">–</b><small>дней</small></div>
-                    <div><b data-u="h">–</b><small>часов</small></div>
-                    <div><b data-u="m">–</b><small>минут</small></div>
+                    <div><b data-u="d">–</b><small data-w="d">дней</small></div>
+                    <div><b data-u="h">–</b><small data-w="h">часов</small></div>
+                    <div><b data-u="m">–</b><small data-w="m">минут</small></div>
                   </div>
                   <p class="cd-date">{inv.date}{time && `, ${time}`}</p>
                   {google && (
@@ -254,6 +254,8 @@ const link = 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-
 </div>
 
 <script>
+  import { pluralRu } from '../lib/plural';
+
   const root = document.querySelector<HTMLElement>('.st');
   if (root) {
     const stories = [...root.querySelectorAll<HTMLElement>('.story')];
@@ -383,12 +385,23 @@ const link = 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-
     const target = cd ? new Date(cd.dataset.target ?? '').getTime() : NaN;
     if (cd && !Number.isNaN(target)) {
       const u = (k: string) => cd.querySelector(`[data-u="${k}"]`)!;
+      const w = (k: string) => cd.querySelector(`[data-w="${k}"]`);
+      const forms: Record<string, [string, string, string]> = {
+        d: ['день', 'дня', 'дней'],
+        h: ['час', 'часа', 'часов'],
+        m: ['минута', 'минуты', 'минут'],
+      };
       const pad = (n: number) => String(n).padStart(2, '0');
+      const set = (k: string, n: number) => {
+        const label = w(k);
+        if (label) label.textContent = pluralRu(n, forms[k]);
+        return n;
+      };
       const update = () => {
         const diff = Math.max(0, target - Date.now());
-        u('d').textContent = String(Math.floor(diff / 864e5));
-        u('h').textContent = pad(Math.floor(diff / 36e5) % 24);
-        u('m').textContent = pad(Math.floor(diff / 6e4) % 60);
+        u('d').textContent = String(set('d', Math.floor(diff / 864e5)));
+        u('h').textContent = pad(set('h', Math.floor(diff / 36e5) % 24));
+        u('m').textContent = pad(set('m', Math.floor(diff / 6e4) % 60));
       };
       update();
       setInterval(update, 10000);
@@ -469,6 +482,8 @@ const link = 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-
     background: #000;
     color: #fff;
     isolation: isolate;
+    /* имена/заголовки в cqw — рамка на десктопе уже окна, vw их распирало */
+    container-type: inline-size;
   }
   @media (min-width: 600px) {
     .st-backdrop { display: block; }
@@ -534,7 +549,7 @@ const link = 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 400;
-    font-size: clamp(3rem, 15vw, 4.2rem);
+    font-size: clamp(3rem, 15cqw, 4.2rem);
     line-height: 0.98;
     text-shadow: 0 4px 30px rgb(0 0 0 / 0.35);
   }
@@ -548,7 +563,7 @@ const link = 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-
     color: #fff;
     text-shadow: 0 3px 18px rgb(0 0 0 / 0.35);
   }
-  .hand--xl { font-size: clamp(2.6rem, 12vw, 3.4rem); }
+  .hand--xl { font-size: clamp(2.6rem, 12cqw, 3.4rem); }
 
   /* классический текст сторис: плашка под каждой строкой */
   .hl {

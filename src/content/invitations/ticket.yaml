@@ -1,9 +1,9 @@
 theme: ticket
 groom: Илья
 bride: Полина
-date: 18 апреля 2027
+date: 27 декабря 2026
 city: Лиссабон
-countdown: "2027-04-18T16:00:00"
+countdown: "2026-12-27T16:00:00"
 heroPhoto: /photos/hero.jpg
 gallery:
   - /photos/story/story-6.jpg
@@ -43,7 +43,7 @@ telegramChat:
   url: "https://t.me/example"
   text: Чат рейса — здесь объявления экипажа, фото и видео с праздника.
 rsvp:
-  deadline: 18.03.2027
+  deadline: 18.11.2026
 organizer:
   name: Беатрис
   phone: "+351 912 345 678"

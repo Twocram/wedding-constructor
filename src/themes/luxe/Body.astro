@@ -1,0 +1,412 @@
+---
+// тема luxe — «мрамор и золото»: строгая симметрия, волосяные линейки, овальные портреты, уголки на анкете
+import type { Props } from '../../components/ClassicBody.astro';
+import Countdown from '../../components/Countdown.astro';
+import AddToCalendar from '../../components/AddToCalendar.astro';
+import RsvpFields from '../../components/RsvpFields.astro';
+
+const { inv, slug, cal } = Astro.props as Props;
+
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+const diamond = 'M4 0 8 4 4 8 0 4Z';
+---
+
+<main id="content" class="luxe">
+  {inv.countdown && (
+    <div class="lx-countdown">
+      <Countdown target={inv.countdown}>
+        {cal && <AddToCalendar slug={slug} google={cal.google} />}
+      </Countdown>
+    </div>
+  )}
+
+  {inv.welcome && (
+    <section class="lx-sec">
+      <div class="lx-wrap">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker" data-guest="{g}, ждём вас">Дорогие гости</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <p class="lx-lead fade-up">{inv.welcome}</p>
+        <p class="lx-sign fade-up">{inv.groom} <i>&</i> {inv.bride}</p>
+      </div>
+    </section>
+  )}
+
+  {inv.timeline && inv.timeline.length > 0 && (
+    <section class="lx-sec lx-sec--marble">
+      <div class="lx-wrap">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker">Порядок дня</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <h2 class="lx-h2 fade-up">Программа</h2>
+        <ol class="lx-program" role="list">
+          {inv.timeline.map((item, i) => (
+            <li class="fade-up" style={`--i:${i}`}>
+              <time>{item.time}</time>
+              <svg class="lx-diamond" viewBox="0 0 8 8" aria-hidden="true"><path d={diamond} /></svg>
+              <div class="lx-program-body">
+                <h3>{item.title}</h3>
+                {item.text && <p>{item.text}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.gallery && inv.gallery.length > 0 && (
+    <section class="lx-sec lx-sec--marble">
+      <div class="lx-wrap lx-wrap--wide">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker">Наша история</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <h2 class="lx-h2 fade-up">Портретная галерея</h2>
+        <ul class="lx-portraits" role="list">
+          {inv.gallery.map((src, i) => (
+            <li class="fade-up" style={`--i:${i % 3}`}>
+              <div class="lx-oval">
+                <img src={src} alt={`${inv.groom} и ${inv.bride}, портрет ${i + 1}`} loading="lazy" decoding="async" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {inv.venue && (
+    <section class="lx-sec">
+      <div class="lx-wrap">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker">Место торжества</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <h2 class="lx-h2 fade-up">{inv.venue.name}</h2>
+        <p class="lx-address fade-up">{inv.venue.address}</p>
+        <a class="lx-btn fade-up" href={routeUrl} target="_blank" rel="noopener">Проложить маршрут</a>
+        {inv.venue.mapIframe && (
+          <div class="lx-map fade-up">
+            <iframe src={inv.venue.mapIframe} loading="lazy" title={`Карта: ${inv.venue.name}`}></iframe>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.dressCode && (
+    <section class="lx-sec">
+      <div class="lx-wrap">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker">Форма одежды</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <h2 class="lx-h2 fade-up">Дресс-код</h2>
+        <p class="lx-text fade-up">{inv.dressCode.text}</p>
+        {inv.dressCode.colors && inv.dressCode.colors.length > 0 && (
+          <ul class="lx-swatches" role="list" aria-label="Палитра дня">
+            {inv.dressCode.colors.map((c, i) => (
+              <li class="fade-up" style={`--i:${i}`}><span style={`background:${c}`} /></li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.wishes && inv.wishes.length > 0 && (
+    <section class="lx-sec lx-sec--marble">
+      <div class="lx-wrap">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker">Маленькие просьбы</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <h2 class="lx-h2 fade-up">Пожелания</h2>
+        <ol class="lx-wishes" role="list">
+          {inv.wishes.map((w, i) => (
+            <li class="fade-up" style={`--i:${i}`}>
+              <svg class="lx-diamond" viewBox="0 0 8 8" aria-hidden="true"><path d={diamond} /></svg>
+              <p>{w}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.transfer && (
+    <section class="lx-sec">
+      <div class="lx-wrap">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker">Логистика</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <h2 class="lx-h2 lx-h2--small fade-up">Трансфер</h2>
+        <p class="lx-text fade-up">{inv.transfer}</p>
+      </div>
+    </section>
+  )}
+
+  {(inv.telegramChat || inv.organizer) && (
+    <section class="lx-sec lx-sec--marble">
+      <div class="lx-wrap lx-wrap--wide">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker">На связи</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <h2 class="lx-h2 fade-up">Контакты</h2>
+        <div class="lx-contact-grid">
+          {inv.telegramChat && (
+            <article class="lx-panel fade-up">
+              <h3>Чат праздника</h3>
+              <p>{inv.telegramChat.text}</p>
+              <a class="lx-btn" href={inv.telegramChat.url} target="_blank" rel="noopener">Вступить в чат</a>
+            </article>
+          )}
+          {inv.organizer && (
+            <article class="lx-panel fade-up" style="--i:1">
+              <h3>Организатор</h3>
+              <p>{inv.organizer.name}</p>
+              <a class="lx-phone" href={`tel:${inv.organizer.phone.replace(/[^\d+]/g, '')}`}>{inv.organizer.phone}</a>
+            </article>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {inv.rsvp && (
+    <section class="lx-sec" id="rsvp">
+      <div class="lx-wrap">
+        <header class="lx-head fade-up">
+          <span class="lx-rule" aria-hidden="true"></span>
+          <p class="lx-kicker">Ответ на приглашение</p>
+          <span class="lx-rule" aria-hidden="true"></span>
+        </header>
+        <h2 class="lx-h2 fade-up">Répondez s'il vous plaît</h2>
+        <p class="lx-deadline fade-up">Просим ответить до <span>{inv.rsvp.deadline}</span></p>
+        <div class="lx-rsvp fade-up">
+          <i class="lx-corner lx-corner--tl" aria-hidden="true"></i>
+          <i class="lx-corner lx-corner--tr" aria-hidden="true"></i>
+          <i class="lx-corner lx-corner--bl" aria-hidden="true"></i>
+          <i class="lx-corner lx-corner--br" aria-hidden="true"></i>
+          <RsvpFields />
+        </div>
+      </div>
+    </section>
+  )}
+</main>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.registerPlugin(ScrollTrigger);
+    // глубина колоды: накрытая карточка чуть уменьшается и темнеет под следующей
+    document.querySelectorAll('.luxe > .lx-countdown, .luxe > .lx-sec').forEach((sec, i, all) => {
+      const next = all[i + 1];
+      if (!next) return;
+      gsap.to(sec, {
+        scale: 0.94,
+        filter: 'brightness(0.93)',
+        transformOrigin: 'center top',
+        ease: 'none',
+        scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top', scrub: true },
+      });
+    });
+  }
+</script>
+
+<style>
+  .luxe { overflow-x: clip; }
+  /* механика темы: колода — каждая секция полноэкранная карточка, следующая наезжает поверх */
+  .lx-countdown, .lx-sec {
+    position: sticky;
+    top: 0;
+    min-height: 100svh;
+    display: grid;
+    align-content: center;
+    background: var(--bg);
+    border-top: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    box-shadow: 0 -28px 52px -28px rgba(60, 45, 15, 0.4);
+    /* sticky + content-visibility:auto ломают друг друга — отключаем пропуск рендера */
+    content-visibility: visible;
+    padding-top: clamp(64px, 11vw, 110px);
+    padding-bottom: clamp(64px, 11vw, 110px);
+    text-align: center;
+  }
+  .lx-countdown :global(.countdown) { padding-top: 0; padding-bottom: 0; width: 100%; }
+  .lx-sec { padding: clamp(64px, 11vw, 110px) 0; }
+  /* мраморная полоса: та же фактура, что в hero, приглушённая */
+  .lx-sec--marble {
+    background:
+      radial-gradient(60% 50% at 20% 0%, color-mix(in srgb, var(--text) 4%, transparent), transparent 60%),
+      radial-gradient(55% 45% at 85% 90%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 65%),
+      var(--surface);
+  }
+  .lx-wrap { width: 100%; max-width: 640px; margin: 0 auto; padding: 0 22px; }
+  .lx-wrap--wide { max-width: 1000px; }
+
+  /* шапка секции: волосяная линейка — кикер — линейка */
+  .lx-head { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .lx-rule { width: min(72px, 18vw); height: 1px; background: linear-gradient(90deg, transparent, var(--accent)); }
+  .lx-head .lx-rule:last-child { background: linear-gradient(90deg, var(--accent), transparent); }
+  .lx-kicker {
+    font-family: var(--font-label);
+    font-size: 0.62rem;
+    letter-spacing: 0.4em;
+    margin-right: -0.4em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .lx-h2 { font-size: clamp(1.72rem, 6.2vw, 2.7rem); margin: 14px 0 34px; }
+  .lx-h2--small { font-size: 1.6rem; margin-bottom: 12px; }
+
+  .lx-lead { font-family: var(--font-display); font-size: clamp(1.3rem, 4.6vw, 1.7rem); line-height: 1.55; max-width: 32ch; margin: 24px auto 0; }
+  .lx-sign { margin-top: 24px; font-family: var(--font-label); font-size: 0.8rem; letter-spacing: 0.3em; margin-right: -0.3em; text-transform: uppercase; color: var(--text-2); }
+  .lx-sign i { font-family: var(--font-display); font-style: italic; text-transform: none; letter-spacing: 0; color: var(--accent); font-size: 1.05rem; }
+
+  /* портреты: овалы с золотой окантовкой, шахматный ритм */
+  .lx-portraits { list-style: none; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 30px 26px; }
+  .lx-portraits li { width: calc(50% - 13px); max-width: 240px; }
+  /* первый портрет — широкий овал на всю строку, как центральная работа в галерее */
+  .lx-portraits li:first-child { width: 100%; max-width: 540px; }
+  .lx-portraits li:first-child .lx-oval { aspect-ratio: 16 / 10; }
+  .lx-oval {
+    aspect-ratio: 3 / 4;
+    padding: 7px;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    border-radius: 50%;
+    box-shadow: 0 20px 40px -26px rgba(120, 95, 40, 0.45);
+  }
+  .lx-oval img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+
+  .lx-address { color: var(--text-2); margin: -16px 0 24px; }
+  .lx-map { margin-top: 28px; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); padding: 6px; background: var(--bg); }
+  .lx-map iframe { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; filter: saturate(0.6) contrast(1.04); }
+
+  .lx-btn {
+    display: inline-block;
+    padding: 14px 30px;
+    background: linear-gradient(180deg, var(--accent-2), var(--accent));
+    color: var(--accent-ink);
+    text-decoration: none;
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    box-shadow: 0 16px 32px -18px rgba(120, 95, 40, 0.6);
+    transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
+  }
+  .lx-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 36px -18px rgba(120, 95, 40, 0.7); }
+
+  /* программа: время золотом — ромб — текст */
+  .lx-program { list-style: none; padding: 0; max-width: 460px; margin: 0 auto; }
+  .lx-program li {
+    display: grid;
+    grid-template-columns: auto 12px 1fr;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 0;
+    text-align: left;
+  }
+  .lx-program li + li { border-top: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); }
+  .lx-program time {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    min-width: 3.2em;
+    background: linear-gradient(178deg, var(--accent-2), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .lx-diamond { width: 8px; height: 8px; fill: var(--accent); }
+  .lx-program h3 { font-family: var(--font-body); font-weight: 500; font-size: 1.02rem; }
+  .lx-program p { color: var(--text-2); font-size: 0.93rem; margin-top: 2px; }
+
+  .lx-text { max-width: 40ch; margin: 0 auto; color: var(--text-2); line-height: 1.8; }
+
+  /* дресс-код: квадратные камни в золотых рамках */
+  .lx-swatches { list-style: none; padding: 0; margin-top: 30px; display: flex; justify-content: center; gap: 14px; }
+  .lx-swatches li {
+    padding: 5px;
+    border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+    background: var(--bg);
+  }
+  .lx-swatches span { display: block; width: 34px; height: 34px; }
+
+  /* пожелания: ромб + строка */
+  .lx-wishes { list-style: none; padding: 0; display: grid; gap: 22px; max-width: 520px; margin: 0 auto; text-align: left; }
+  .lx-wishes li { display: grid; grid-template-columns: 10px 1fr; gap: 16px; align-items: start; }
+  .lx-wishes .lx-diamond { margin-top: 9px; }
+  .lx-wishes p { color: var(--text-2); line-height: 1.75; }
+
+  .lx-contact-grid { display: grid; gap: 18px; }
+  .lx-panel {
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    background: var(--bg);
+    padding: 34px 26px;
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+  }
+  .lx-panel h3 { font-size: 1.25rem; }
+  .lx-panel p { color: var(--text-2); font-size: 0.95rem; line-height: 1.65; }
+  .lx-phone { font-family: var(--font-display); font-size: 1.15rem; color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); padding-bottom: 3px; }
+
+  .lx-deadline { color: var(--text-2); font-size: 0.94rem; margin: -16px 0 26px; }
+  .lx-deadline span { font-family: var(--font-display); font-size: 1.05rem; color: var(--accent); white-space: nowrap; }
+  /* анкета: мраморная плашка с золотыми уголками */
+  .lx-rsvp { position: relative; background: var(--surface); padding: clamp(28px, 6vw, 44px); text-align: left; }
+  .lx-corner { position: absolute; width: 26px; height: 26px; border: 0 solid var(--accent); }
+  .lx-corner--tl { top: 8px; left: 8px; border-top-width: 1px; border-left-width: 1px; }
+  .lx-corner--tr { top: 8px; right: 8px; border-top-width: 1px; border-right-width: 1px; }
+  .lx-corner--bl { bottom: 8px; left: 8px; border-bottom-width: 1px; border-left-width: 1px; }
+  .lx-corner--br { bottom: 8px; right: 8px; border-bottom-width: 1px; border-right-width: 1px; }
+  .lx-rsvp :global(.plate) { padding: 0; background: none; border: 0; }
+  .lx-rsvp :global(.plate > .plate-inner) { padding: 0; background: none; box-shadow: none; }
+  .lx-rsvp :global(.btn) { border-radius: 0; background: linear-gradient(180deg, var(--accent-2), var(--accent)); }
+
+  /* countdown: цифры в золотых рамках вместо открытой сетки */
+  .lx-countdown :global(.countdown-grid) { gap: 12px; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .lx-countdown :global(.countdown-grid div) { border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); background: var(--bg); padding: 16px 4px 12px; }
+  .lx-countdown :global(.countdown-grid div + div)::before { display: none; }
+  .lx-countdown :global(.countdown-grid span) { background: linear-gradient(178deg, var(--accent-2), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lx-countdown :global(.cal-link) { border-radius: 0; border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+
+  @media (min-width: 720px) {
+    /* программа вокруг центральной оси: время слева от линии, текст справа */
+    .lx-program { position: relative; max-width: 640px; }
+    .lx-program::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(transparent, color-mix(in srgb, var(--accent) 50%, transparent) 15%, color-mix(in srgb, var(--accent) 50%, transparent) 85%, transparent);
+    }
+    .lx-program li { grid-template-columns: 1fr 40px 1fr; gap: 0; }
+    .lx-program li + li { border-top: 0; }
+    .lx-program time { justify-self: end; text-align: right; }
+    .lx-program .lx-diamond { justify-self: center; position: relative; z-index: 1; }
+    .lx-program-body { justify-self: start; }
+    .lx-portraits li { width: calc(33.333% - 18px); }
+    .lx-portraits li:first-child { width: 100%; }
+    .lx-portraits li:nth-child(3n) { transform: translateY(28px); }
+    .lx-contact-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>

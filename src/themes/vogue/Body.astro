@@ -1,0 +1,454 @@
+---
+// тема vogue — «ч/б глянец»: огромные номера глав, асимметричная сетка, программа как call sheet показа
+import type { Props } from '../../components/ClassicBody.astro';
+import Countdown from '../../components/Countdown.astro';
+import AddToCalendar from '../../components/AddToCalendar.astro';
+import RsvpFields from '../../components/RsvpFields.astro';
+
+const { inv, slug, cal } = Astro.props as Props;
+
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+// главы нумеруются по факту: пустых секций в нумерации нет
+const chapters = [
+  inv.welcome && 'letter',
+  inv.venue && 'venue',
+  inv.timeline?.length && 'program',
+  inv.gallery?.length && 'story',
+  inv.dressCode && 'dress',
+  inv.wishes?.length && 'wishes',
+  inv.transfer && 'transfer',
+  (inv.telegramChat || inv.organizer) && 'contacts',
+  inv.rsvp && 'rsvp',
+].filter(Boolean) as string[];
+const num = (id: string) => String(chapters.indexOf(id) + 1).padStart(2, '0');
+---
+
+<main id="content" class="vogue">
+  {inv.countdown && (
+    <div class="vg-countdown">
+      <Countdown target={inv.countdown}>
+        {cal && <AddToCalendar slug={slug} google={cal.google} />}
+      </Countdown>
+    </div>
+  )}
+
+  {inv.welcome && (
+    <section class="vg-sec">
+      <div class="vg-wrap">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('letter')}</span>
+          <p class="vg-kicker" data-guest="{g}, ждём вас">Дорогие гости</p>
+        </header>
+        <p class="vg-lead fade-up">{inv.welcome}</p>
+        <p class="vg-sign fade-up">{inv.groom} & {inv.bride}</p>
+      </div>
+    </section>
+  )}
+
+  {inv.venue && (
+    <section class="vg-sec vg-sec--line">
+      <div class="vg-wrap">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('venue')}</span>
+          <p class="vg-kicker">Локация</p>
+        </header>
+        <h2 class="vg-h2 vg-venue-name fade-up">{inv.venue.name}</h2>
+        <p class="vg-address fade-up">{inv.venue.address}</p>
+        <a class="vg-btn fade-up" href={routeUrl} target="_blank" rel="noopener">Проложить маршрут</a>
+        {inv.venue.mapIframe && (
+          <div class="vg-map fade-up">
+            <iframe src={inv.venue.mapIframe} loading="lazy" title={`Карта: ${inv.venue.name}`}></iframe>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.timeline && inv.timeline.length > 0 && (
+    <section class="vg-sec vg-sec--line">
+      <div class="vg-wrap">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('program')}</span>
+          <p class="vg-kicker">Тайминг</p>
+        </header>
+        <h2 class="vg-h2 fade-up">Call sheet</h2>
+        <ol class="vg-sheet" role="list">
+          {inv.timeline.map((item, i) => (
+            <li class="fade-up" style={`--i:${i}`}>
+              <time>{item.time}</time>
+              <div>
+                <h3>{item.title}</h3>
+                {item.text && <p>{item.text}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.gallery && inv.gallery.length > 0 && (
+    <section class="vg-sec vg-sec--line vg-runway">
+      <div class="vg-wrap vg-wrap--wide">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('story')}</span>
+          <p class="vg-kicker">Наша история</p>
+        </header>
+        <h2 class="vg-h2 fade-up">Кадры</h2>
+        <ul class="vg-frames vg-runway-track" role="list">
+          {inv.gallery.map((src, i) => (
+            <li class="fade-up" style={`--i:${i % 3}`}>
+              <img src={src} alt={`${inv.groom} и ${inv.bride}, кадр ${i + 1}`} loading="lazy" decoding="async" />
+            </li>
+          ))}
+        </ul>
+        <div class="vg-progress" aria-hidden="true"><i></i></div>
+      </div>
+    </section>
+  )}
+
+  {inv.dressCode && (
+    <section class="vg-sec vg-sec--line">
+      <div class="vg-wrap">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('dress')}</span>
+          <p class="vg-kicker">Форма одежды</p>
+        </header>
+        <h2 class="vg-h2 fade-up">Дресс-код</h2>
+        <p class="vg-text fade-up">{inv.dressCode.text}</p>
+        {inv.dressCode.colors && inv.dressCode.colors.length > 0 && (
+          <ul class="vg-swatches" role="list" aria-label="Палитра вечера">
+            {inv.dressCode.colors.map((c, i) => (
+              <li class="fade-up" style={`--i:${i};background:${c}`} />
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.wishes && inv.wishes.length > 0 && (
+    <section class="vg-sec vg-sec--line">
+      <div class="vg-wrap">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('wishes')}</span>
+          <p class="vg-kicker">Просьбы</p>
+        </header>
+        <h2 class="vg-h2 fade-up">Заметки редакции</h2>
+        <ol class="vg-notes" role="list">
+          {inv.wishes.map((w, i) => (
+            <li class="fade-up" style={`--i:${i}`}>
+              <span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <p>{w}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.transfer && (
+    <section class="vg-sec vg-sec--line">
+      <div class="vg-wrap">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('transfer')}</span>
+          <p class="vg-kicker">Логистика</p>
+        </header>
+        <h2 class="vg-h2 vg-h2--small fade-up">Трансфер</h2>
+        <p class="vg-text fade-up">{inv.transfer}</p>
+      </div>
+    </section>
+  )}
+
+  {(inv.telegramChat || inv.organizer) && (
+    <section class="vg-sec vg-sec--line">
+      <div class="vg-wrap">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('contacts')}</span>
+          <p class="vg-kicker">Контакты</p>
+        </header>
+        <h2 class="vg-h2 fade-up">На связи</h2>
+        <div class="vg-contact-grid">
+          {inv.telegramChat && (
+            <article class="vg-panel fade-up">
+              <h3>Чат гостей</h3>
+              <p>{inv.telegramChat.text}</p>
+              <a class="vg-btn" href={inv.telegramChat.url} target="_blank" rel="noopener">Вступить</a>
+            </article>
+          )}
+          {inv.organizer && (
+            <article class="vg-panel fade-up" style="--i:1">
+              <h3>Координатор</h3>
+              <p>{inv.organizer.name}</p>
+              <a class="vg-phone" href={`tel:${inv.organizer.phone.replace(/[^\d+]/g, '')}`}>{inv.organizer.phone}</a>
+            </article>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {inv.rsvp && (
+    <section class="vg-sec vg-sec--line" id="rsvp">
+      <div class="vg-wrap">
+        <header class="vg-head fade-up">
+          <span class="vg-num">{num('rsvp')}</span>
+          <p class="vg-kicker">Ответ</p>
+        </header>
+        <h2 class="vg-h2 fade-up">RSVP</h2>
+        <p class="vg-deadline fade-up">Ответьте до <span>{inv.rsvp.deadline}</span></p>
+        <div class="vg-rsvp fade-up">
+          <RsvpFields />
+        </div>
+      </div>
+    </section>
+  )}
+</main>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+  const mm = gsap.matchMedia();
+  mm.add('(min-width: 720px) and (prefers-reduced-motion: no-preference)', () => {
+    const track = document.querySelector('.vg-runway-track');
+    const section = document.querySelector('.vg-runway');
+    if (!track || !section) return;
+    const dist = () => Math.max(0, track.scrollWidth - section.clientWidth + 40);
+    const st = { trigger: section, start: 'top top', end: () => `+=${dist()}`, scrub: 0.5, invalidateOnRefresh: true };
+    gsap.to(track, {
+      x: () => -dist(),
+      ease: 'none',
+      scrollTrigger: { ...st, pin: true },
+    });
+    gsap.to('.vg-progress i', { scaleX: 1, ease: 'none', scrollTrigger: st });
+  });
+</script>
+
+<style>
+  .vogue { overflow-x: clip; }
+  .vg-sec { position: relative; padding: clamp(72px, 12vw, 124px) 0; }
+  .vg-sec--line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100% - 44px, 1000px);
+    height: 1px;
+    background: var(--line-strong);
+  }
+  .vg-wrap { width: 100%; max-width: 680px; margin: 0 auto; padding: 0 22px; }
+  .vg-wrap--wide { max-width: 1080px; }
+
+  /* шапка главы: огромный контурный номер + кикер; глянец прижат к левому краю на всех экранах */
+  .vg-head { position: relative; display: grid; justify-items: start; margin-bottom: 26px; }
+  .vg-num {
+    font-family: var(--font-display);
+    font-size: clamp(4.4rem, 17vw, 8rem);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--text) 40%, transparent);
+    user-select: none;
+  }
+  .vg-kicker {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    background: var(--bg);
+    padding: 4px 18px 4px 0;
+    font-family: var(--font-label);
+    font-weight: 300;
+    font-size: 0.62rem;
+    letter-spacing: 0.5em;
+    margin-right: -0.5em;
+    text-transform: uppercase;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .vg-h2 {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: clamp(1.3rem, 5vw, 1.9rem);
+    margin: 0 0 40px;
+  }
+  .vg-h2--small { font-size: 1.15rem; margin-bottom: 16px; }
+
+  .vg-lead { font-size: clamp(1.1rem, 4vw, 1.35rem); line-height: 1.75; max-width: 34ch; color: var(--text); }
+  .vg-sign { margin-top: 26px; font-family: var(--font-label); font-weight: 300; font-size: 0.72rem; letter-spacing: 0.4em; margin-right: -0.4em; text-transform: uppercase; color: var(--text-2); }
+
+  /* кадры: всё в ч/б, цвет возвращается при наведении; ритм сетки ломаем смещением */
+  .vg-frames { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 18px; }
+  .vg-frames li { width: calc(50% - 9px); }
+  .vg-frames img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.06);
+    outline: 1px solid var(--img-outline);
+    outline-offset: -1px;
+    transition: filter 0.7s var(--ease);
+  }
+  .vg-frames li:hover img { filter: none; }
+
+  /* механика темы: подиум — на десктопе галерея пинится и уезжает вбок по скроллу; на мобильном — snap-карусель */
+  .vg-runway { content-visibility: visible; }
+  @media (max-width: 719px) {
+    .vg-runway-track {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      margin: 0 -22px;
+      padding: 0 22px 12px;
+    }
+    .vg-runway-track::-webkit-scrollbar { display: none; }
+    .vg-runway-track li { flex: 0 0 74%; width: auto; scroll-snap-align: center; }
+  }
+  @media (min-width: 720px) {
+    .vg-runway { min-height: 100svh; display: grid; align-content: center; }
+    .vg-runway .vg-wrap { max-width: none; overflow: hidden; }
+    .vg-runway-track { flex-wrap: nowrap; width: max-content; gap: 24px; }
+    .vg-runway-track li { flex: none; width: clamp(220px, 24vw, 360px); }
+    .vg-runway-track li:nth-child(3n + 2) { transform: translateY(32px); }
+    /* прогресс подиума: тонкая линия под лентой, заполняется тем же scrub */
+    .vg-progress { position: relative; margin: 44px 40px 0 0; height: 1px; background: var(--line-strong); }
+    .vg-progress i { position: absolute; inset: 0; background: var(--text); transform: scaleX(0); transform-origin: left; }
+  }
+  @media (max-width: 719px) { .vg-progress { display: none; } }
+
+  .vg-venue-name { margin-bottom: 18px; }
+  .vg-address { color: var(--text-2); margin-bottom: 26px; letter-spacing: 0.06em; }
+  .vg-sec .vg-btn { display: inline-block; }
+  .vg-map { margin-top: 30px; outline: 1px solid var(--line-strong); outline-offset: -1px; }
+  .vg-map iframe { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; filter: grayscale(1) contrast(1.1) brightness(0.85); }
+
+  .vg-btn {
+    padding: 15px 32px;
+    border: 1px solid var(--text);
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--font-label);
+    font-weight: 300;
+    font-size: 0.68rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
+  }
+  .vg-btn:hover { background: var(--text); color: var(--bg); }
+
+  /* call sheet: строгая таблица, время в отдельной колонке */
+  .vg-sheet { list-style: none; padding: 0; }
+  .vg-sheet li {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    gap: 20px;
+    padding: 20px 0;
+    border-top: 1px solid var(--line);
+    align-items: baseline;
+  }
+  .vg-sheet li:last-child { border-bottom: 1px solid var(--line); }
+  .vg-sheet time { font-family: var(--font-display); font-size: 1.25rem; color: var(--text); }
+  .vg-sheet h3 { font-family: var(--font-body); font-weight: 400; font-size: 0.82rem; letter-spacing: 0.24em; text-transform: uppercase; }
+  .vg-sheet p { color: var(--text-2); font-size: 0.92rem; margin-top: 4px; }
+
+  .vg-text { max-width: 42ch; color: var(--text-2); line-height: 1.8; }
+
+  .vg-swatches { list-style: none; padding: 0; margin-top: 32px; display: flex; }
+  .vg-swatches li {
+    width: 52px;
+    height: 52px;
+    outline: 1px solid var(--bg);
+    outline-offset: -1px;
+    transition: transform 0.4s var(--ease);
+  }
+  .vg-swatches li:hover { transform: scale(1.12); position: relative; z-index: 1; }
+
+  /* заметки редакции: нумерованные строки */
+  .vg-notes { list-style: none; padding: 0; display: grid; gap: 24px; max-width: 560px; margin: 0 auto; }
+  .vg-notes li { display: grid; grid-template-columns: 40px 1fr; gap: 18px; align-items: start; }
+  .vg-notes span { font-family: var(--font-display); font-size: 1.6rem; line-height: 1; color: color-mix(in srgb, var(--text) 45%, transparent); }
+  .vg-notes p { color: var(--text-2); line-height: 1.7; padding-top: 4px; }
+
+  .vg-contact-grid { display: grid; gap: 1px; background: var(--line-strong); }
+  .vg-panel { background: var(--bg); padding: 34px 26px; display: grid; justify-items: center; gap: 12px; text-align: center; }
+  .vg-panel h3 { font-size: 1rem; font-weight: 400; letter-spacing: 0.28em; text-transform: uppercase; font-family: var(--font-label); }
+  .vg-panel p { color: var(--text-2); font-size: 0.95rem; line-height: 1.65; max-width: 34ch; }
+  .vg-phone { font-family: var(--font-display); font-size: 1.15rem; color: var(--text); text-decoration: none; border-bottom: 1px solid var(--line-strong); padding-bottom: 3px; transition: border-color 0.3s; }
+  .vg-phone:hover { border-color: var(--text); }
+
+  .vg-deadline { color: var(--text-2); font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; margin: -18px 0 30px; }
+  .vg-deadline span { font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.06em; color: var(--text); white-space: nowrap; }
+
+  /* анкета: поля-линейки, квадратные индикаторы, кнопка-контур */
+  .vg-rsvp { text-align: left; }
+  .vg-rsvp :global(.plate) { padding: 0; background: none; border: 0; }
+  .vg-rsvp :global(.plate > .plate-inner) { padding: 0; background: none; box-shadow: none; }
+  .vg-rsvp :global(form) { gap: 28px; }
+  .vg-rsvp :global(.field > span) { font-weight: 300; font-size: 0.62rem; letter-spacing: 0.34em; color: var(--text-2); }
+  .vg-rsvp :global(.field input),
+  .vg-rsvp :global(.field textarea) {
+    padding: 10px 2px 12px;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--line-strong);
+    border-radius: 0;
+    color: var(--text);
+  }
+  .vg-rsvp :global(.field textarea) { min-height: 88px; }
+  .vg-rsvp :global(.field input::placeholder),
+  .vg-rsvp :global(.field textarea::placeholder) { color: color-mix(in srgb, var(--text-2) 55%, transparent); }
+  .vg-rsvp :global(.field input:focus),
+  .vg-rsvp :global(.field textarea:focus) {
+    background: transparent;
+    border-bottom-color: var(--text);
+    box-shadow: 0 1px 0 var(--text);
+  }
+  .vg-rsvp :global(.choice) { border-radius: 0; }
+  .vg-rsvp :global(.choice strong) { font-weight: 400; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; }
+  .vg-rsvp :global(.choice::after) { border-radius: 0; }
+  .vg-rsvp :global(.choice:has(:checked)) { background: color-mix(in srgb, var(--text) 6%, transparent); border-color: var(--text); }
+  .vg-rsvp :global(.choice:has(:checked)::after) { background: var(--text); border-color: var(--text); box-shadow: inset 0 0 0 4px var(--bg); }
+  .vg-rsvp :global(.btn) {
+    border-radius: 0;
+    background: var(--text);
+    color: var(--bg);
+    font-family: var(--font-label);
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    box-shadow: none;
+  }
+  .vg-rsvp :global(.btn .btn-icon) { border-radius: 0; }
+  .vg-rsvp :global(.form-status) { letter-spacing: 0.06em; }
+
+  /* countdown: не сетка с коробками, а строка через слэш — как подпись в лукбуке */
+  .vg-countdown :global(.countdown .eyebrow) { font-weight: 300; letter-spacing: 0.5em; color: var(--text-2); }
+  .vg-countdown :global(.countdown .eyebrow)::before,
+  .vg-countdown :global(.countdown .eyebrow)::after { opacity: 0.4; }
+  .vg-countdown :global(.countdown-grid div) { position: relative; justify-items: center; }
+  .vg-countdown :global(.countdown-grid div + div)::before { display: none; }
+  .vg-countdown :global(.countdown-grid div):not(:last-child)::after {
+    content: '/';
+    position: absolute;
+    right: -0.5em;
+    top: 0.5em;
+    font-family: var(--font-label);
+    font-weight: 300;
+    font-size: 1.2rem;
+    color: var(--muted);
+  }
+  .vg-countdown :global(.countdown-grid span) { font-weight: 400; font-size: clamp(2rem, 8vw, 3rem); }
+  .vg-countdown :global(.countdown-grid small) { font-family: var(--font-label); font-weight: 300; font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+  .vg-countdown :global(.cal-link) { border-radius: 0; font-weight: 300; }
+
+  @media (min-width: 720px) {
+    .vg-wrap { max-width: 1080px; padding: 0 40px; }
+    .vg-h2 { font-size: clamp(1.7rem, 4vw, 2.5rem); }
+    .vg-lead { font-size: clamp(1.4rem, 2.4vw, 1.9rem); max-width: 26ch; }
+    .vg-map iframe { aspect-ratio: 16 / 9; }
+    .vg-contact-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>

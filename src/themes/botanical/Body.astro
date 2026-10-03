@@ -1,0 +1,369 @@
+---
+// тема botanical — «гербарий»: крафт, прижатые листья, полароиды с подписями, программа-стебель
+import type { Props } from '../../components/ClassicBody.astro';
+import Countdown from '../../components/Countdown.astro';
+import AddToCalendar from '../../components/AddToCalendar.astro';
+import RsvpFields from '../../components/RsvpFields.astro';
+
+const { inv, slug, cal } = Astro.props as Props;
+
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+const captions = ['Из нашего сада', 'Собрано вместе', 'Летний лист', 'Между страниц', 'Цветение', 'Тепло'];
+const sprig = 'M70 48 V10 M70 42 C 56 40, 46 32, 44 20 C 56 22, 66 30, 70 42 Z M70 42 C 84 40, 94 32, 96 20 C 84 22, 74 30, 70 42 Z M70 28 C 60 26, 54 20, 53 12 C 61 14, 67 20, 70 28 Z M70 28 C 80 26, 86 20, 87 12 C 79 14, 73 20, 70 28 Z';
+---
+
+<main id="content" class="botanical">
+  {inv.countdown && (
+    <div class="bt-countdown">
+      <Countdown target={inv.countdown}>
+        {cal && <AddToCalendar slug={slug} google={cal.google} />}
+      </Countdown>
+    </div>
+  )}
+
+  {inv.welcome && (
+    <section class="bt-sec bt-letter">
+      <div class="bt-wrap">
+        <article class="bt-card bt-card--letter fade-up">
+          <svg class="bt-sprig" viewBox="0 0 140 52" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><path d={sprig} /></svg>
+          <p class="bt-kicker" data-guest="{g}, ждём вас">Дорогие гости</p>
+          <p class="bt-letter-text">{inv.welcome}</p>
+          <p class="bt-letter-sign">{inv.groom} <i>&</i> {inv.bride}</p>
+        </article>
+      </div>
+    </section>
+  )}
+
+  {inv.venue && (
+    <section class="bt-sec bt-venue">
+      <div class="bt-wrap">
+        <p class="bt-kicker">Место встречи</p>
+        <h2 class="bt-h2">У калитки сада</h2>
+        <div class="bt-gate fade-up">
+          <p class="bt-venue-name">{inv.venue.name}</p>
+          <p class="bt-venue-address">{inv.venue.address}</p>
+          <a class="bt-btn" href={routeUrl} target="_blank" rel="noopener">Проложить маршрут</a>
+        </div>
+        {inv.venue.mapIframe && (
+          <div class="bt-map fade-up">
+            <iframe src={inv.venue.mapIframe} loading="lazy" title={`Карта: ${inv.venue.name}`}></iframe>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.timeline && inv.timeline.length > 0 && (
+    <section class="bt-sec bt-program">
+      <div class="bt-wrap">
+        <p class="bt-kicker">В этот день</p>
+        <h2 class="bt-h2">Программа</h2>
+        <ol class="bt-stem" role="list">
+          <i class="bt-stem-line" aria-hidden="true"></i>
+          {inv.timeline.map((item, i) => (
+            <li class="fade-up" style={`--i:${i}`}>
+              <svg class="bt-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M12 21 C 4 17, 3 8, 12 3 C 21 8, 20 17, 12 21 Z M12 21 V 6" /></svg>
+              <time>{item.time}</time>
+              <div>
+                <h3>{item.title}</h3>
+                {item.text && <p>{item.text}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.gallery && inv.gallery.length > 0 && (
+    <section class="bt-sec bt-herbarium">
+      <div class="bt-wrap bt-wrap--wide">
+        <p class="bt-kicker">Наша история</p>
+        <h2 class="bt-h2">Гербарий</h2>
+        <ul class="bt-photos" role="list">
+          {inv.gallery.map((src, i) => (
+            <li class="bt-photo fade-up" style={`--i:${i % 3};--r:${i % 2 ? 1.6 : -2}deg`}>
+              <figure>
+                <img src={src} alt={`${inv.groom} и ${inv.bride}, фото ${i + 1}`} loading="lazy" decoding="async" />
+                <figcaption>{captions[i % captions.length]}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {inv.dressCode && (
+    <section class="bt-sec bt-dress">
+      <div class="bt-wrap">
+        <p class="bt-kicker">Форма одежды</p>
+        <h2 class="bt-h2">Дресс-код</h2>
+        <p class="bt-dress-text fade-up">{inv.dressCode.text}</p>
+        {inv.dressCode.colors && inv.dressCode.colors.length > 0 && (
+          <ul class="bt-petals" role="list" aria-label="Палитра дня">
+            {inv.dressCode.colors.map((c, i) => (
+              <li class="fade-up" style={`--i:${i};background:${c}`} />
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  )}
+
+  {inv.wishes && inv.wishes.length > 0 && (
+    <section class="bt-sec bt-wishes">
+      <div class="bt-wrap bt-wrap--wide">
+        <p class="bt-kicker">Маленькие просьбы</p>
+        <h2 class="bt-h2">Пожелания</h2>
+        <ol class="bt-seeds" role="list">
+          {inv.wishes.map((w, i) => (
+            <li class="bt-card fade-up" style={`--i:${i}`}>
+              <span class="bt-seed-n">№ {i + 1}</span>
+              <p>{w}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {inv.transfer && (
+    <section class="bt-sec bt-transfer">
+      <div class="bt-wrap">
+        <article class="bt-card fade-up">
+          <p class="bt-kicker">Логистика</p>
+          <h2 class="bt-h2 bt-h2--small">Трансфер</h2>
+          <p class="bt-transfer-text">{inv.transfer}</p>
+        </article>
+      </div>
+    </section>
+  )}
+
+  {(inv.telegramChat || inv.organizer) && (
+    <section class="bt-sec bt-contacts">
+      <div class="bt-wrap">
+        <p class="bt-kicker">На связи</p>
+        <h2 class="bt-h2">Контакты</h2>
+        <div class="bt-contact-grid">
+          {inv.telegramChat && (
+            <article class="bt-card fade-up">
+              <h3>Чат праздника</h3>
+              <p>{inv.telegramChat.text}</p>
+              <a class="bt-btn" href={inv.telegramChat.url} target="_blank" rel="noopener">Вступить в чат</a>
+            </article>
+          )}
+          {inv.organizer && (
+            <article class="bt-card fade-up" style="--i:1">
+              <h3>Организатор</h3>
+              <p>{inv.organizer.name}</p>
+              <a class="bt-phone" href={`tel:${inv.organizer.phone.replace(/[^\d+]/g, '')}`}>{inv.organizer.phone}</a>
+            </article>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {inv.rsvp && (
+    <section class="bt-sec bt-rsvp" id="rsvp">
+      <div class="bt-wrap">
+        <article class="bt-card bt-card--letter fade-up">
+          <svg class="bt-sprig" viewBox="0 0 140 52" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><path d={sprig} /></svg>
+          <p class="bt-kicker">Ответ на приглашение</p>
+          <p class="bt-rsvp-deadline">Просим ответить до <span>{inv.rsvp.deadline}</span></p>
+          <RsvpFields />
+        </article>
+      </div>
+    </section>
+  )}
+</main>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.registerPlugin(ScrollTrigger);
+    const line = document.querySelector('.bt-stem-line');
+    if (line) {
+      gsap.to(line, {
+        scaleY: 1,
+        ease: 'none',
+        scrollTrigger: { trigger: '.bt-stem', start: 'top 78%', end: 'bottom 55%', scrub: 0.6 },
+      });
+    }
+  }
+</script>
+
+<style>
+  .botanical { overflow-x: clip; }
+  .bt-sec { padding: clamp(64px, 11vw, 110px) 0; text-align: center; }
+  .bt-wrap { width: 100%; max-width: 640px; margin: 0 auto; padding: 0 22px; }
+  .bt-wrap--wide { max-width: 1000px; }
+
+  .bt-kicker {
+    font-family: var(--font-label);
+    font-size: 0.64rem;
+    letter-spacing: 0.34em;
+    margin-right: -0.34em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .bt-h2 { font-weight: 500; font-size: clamp(1.9rem, 6.4vw, 2.8rem); margin: 10px 0 34px; }
+  .bt-h2--small { font-size: 1.6rem; margin-bottom: 14px; }
+
+  /* крафт-карточка: тёплая бумага, тонкая рамка, лёгкая тень */
+  .bt-card {
+    background: color-mix(in srgb, var(--surface) 65%, var(--bg));
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-md);
+    box-shadow: 0 18px 36px -24px rgba(60, 66, 45, 0.35);
+    padding: clamp(28px, 6vw, 44px);
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+  }
+  .bt-letter { background: var(--surface); }
+
+  .bt-sprig { width: 76px; color: var(--accent); transform-origin: 50% 100%; animation: bt-sway 7s ease-in-out infinite alternate; }
+  @keyframes bt-sway {
+    from { rotate: -2.5deg; }
+    to { rotate: 2.5deg; }
+  }
+  .bt-letter-text { font-size: 1.08rem; line-height: 1.8; color: var(--text); max-width: 36ch; }
+  .bt-letter-sign { font-family: var(--font-display); font-style: italic; font-size: 1.2rem; color: var(--text-2); }
+  .bt-letter-sign i { color: var(--accent); }
+
+  /* гербарий: полароиды с наклоном и подписью */
+  .bt-photos { list-style: none; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 22px 18px; }
+  /* первое фото гербария — разворот на всю строку */
+  .bt-photo { width: calc(50% - 9px); max-width: 260px; }
+  .bt-photo:first-child { width: 100%; max-width: 520px; }
+  .bt-photo:first-child img { aspect-ratio: 16 / 10; }
+  .bt-photo figure {
+    background: #fbfaf4;
+    border: 1px solid var(--line);
+    padding: 10px 10px 14px;
+    rotate: var(--r);
+    box-shadow: 0 14px 28px -18px rgba(60, 66, 45, 0.4);
+    transition: rotate 0.5s var(--ease), transform 0.5s var(--ease);
+  }
+  .bt-photo:hover figure { rotate: 0deg; transform: translateY(-4px); }
+  .bt-photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+  .bt-photo figcaption {
+    margin-top: 10px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--text-2);
+  }
+
+  /* калитка: карточка с арочным верхом */
+  .bt-gate {
+    border: 1px solid var(--line-strong);
+    border-radius: 999px 999px var(--r-md) var(--r-md);
+    padding: clamp(48px, 10vw, 72px) 28px clamp(30px, 6vw, 40px);
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    background:
+      radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 70%);
+  }
+  .bt-venue-name { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.5rem, 5.6vw, 2.1rem); line-height: 1.25; }
+  .bt-venue-address { color: var(--text-2); margin-bottom: 10px; }
+  .bt-map { margin-top: 22px; border: 1px solid var(--line-strong); border-radius: var(--r-md); overflow: hidden; }
+  .bt-map iframe { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; filter: saturate(0.7); }
+
+  .bt-btn {
+    display: inline-block;
+    padding: 13px 26px;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--accent);
+    text-decoration: none;
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
+  }
+  .bt-btn:hover { background: var(--accent); color: var(--accent-ink); }
+
+  /* программа-стебель: линия слева, узлы-листья */
+  .bt-stem { list-style: none; padding: 0; position: relative; max-width: 460px; margin: 0 auto; text-align: left; }
+  /* механика темы: стебель растёт по мере скролла (scaleY scrub) */
+  .bt-stem-line {
+    position: absolute;
+    left: 11px;
+    top: 12px;
+    bottom: 12px;
+    width: 1px;
+    background: linear-gradient(var(--accent-2), var(--accent));
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  .bt-stem li { position: relative; display: grid; grid-template-columns: 24px auto 1fr; gap: 16px; align-items: baseline; padding: 16px 0; }
+  .bt-leaf { width: 23px; height: 23px; color: var(--accent); background: var(--bg); position: relative; z-index: 1; align-self: start; margin-left: -1px; transition: scale 0.7s var(--ease); scale: 0; }
+  .bt-stem li.visible .bt-leaf { scale: 1; }
+  /* распустившийся лист чуть качается на ветру */
+  .bt-stem li.visible .bt-leaf { animation: bt-leaf-sway 5s ease-in-out 0.8s infinite alternate; }
+  @keyframes bt-leaf-sway {
+    from { rotate: -6deg; }
+    to { rotate: 6deg; }
+  }
+  .bt-stem time { font-family: var(--font-display); font-size: 1.25rem; color: var(--text); white-space: nowrap; }
+  .bt-stem h3 { font-family: var(--font-body); font-weight: 500; font-size: 1rem; }
+  .bt-stem p { color: var(--text-2); font-size: 0.92rem; margin-top: 2px; }
+
+  /* дресс-код: лепестки */
+  .bt-dress-text { max-width: 40ch; margin: 0 auto 28px; color: var(--text-2); line-height: 1.75; }
+  .bt-petals { list-style: none; padding: 0; display: flex; justify-content: center; gap: 12px; }
+  .bt-petals li {
+    width: 44px;
+    height: 62px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    border: 1px solid rgba(47, 51, 39, 0.15);
+    rotate: calc(-14deg + var(--i, 0) * 7deg);
+  }
+
+  /* пожелания: пакетики семян */
+  .bt-seeds { list-style: none; padding: 0; display: grid; gap: 16px; max-width: 720px; margin: 0 auto; }
+  .bt-seeds p { color: var(--text-2); line-height: 1.7; max-width: 34ch; }
+  .bt-seed-n { font-family: var(--font-label); font-size: 0.64rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
+
+  .bt-transfer-text { color: var(--text-2); max-width: 36ch; line-height: 1.75; }
+
+  .bt-contact-grid { display: grid; gap: 16px; text-align: center; }
+  .bt-contact-grid h3 { font-size: 1.2rem; font-weight: 500; }
+  .bt-contact-grid p { color: var(--text-2); font-size: 0.95rem; line-height: 1.65; }
+  .bt-phone { font-family: var(--font-display); font-size: 1.1rem; color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line-strong); padding-bottom: 2px; }
+
+  .bt-rsvp-deadline { color: var(--text-2); font-size: 0.92rem; }
+  .bt-rsvp-deadline span { font-family: var(--font-display); font-size: 1.05rem; color: var(--accent); white-space: nowrap; }
+  .bt-rsvp .bt-card { text-align: left; }
+  .bt-rsvp .bt-card > .bt-sprig, .bt-rsvp .bt-card > .bt-kicker, .bt-rsvp .bt-card > .bt-rsvp-deadline { justify-self: center; }
+  .bt-rsvp .bt-card :global(.rsvp-plate) { width: 100%; }
+  /* анкета: снимаем поднос, свои отступов достаточно */
+  .bt-rsvp :global(.plate) { padding: 0; background: none; border: 0; }
+  .bt-rsvp :global(.plate > .plate-inner) { padding: 20px 0 0; background: none; box-shadow: none; }
+
+  .bt-countdown :global(.countdown) { background: radial-gradient(80% 60% at 50% 100%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 70%); }
+  /* countdown: цифры в круглых «витринах» гербария */
+  .bt-countdown :global(.countdown-grid) { gap: 10px; }
+  .bt-countdown :global(.countdown-grid div) { border: 1px solid var(--line-strong); border-radius: 999px; padding: 22px 4px; background: var(--bg); }
+  .bt-countdown :global(.countdown-grid div + div)::before { display: none; }
+  .bt-countdown :global(.countdown-grid span) { font-size: clamp(1.8rem, 7vw, 2.6rem); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bt-stem-line { transform: none; }
+    .bt-leaf { scale: 1; }
+    .bt-sprig, .bt-stem li.visible .bt-leaf { animation: none; }
+  }
+
+  @media (min-width: 720px) {
+    .bt-seeds { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .bt-contact-grid { grid-template-columns: 1fr 1fr; }
+    .bt-photo { width: calc(33.333% - 12px); }
+  }
+</style>

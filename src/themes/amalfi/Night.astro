@@ -67,10 +67,10 @@ const glints = Array.from({ length: 16 }, (_, i) => {
     <p class="am-night-it" lang="it">Mancano ancora…</p>
     <h2 id="am-night-title" class="am-night-title">до нашего вечера у моря</h2>
     <div class="am-cd" role="timer" aria-live="off">
-      <div><span data-unit="days">–</span><small>дней</small></div>
-      <div><span data-unit="hours">–</span><small>часов</small></div>
-      <div><span data-unit="minutes">–</span><small>минут</small></div>
-      <div><span data-unit="seconds">–</span><small>секунд</small></div>
+      <div><span data-unit="days">–</span><small data-word="days">дней</small></div>
+      <div><span data-unit="hours">–</span><small data-word="hours">часов</small></div>
+      <div><span data-unit="minutes">–</span><small data-word="minutes">минут</small></div>
+      <div><span data-unit="seconds">–</span><small data-word="seconds">секунд</small></div>
     </div>
     {Astro.slots.has('default') && <div class="am-night-cal"><slot /></div>}
   </div>
@@ -97,17 +97,31 @@ const glints = Array.from({ length: 16 }, (_, i) => {
 </section>
 
 <script>
+  import { pluralRu } from '../../lib/plural';
+
   document.querySelectorAll<HTMLElement>('.am-night').forEach((el) => {
     const target = new Date(el.dataset.target ?? '').getTime();
     if (Number.isNaN(target)) return;
     const q = (u: string) => el.querySelector<HTMLElement>(`[data-unit="${u}"]`)!;
+    const w = (u: string) => el.querySelector(`[data-word="${u}"]`);
+    const forms: Record<string, [string, string, string]> = {
+      days: ['день', 'дня', 'дней'],
+      hours: ['час', 'часа', 'часов'],
+      minutes: ['минута', 'минуты', 'минут'],
+      seconds: ['секунда', 'секунды', 'секунд'],
+    };
     const units = { days: q('days'), hours: q('hours'), minutes: q('minutes'), seconds: q('seconds') };
+    const set = (u: string, n: number) => {
+      const label = w(u);
+      if (label) label.textContent = pluralRu(n, forms[u]);
+      return n;
+    };
     const tick = () => {
       const diff = Math.max(0, target - Date.now());
-      units.days.textContent = String(Math.floor(diff / 864e5));
-      units.hours.textContent = String(Math.floor(diff / 36e5) % 24).padStart(2, '0');
-      units.minutes.textContent = String(Math.floor(diff / 6e4) % 60).padStart(2, '0');
-      units.seconds.textContent = String(Math.floor(diff / 1e3) % 60).padStart(2, '0');
+      units.days.textContent = String(set('days', Math.floor(diff / 864e5)));
+      units.hours.textContent = String(set('hours', Math.floor(diff / 36e5) % 24)).padStart(2, '0');
+      units.minutes.textContent = String(set('minutes', Math.floor(diff / 6e4) % 60)).padStart(2, '0');
+      units.seconds.textContent = String(set('seconds', Math.floor(diff / 1e3) % 60)).padStart(2, '0');
     };
     tick();
     setInterval(tick, 1000);

@@ -1,9 +1,9 @@
 theme: editorial
 groom: Александр
 bride: Мария
-date: 18 сентября 2027
+date: 18 декабря 2026
 city: Москва
-countdown: "2027-09-18T15:30:00"
+countdown: "2026-12-18T15:30:00"
 heroPhoto: /photos/story/story-11.jpg
 gallery:
   - /photos/story/story-7.jpg
@@ -44,7 +44,7 @@ telegramChat:
   url: "https://t.me/example"
   text: Чат гостей, где мы делимся новостями, а после праздника — фотографиями и видео.
 rsvp:
-  deadline: 18.08.2027
+  deadline: 18.11.2026
 organizer:
   name: Екатерина
   phone: "+7 (925) 123-45-67"

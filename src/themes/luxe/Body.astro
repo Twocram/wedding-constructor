@@ -214,13 +214,14 @@ const diamond = 'M4 0 8 4 4 8 0 4Z';
 
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     gsap.registerPlugin(ScrollTrigger);
-    // глубина колоды: накрытая карточка чуть уменьшается и темнеет под следующей
+    // глубина колоды: накрытая карточка чуть уменьшается под следующей.
+    // без filter:brightness — на мобильных GPU анимированный фильтр на полноэкранной
+    // sticky-секции даёт тёмные мерцания при скролле; глубину дают scale + тень карточки
     document.querySelectorAll('.luxe > .lx-countdown, .luxe > .lx-sec').forEach((sec, i, all) => {
       const next = all[i + 1];
       if (!next) return;
       gsap.to(sec, {
         scale: 0.94,
-        filter: 'brightness(0.93)',
         transformOrigin: 'center top',
         ease: 'none',
         scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top', scrub: true },

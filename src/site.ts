@@ -10,7 +10,7 @@ export const orderUrl = (themeName?: string) => {
   return `https://t.me/${orderTelegram}?text=${encodeURIComponent(text)}`;
 };
 
-export type ThemeInfo = { name: string; tagline: string; tags: string[] };
+export type ThemeInfo = { name: string; tagline: string; tags: string[]; isNew?: boolean };
 
 export const themes: Record<string, ThemeInfo> = {
   cover: { name: 'Cover', tagline: 'Классика с конвертом и сургучной печатью', tags: ['Светлая', 'Конверт'] },
@@ -21,7 +21,7 @@ export const themes: Record<string, ThemeInfo> = {
   amalfi: { name: 'Amalfi', tagline: 'Вечер у моря: ночное небо, золото и арки', tags: ['Тёмная', 'Destination'] },
   deco: { name: 'Deco', tagline: 'Ар-деко: золотая рамка, геометрия, Гэтсби', tags: ['Тёмная', 'Вечерняя'] },
   vogue: { name: 'Vogue', tagline: 'Чёрно-белый глянец: крупная типографика, ноль декора', tags: ['Тёмная', 'Минимализм'] },
-  ticket: { name: 'Ticket', tagline: 'Посадочный талон для свадьбы-путешествия', tags: ['Светлая', 'Необычная'] },
-  cinema: { name: 'Cinema', tagline: 'Кино одним экраном: сцены, титры, премьера', tags: ['Тёмная', 'Одним экраном'] },
-  stories: { name: 'Stories', tagline: 'Как сторис в Instagram: тапы, стикеры, опрос «Придёте?»', tags: ['Новинка', 'Одним экраном'] },
+  ticket: { name: 'Ticket', tagline: 'Посадочный талон для свадьбы-путешествия', tags: ['Светлая', 'Необычная'], isNew: true },
+  cinema: { name: 'Cinema', tagline: 'Кино одним экраном: сцены, титры, премьера', tags: ['Тёмная', 'Одним экраном'], isNew: true },
+  stories: { name: 'Stories', tagline: 'Как сторис в Instagram: тапы, стикеры, опрос «Придёте?»', tags: ['Новинка', 'Одним экраном'], isNew: true },
 };

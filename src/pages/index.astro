@@ -49,6 +49,7 @@ const steps = [
           <p class="eyebrow">Каталог</p>
           <h2 id="themes-title">Выберите свой стиль</h2>
           <p>Нажмите на карточку — откроется живое демо с примером пары.</p>
+          <p class="shop-note">Любые тексты, фото и цвета дресс-кода меняем под вашу пару — это входит в стоимость</p>
         </div>
         <ul class="themes">
           {invitations.map((inv, i) => {
@@ -56,6 +57,7 @@ const steps = [
             return (
               <li class="theme fade-up" style={`--i:${i % 3}`}>
                 <a class="theme-phone" href={`/${inv.id}`} aria-label={`Демо ${t.name}: ${inv.data.groom} и ${inv.data.bride}`}>
+                  {t.isNew && <span class="theme-new">New</span>}
                   <img src={`/previews/${inv.id}.webp`} alt="" width="600" height="1298" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
                 </a>
                 <div class="theme-info">
@@ -176,6 +178,7 @@ const steps = [
   .theme { display: grid; gap: 22px; justify-items: center; text-align: center; }
   .theme-phone {
     display: block;
+    position: relative;
     width: min(100%, 290px);
     aspect-ratio: 390 / 844;
     border-radius: 38px;
@@ -186,6 +189,28 @@ const steps = [
   }
   .theme-phone img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 30px; background: var(--surface); }
   .theme-phone:hover { transform: translateY(-6px) rotate(-0.6deg); box-shadow: 0 1px 0 1px #3a3631 inset, 0 44px 70px -30px rgb(40 30 20 / 0.6), 0 14px 24px -14px rgb(40 30 20 / 0.3); }
+  .theme-new {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    z-index: 1;
+    padding: 5px 11px;
+    border-radius: 99px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--accent) 80%, black 20%);
+  }
+  .shop-note {
+    margin: 6px 0 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .shop-note::before { content: '✦'; margin-right: 8px; font-size: 0.75em; vertical-align: 0.12em; }
   .theme-info { display: grid; gap: 8px; justify-items: center; max-width: 300px; }
   .theme-tags { display: flex; gap: 6px; }
   .theme-tags span { font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line-strong); border-radius: 99px; padding: 4px 10px; }

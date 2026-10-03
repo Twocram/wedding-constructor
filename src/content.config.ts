@@ -5,12 +5,13 @@ import { glob } from 'astro/loaders';
 const invitations = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/invitations' }),
   schema: z.object({
-    theme: z.enum(['cover', 'botanical', 'editorial', 'watercolor', 'luxe', 'amalfi', 'deco', 'vogue', 'ticket', 'cinema', 'stories']).default('cover'),
+    theme: z.enum(['cover', 'botanical', 'editorial', 'watercolor', 'luxe', 'amalfi', 'deco', 'vogue', 'ticket', 'cinema', 'stories', 'coquette', 'toile']).default('cover'),
     groom: z.string(),
     bride: z.string(),
     date: z.string(), // "3 октября 2026"
     city: z.string().optional(), // город для первого экрана
     heroPhoto: z.string().optional(),
+    heroVideo: z.string().optional(), // видео первого экрана вместо фото (muted loop)
     welcome: z.string().optional(),
     venue: z.object({
       name: z.string(),

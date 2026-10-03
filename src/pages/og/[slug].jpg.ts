@@ -26,6 +26,8 @@ const looks: Record<Theme, Look> = {
   ticket: { bg: '#f3efe6', text: '#25303c', muted: '#77808c', accent: '#c2452d', font: 'Playfair Display', italic: true },
   stories: { bg: '#1b1a1d', text: '#ffffff', muted: '#a9a5ae', accent: '#f19a7e', font: 'Playfair Display', italic: true },
   cinema: { bg: '#0b0a09', text: '#f2ece1', muted: '#91887b', accent: '#e0b36a', font: 'Oswald', upper: true },
+  coquette: { bg: '#faeef1', text: '#432a31', muted: '#8f6d76', accent: '#b25a70', font: 'Playfair Display', italic: true },
+  toile: { bg: '#f3f0e7', text: '#24344e', muted: '#6d7a90', accent: '#3a5a80', font: 'Cormorant Garamond' },
 };
 
 const fontDir = (pkg: string) => join(process.cwd(), 'node_modules/@fontsource', pkg, 'files');

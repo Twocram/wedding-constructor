@@ -1,4 +1,5 @@
 ---
+import HeroMedia from './HeroMedia.astro';
 import ScrollHint from './ScrollHint.astro';
 interface Props {
   groom: string;
@@ -6,12 +7,13 @@ interface Props {
   date: string;
   city?: string;
   heroPhoto?: string;
+  heroVideo?: string;
 }
-const { groom, bride, date, city, heroPhoto } = Astro.props;
+const { groom, bride, date, city, heroPhoto , heroVideo} = Astro.props;
 ---
 
 <header class="hero-vg">
-  {heroPhoto && <img src={heroPhoto} alt="" class="vg-photo" fetchpriority="high" />}
+  {(heroPhoto || heroVideo) && <HeroMedia photo={heroPhoto} video={heroVideo} class="vg-photo" />}
   <div class="vg-veil" aria-hidden="true"></div>
 
   <div class="vg-content">

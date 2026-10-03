@@ -2,7 +2,7 @@
 interface Props {
   title: string;
   description?: string;
-  theme?: 'cover' | 'botanical' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories';
+  theme?: 'cover' | 'botanical' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories' | 'coquette' | 'toile';
   image?: string;
   noindex?: boolean;
 }
@@ -31,6 +31,10 @@ const fontSets: Record<string, string> = {
     'https://fonts.googleapis.com/css2?family=Prata&family=Oswald:wght@300;400&family=Jost:wght@300;400;500&display=swap',
   stories:
     'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Caveat:wght@700&family=Playfair+Display:ital@1&display=swap',
+  coquette:
+    'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Caveat:wght@600&family=Jost:wght@300;400;500&display=swap',
+  toile:
+    'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap',
   cinema:
     'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@300;400;500&display=swap',
 };
@@ -47,9 +51,11 @@ const accents: Record<string, [string, string]> = {
   luxe: ['%23faf7f1', '%23a9853e'],
   vogue: ['%23111110', '%23e6e1d4'],
   stories: ['%23b24f78', '%23ffffff'],
+  coquette: ['%23faeef1', '%23b25a70'],
+  toile: ['%23f3f0e7', '%233a5a80'],
 };
 const [favBg, favFg] = accents[theme];
-const themeColors: Record<string, string> = { cover: '#f6f2ea', botanical: '#f3f1e8', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000' };
+const themeColors: Record<string, string> = { cover: '#f6f2ea', botanical: '#f3f1e8', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000', coquette: '#faeef1', toile: '#f3f0e7' };
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -265,6 +271,45 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     --r-md: 20px;
   }
   body[data-theme='watercolor'] .section h2 { font-weight: 500; }
+
+
+  body[data-theme='coquette'] {
+    --bg: #faeef1;
+    --surface: #f5e2e7;
+    --surface-2: #efd4dc;
+    --text: #432a31;
+    --text-2: #74505a;
+    --muted: #8f6d76;
+    --accent: #b25a70;
+    --accent-2: #d795a6;
+    --accent-ink: #fdf7f8;
+    --line: rgba(67, 42, 49, 0.12);
+    --line-strong: rgba(67, 42, 49, 0.3);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-accent: 'Caveat', cursive;
+    --r-lg: 28px;
+    --r-md: 16px;
+    --r-swatch: 50%;
+  }
+  body[data-theme='coquette'] .section h2 { font-style: italic; }
+
+  body[data-theme='toile'] {
+    --bg: #f3f0e7;
+    --surface: #eae6d9;
+    --surface-2: #e0dac8;
+    --text: #24344e;
+    --text-2: #4c5a75;
+    --muted: #6d7a90;
+    --accent: #3a5a80;
+    --accent-2: #7c97b5;
+    --accent-ink: #f5f3ec;
+    --line: rgba(36, 52, 78, 0.14);
+    --line-strong: rgba(36, 52, 78, 0.32);
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --r-lg: 6px;
+    --r-md: 4px;
+    --r-swatch: 50%;
+  }
 
   body[data-theme='luxe'] {
     --bg: #faf7f1;

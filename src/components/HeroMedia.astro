@@ -1,0 +1,15 @@
+---
+// фото или видео первого экрана; видео — muted loop playsinline (автоплей только так), фото уходит в poster
+interface Props {
+  photo?: string;
+  video?: string;
+  class?: string;
+}
+const { photo, video, class: cls } = Astro.props;
+---
+
+{video ? (
+  <video class={cls} src={video} poster={photo} autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
+) : (
+  photo && <img class={cls} src={photo} alt="" fetchpriority="high" />
+)}

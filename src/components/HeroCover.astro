@@ -1,4 +1,5 @@
 ---
+import HeroMedia from './HeroMedia.astro';
 import Monogram from './Monogram.astro';
 import ScrollHint from './ScrollHint.astro';
 interface Props {
@@ -7,12 +8,13 @@ interface Props {
   date: string;
   city?: string;
   heroPhoto?: string;
+  heroVideo?: string;
 }
-const { groom, bride, date, city, heroPhoto } = Astro.props;
+const { groom, bride, date, city, heroPhoto , heroVideo} = Astro.props;
 ---
 
 <header class="hero">
-  {heroPhoto && <img src={heroPhoto} alt="" class="hero-photo" fetchpriority="high" />}
+  {(heroPhoto || heroVideo) && <HeroMedia photo={heroPhoto} video={heroVideo} class="hero-photo" />}
   <div class="hero-veil" aria-hidden="true"></div>
   <div class="fireflies" aria-hidden="true">
     {Array.from({ length: 14 }).map(() => <i />)}

@@ -1,0 +1,48 @@
+theme: coquette
+groom: Егор
+bride: Василиса
+date: 14 февраля 2027
+city: Москва
+countdown: "2027-02-14T16:00:00"
+heroPhoto: /photos/story/story-6.jpg
+gallery:
+  - /photos/story/story-6.jpg
+  - /photos/story/story-1.jpg
+  - /photos/story/story-9.jpg
+welcome: Мы долго ждали этот день — и хотим разделить его с самыми дорогими людьми. Приезжайте, будет нежно.
+venue:
+  name: Усадьба «Середниково»
+  address: Московская обл., пос. Санатория Мцыри, 1
+timeline:
+  - time: "15:00"
+    title: Сбор гостей
+    text: Лимонады, клубника и первые объятия.
+    icon: glass
+  - time: "16:00"
+    title: Церемония
+    text: Самый трогательный момент.
+    icon: heart
+  - time: "17:30"
+    title: Ужин и танцы
+    text: До самого вечера.
+    icon: music
+dressCode:
+  text: Будем рады пастели — розовой, голубой, сливочной. Белый, как всегда, только для невесты.
+  colors: ["#e8b4c2", "#d795a6", "#f0d9d5", "#b8c6d9", "#f5ead9"]
+wishes:
+  - title: Подарки
+    text: Лучший подарок — ваше присутствие. Если хочется знака внимания — мы будем рады конверту.
+  - title: Дети
+    text: Мы очень любим ваших малышей, но этот вечер — только для взрослых.
+transfer: В 14:00 от м. Планерная будет шаттл до усадьбы и обратно в 23:00.
+rsvp:
+  deadline: 20.01.2027
+  plusOne: true
+  drinks:
+    - Шампанское
+    - Вино розовое
+    - Лимонады
+organizer:
+  name: Аполлинария
+  phone: "+7 (968) 806-44-04"
+music: /music/song.mp3

@@ -23,5 +23,7 @@ export const themes: Record<string, ThemeInfo> = {
   vogue: { name: 'Vogue', tagline: 'Чёрно-белый глянец: крупная типографика, ноль декора', tags: ['Тёмная', 'Минимализм'] },
   ticket: { name: 'Ticket', tagline: 'Посадочный талон для свадьбы-путешествия', tags: ['Светлая', 'Необычная'], isNew: true },
   cinema: { name: 'Cinema', tagline: 'Кино одним экраном: сцены, титры, премьера', tags: ['Тёмная', 'Одним экраном'], isNew: true },
+  coquette: { name: 'Coquette', tagline: 'Банты, жемчуг и пудровый розовый — нежная кокетка', tags: ['Светлая', 'Нежная'], isNew: true },
+  toile: { name: 'Toile de Jouy', tagline: 'Синий фарфор: чернильный принт и кремовая бумага', tags: ['Светлая', 'Классика'], isNew: true },
   stories: { name: 'Stories', tagline: 'Как сторис в Instagram: тапы, стикеры, опрос «Придёте?»', tags: ['Новинка', 'Одним экраном'], isNew: true },
 };

@@ -35,7 +35,12 @@ timeline:
     icon: sunset
 dressCode:
   text: Для мужчин уместным будет классический черный костюм со светлой рубашкой. Девушек просим выбрать вечерние и коктейльные платья предложенных оттенков и избегать белого цвета.
-  colors: ["#8a9a5b", "#c4a484", "#d4af7a", "#e8dcc8", "#3d3d3d"]
+  colors:
+    - image: /photos/fabrics/silk-sage.webp
+    - image: /photos/fabrics/silk-camel.webp
+    - image: /photos/fabrics/silk-gold.webp
+    - image: /photos/fabrics/silk-cream.webp
+    - image: /photos/fabrics/silk-dark.webp
   lookbook:
     - /photos/story/story-3.jpg
     - /photos/story/story-7.jpg

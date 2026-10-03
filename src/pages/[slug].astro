@@ -10,6 +10,8 @@ import HeroEditorial from '../components/HeroEditorial.astro';
 import HeroAmalfi from '../components/HeroAmalfi.astro';
 import HeroDeco from '../components/HeroDeco.astro';
 import HeroTicket from '../components/HeroTicket.astro';
+import HeroCoquette from '../components/HeroCoquette.astro';
+import HeroToile from '../components/HeroToile.astro';
 import Envelope from '../components/Envelope.astro';
 import ClassicBody from '../components/ClassicBody.astro';
 import EditorialBody from '../themes/editorial/Body.astro';
@@ -20,6 +22,8 @@ import VogueBody from '../themes/vogue/Body.astro';
 import AmalfiBody from '../themes/amalfi/Body.astro';
 import DecoBody from '../themes/deco/Body.astro';
 import TicketBody from '../themes/ticket/Body.astro';
+import CoquetteBody from '../themes/coquette/Body.astro';
+import ToileBody from '../themes/toile/Body.astro';
 import Footer from '../components/Footer.astro';
 import Cinema from '../components/Cinema.astro';
 import Stories from '../components/Stories.astro';
@@ -37,11 +41,11 @@ const { inv } = Astro.props;
 const title = `${inv.groom} & ${inv.bride}`;
 const slug = Astro.params.slug!;
 const cal = calendarEvent(inv, new URL(`/${slug}`, Astro.site).href);
-const heroes = { cover: HeroCover, botanical: HeroBotanical, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket };
+const heroes = { cover: HeroCover, botanical: HeroBotanical, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile };
 // cinema и stories — отдельные одноэкранные форматы, у них нет hero и ленты секций
 const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme];
 // у каждой темы своё тело страницы; cover — базовая классика на общих секциях
-const bodies = { cover: ClassicBody, botanical: BotanicalBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody };
+const bodies = { cover: ClassicBody, botanical: BotanicalBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody };
 const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null;
 // день недели к дате на первом экране: «суббота, 3 октября 2026» — из ISO-даты таймера
 const weekday = inv.countdown
@@ -58,7 +62,7 @@ const heroDate = weekday ? `${weekday}, ${inv.date}` : inv.date;
   {inv.theme === 'cinema' && <Cinema inv={inv} slug={slug} google={cal?.google} />}
   {inv.theme === 'stories' && <Stories inv={inv} slug={slug} google={cal?.google} />}
 
-  {Hero && <Hero groom={inv.groom} bride={inv.bride} date={heroDate} city={inv.city} heroPhoto={inv.heroPhoto} />}
+  {Hero && <Hero groom={inv.groom} bride={inv.bride} date={heroDate} city={inv.city} heroPhoto={inv.heroPhoto} heroVideo={inv.heroVideo} />}
 
   {Body && <Body inv={inv} slug={slug} cal={cal} />}
 

@@ -1,9 +1,10 @@
 import {
+  breakdownTotal,
   contactMethodLabels,
   contactUrl,
+  estimateAmount,
   eventTypeLabels,
   leadSourceLabels,
-  prices,
   productLabels,
   rub,
   themes,
@@ -29,16 +30,10 @@ export const sendTelegram = async (html: string) => {
   if (!res.ok) throw new Error(`Telegram ${res.status}: ${await res.text()}`);
 };
 
-// ориентир по цене из прайса — чтобы сразу видеть порядок суммы
-const estimate = (lead: LeadRow) => {
-  const base = lead.product === 'custom' ? prices.custom : lead.product === 'template' ? prices.template : 0;
-  if (!base) return undefined;
-  return base + (lead.namedLinks ?? 0) * prices.named;
-};
-
 export const notifyNewLead = (lead: LeadRow) => {
   const theme = lead.themeSlug ? themes[lead.themeSlug]?.name ?? lead.themeSlug : undefined;
-  const total = estimate(lead);
+  const estimate = estimateAmount(lead.product, lead.namedLinks);
+  const total = estimate && breakdownTotal(estimate);
   const utm = [lead.utmSource, lead.utmMedium, lead.utmCampaign].filter(Boolean).join(' / ');
   const contacts = env.tgNotifyContacts
     ? [

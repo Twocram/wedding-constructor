@@ -1,6 +1,9 @@
 import * as z from 'zod';
 import { themes } from './catalog';
 
+// стандартные ошибки валидации — по-русски: их видят и клиенты на сайте, и мы в админке
+z.config(z.locales.ru());
+
 export const contactMethods = ['telegram', 'whatsapp', 'phone'] as const;
 export const products = ['template', 'custom', 'unsure'] as const;
 export const eventTypes = ['wedding', 'birthday', 'anniversary', 'corporate', 'other'] as const;
@@ -66,6 +69,18 @@ export const normalizePhone = (s: string) => {
   return `+${d}`;
 };
 
+export const themeSlugSchema = z.string().refine((s) => Object.hasOwn(themes, s), 'Нет такой темы');
+
+// null — контакт подходит к способу связи; иначе текст ошибки (общая проверка для сайта и админки)
+export const validateContact = (method: ContactMethod, contact: string) => {
+  const digits = phoneDigits(contact).length;
+  const phoneOk = digits >= 10 && digits <= 15;
+  if (method === 'telegram') return telegramHandle.test(contact) || phoneOk ? null : 'Укажите @ник или номер телефона';
+  return phoneOk ? null : 'Укажите номер телефона';
+};
+export const normalizeContact = (method: ContactMethod, contact: string) =>
+  method === 'telegram' && telegramHandle.test(contact) ? `@${contact.replace(/^@/, '')}` : normalizePhone(contact);
+
 // заявка с сайта; honeypot и время заполнения проверяет API, в базу они не попадают
 export const leadInput = z
   .object({
@@ -75,7 +90,7 @@ export const leadInput = z
     product: z.enum(products).default('unsure'),
     eventType: z.enum(eventTypes).default('wedding'),
     eventDate: z.iso.date().optional(),
-    themeSlug: z.string().refine((s) => Object.hasOwn(themes, s), 'Нет такой темы').optional(),
+    themeSlug: themeSlugSchema.optional(),
     namedLinks: z.number().int().min(0).max(1000).optional(),
     message: optionalText(2000),
     source: z.enum(leadSources).default('other'),
@@ -89,26 +104,10 @@ export const leadInput = z
     elapsedMs: z.number().int().min(0).optional(),
   })
   .superRefine((lead, ctx) => {
-    const digits = phoneDigits(lead.contact).length;
-    const ok =
-      lead.contactMethod === 'telegram'
-        ? telegramHandle.test(lead.contact) || (digits >= 10 && digits <= 15)
-        : digits >= 10 && digits <= 15;
-    if (!ok) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['contact'],
-        message: lead.contactMethod === 'telegram' ? 'Укажите @ник или номер телефона' : 'Укажите номер телефона',
-      });
-    }
+    const error = validateContact(lead.contactMethod, lead.contact);
+    if (error) ctx.addIssue({ code: 'custom', path: ['contact'], message: error });
   })
-  .transform((lead) => ({
-    ...lead,
-    contact:
-      lead.contactMethod === 'telegram' && telegramHandle.test(lead.contact)
-        ? `@${lead.contact.replace(/^@/, '')}`
-        : normalizePhone(lead.contact),
-  }));
+  .transform((lead) => ({ ...lead, contact: normalizeContact(lead.contactMethod, lead.contact) }));
 
 export type LeadInput = z.input<typeof leadInput>;
 // разбивка суммы сделки: подставляется из цен, в админке правится вручную

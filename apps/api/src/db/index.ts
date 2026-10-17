@@ -12,6 +12,8 @@ export const sqlite = new Database(env.databasePath);
 sqlite.pragma('journal_mode = WAL');
 sqlite.pragma('foreign_keys = ON');
 sqlite.pragma('busy_timeout = 5000');
+// lower() в SQLite не знает кириллицу — для поиска по заявкам
+sqlite.function('ulower', { deterministic: true }, (v: unknown) => (typeof v === 'string' ? v.toLowerCase() : v));
 
 export const db = drizzle({ client: sqlite, schema });
 

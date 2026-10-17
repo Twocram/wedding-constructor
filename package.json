@@ -9,8 +9,10 @@
   "scripts": {
     "dev": "npm run dev -w @saywed/site",
     "dev:api": "npm run dev -w @saywed/api",
+    "dev:admin": "npm run dev -w @saywed/admin",
     "build": "npm run build -w @saywed/site",
     "build:api": "npm run build -w @saywed/api",
+    "build:admin": "npm run build -w @saywed/admin",
     "typecheck": "npm run typecheck --workspaces --if-present"
   }
 }

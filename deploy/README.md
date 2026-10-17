@@ -1,8 +1,8 @@
 # Деплой
 
-Сайт (`apps/site`) — статика в `/var/www/wedding`, как и раньше. API (`apps/api`) — Node-процесс под systemd за nginx, база SQLite в `/var/lib/saywed`.
+Сайт (`apps/site`) — статика в `/var/www/wedding`, как и раньше. API (`apps/api`) — Node-процесс под systemd за nginx, база SQLite в `/var/lib/saywed`. Админка (`apps/admin`) — статика в `/var/www/admin` на `admin.saywed.ru`, ходит в тот же API.
 
-GitHub Actions (`.github/workflows/deploy.yml`) при пуше в main деплоит только изменившееся приложение. Задача API выключена, пока не выполнена первичная настройка ниже: её включает переменная репозитория `API_DEPLOY_ENABLED`.
+GitHub Actions (`.github/workflows/deploy.yml`) при пуше в main деплоит только изменившееся приложение. Задачи API и админки выключены, пока не выполнена первичная настройка ниже: их включают переменные репозитория `API_DEPLOY_ENABLED` и `ADMIN_DEPLOY_ENABLED`.
 
 ## Первичная настройка сервера (один раз)
 
@@ -89,6 +89,21 @@ sudo -u saywed --preserve-env bash -c 'set -a; . /etc/saywed/api.env; node dist/
 
 Перед этим заполнить реквизиты оператора в `apps/site/src/site.ts` (`legal`) — они выводятся на `/privacy`. Затем переменная репозитория `LEAD_FORM_ENABLED = true` и Run workflow (или любой пуш в сайт). Без неё кнопки «Заказать» ведут в Telegram, как раньше.
 
+### 8. Админка на admin.saywed.ru
+
+1. DNS: A-запись `admin.saywed.ru` → IP сервера.
+2. На сервере:
+
+```bash
+install -d -o deploy -g deploy -m 755 /var/www/admin
+cp nginx/admin.saywed.ru.conf /etc/nginx/sites-available/admin.saywed.ru
+ln -s /etc/nginx/sites-available/admin.saywed.ru /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+certbot --nginx -d admin.saywed.ru
+```
+
+3. Переменная репозитория `ADMIN_DEPLOY_ENABLED = true` → Run workflow. Вход — логином и паролем из шага 6. Ссылка «Открыть в админке» в уведомлениях Telegram ведёт сразу в карточку заявки.
+
 ## Бэкапы
 
 `saywed-backup.timer` каждую ночь в 03:30 делает копию базы в `/var/lib/saywed/backups` (хранится 30 дней) и удаляет отказные заявки старше 12 месяцев — этот срок обещан в `/privacy`. Чтобы копия уходила с сервера, настроить `rclone` (Yandex Object Storage / Selectel S3) и добавить в `/etc/saywed/api.env`:
@@ -106,6 +121,7 @@ npm install
 cp apps/api/.env.example apps/api/.env
 npm run dev:api        # API на :3000, база в apps/api/data/
 npm run dev            # сайт на :4321, /api проксируется на API, форма включена
+npm run dev:admin      # админка на :5173, /api проксируется на API
 npm run cli -w @saywed/api -- create-user artyom "Артём"
 ```
 

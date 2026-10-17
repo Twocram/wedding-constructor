@@ -17,6 +17,7 @@ jobs:
     outputs:
       site: ${{ steps.filter.outputs.site }}
       api: ${{ steps.filter.outputs.api }}
+      admin: ${{ steps.filter.outputs.admin }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -30,6 +31,12 @@ jobs:
             api:
               - 'apps/api/**'
               - 'deploy/backup.sh'
+              - 'packages/shared/**'
+              - 'package-lock.json'
+            admin:
+              - 'apps/admin/**'
+              # типы маршрутов API проверяются при сборке админки
+              - 'apps/api/src/**'
               - 'packages/shared/**'
               - 'package-lock.json'
 
@@ -105,3 +112,34 @@ jobs:
           rsync -az --delete -e "$SSH" release/ "$TARGET:/opt/saywed-api/"
           # миграции применяются при старте процесса
           $SSH "$TARGET" 'sudo systemctl restart saywed-api && for i in $(seq 1 20); do curl -fsS http://127.0.0.1:3000/api/health && exit 0; sleep 1; done; sudo journalctl -u saywed-api -n 50 --no-pager; exit 1'
+
+  admin:
+    # после API: новая админка не должна выйти раньше эндпоинтов, которые она зовёт
+    needs: [changes, api]
+    # включается после настройки admin.saywed.ru (deploy/README.md, раздел «Админка»)
+    if: >-
+      always() && vars.ADMIN_DEPLOY_ENABLED == 'true' &&
+      (needs.api.result == 'success' || needs.api.result == 'skipped') &&
+      (needs.changes.outputs.admin == 'true' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build:admin
+
+      - name: Rsync dist to VPS
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          rsync -az --delete -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            apps/admin/dist/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/admin/"

@@ -1,10 +1,10 @@
 // Каталог и цены — общие для сайта, API и админки. Порядок тем в `themes` = порядок карточек в каталоге.
 
-export const prices = { template: 4000, custom: 8000, named: 200 };
+export const prices = { template: 4000, custom: 8000, named: 200 }
 
-export const rub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`;
+export const rub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 
-export type ThemeInfo = { name: string; tagline: string; tags: string[]; isNew?: boolean };
+export interface ThemeInfo { name: string, tagline: string, tags: string[], isNew?: boolean }
 
 export const themes: Record<string, ThemeInfo> = {
   cover: { name: 'Cover', tagline: 'Классика с конвертом и сургучной печатью', tags: ['Светлая', 'Конверт'] },
@@ -20,4 +20,4 @@ export const themes: Record<string, ThemeInfo> = {
   coquette: { name: 'Coquette', tagline: 'Банты, жемчуг и пудровый розовый — нежная кокетка', tags: ['Светлая', 'Нежная'], isNew: true },
   toile: { name: 'Toile de Jouy', tagline: 'Синий фарфор: чернильный принт и кремовая бумага', tags: ['Светлая', 'Классика'], isNew: true },
   stories: { name: 'Stories', tagline: 'Как сторис в Instagram: тапы, стикеры, опрос «Придёте?»', tags: ['Новинка', 'Одним экраном'], isNew: true },
-};
+}

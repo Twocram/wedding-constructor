@@ -1,23 +1,23 @@
 ---
-import Head from './Head.astro';
+import Head from './Head.astro'
 // место — винтажная итальянская открытка: фото «Saluti da…», марка с перфорацией и круглый штемпель с датой
 interface Props {
-  name: string;
-  address: string;
-  mapIframe?: string;
-  photo?: string;
-  city?: string;
-  date: string; // «20 июня 2027»
-  when?: string; // ISO — для штемпеля
+  name: string
+  address: string
+  mapIframe?: string
+  photo?: string
+  city?: string
+  date: string // «20 июня 2027»
+  when?: string // ISO — для штемпеля
 }
-const { name, address, mapIframe, photo, city, date, when } = Astro.props;
-const routeUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(`${name}, ${address}`)}`;
-const place = (city ?? address).split(',')[0].trim();
-const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-const d = when ? new Date(when) : null;
-const valid = d && !Number.isNaN(d.getTime());
-const stampDate = valid ? `${d.getDate()}·${roman[d.getMonth()]}·${d.getFullYear()}` : date;
-const time = valid ? `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '';
+const { name, address, mapIframe, photo, city, date, when } = Astro.props
+const routeUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(`${name}, ${address}`)}`
+const place = (city ?? address).split(',')[0].trim()
+const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+const d = when ? new Date(when) : null
+const valid = d && !Number.isNaN(d.getTime())
+const stampDate = valid ? `${d.getDate()}·${roman[d.getMonth()]}·${d.getFullYear()}` : date
+const time = valid ? `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : ''
 const ring = `${place.toUpperCase()} · ${place.toUpperCase()} · `;
 ---
 

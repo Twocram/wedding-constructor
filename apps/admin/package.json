@@ -1,23 +1,12 @@
 {
   "name": "@saywed/admin",
-  "private": true,
   "type": "module",
+  "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit"
-  },
-  "devDependencies": {
-    "@saywed/api": "workspace:*",
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/bun": "^1.4.3",
-    "@vitejs/plugin-vue": "^6.0.10",
-    "shadcn-vue": "^2.8.2",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3",
-    "vite": "^8.3.4",
-    "vue-tsc": "^3.3.13"
   },
   "dependencies": {
     "@elysia/eden": "^1.4.10",
@@ -32,5 +21,16 @@
     "vue": "^3.5.44",
     "vue-router": "^5.4.0",
     "vue-sonner": "^2.0.9"
+  },
+  "devDependencies": {
+    "@saywed/api": "workspace:*",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/bun": "^1.4.3",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "shadcn-vue": "^2.8.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.4",
+    "vue-tsc": "^3.3.13"
   }
 }

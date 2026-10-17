@@ -1,19 +1,20 @@
 ---
-import ScrollHint from './ScrollHint.astro';
+import ScrollHint from './ScrollHint.astro'
+
 interface Props {
-  groom: string;
-  bride: string;
-  date: string;
-  city?: string;
-  heroPhoto?: string;
+  groom: string
+  bride: string
+  date: string
+  city?: string
+  heroPhoto?: string
 }
-const { groom, bride, date, city } = Astro.props;
-const initials = `${groom[0]}${bride[0]}`;
+const { groom, bride, date, city } = Astro.props
+const initials = `${groom[0]}${bride[0]}`
 // детерминированный «штрих-код» (SSR-стабильный), как звёзды в amalfi
-const rand = (seed: number) => {
-  const x = Math.sin(seed * 127.1) * 43758.5453;
-  return x - Math.floor(x);
-};
+function rand(seed: number) {
+  const x = Math.sin(seed * 127.1) * 43758.5453
+  return x - Math.floor(x)
+}
 const bars = Array.from({ length: 42 }, (_, i) => (1 + Math.floor(rand(i + 1) * 3)));
 ---
 
@@ -46,7 +47,7 @@ const bars = Array.from({ length: 42 }, (_, i) => (1 + Math.floor(rand(i + 1) * 
       </div>
 
       <div class="tk-barcode" aria-hidden="true">
-        {bars.map((w) => <i style={`width:${w}px`} />)}
+        {bars.map(w => <i style={`width:${w}px`} />)}
       </div>
     </div>
 

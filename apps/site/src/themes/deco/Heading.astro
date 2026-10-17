@@ -2,10 +2,10 @@
 // шапка секции: веер + подпись + заголовок.
 // Forum (римские капители, есть кириллица) — цифры, имена, латиница; Poiret One — геометрические заголовки 1920-х
 interface Props {
-  kicker?: string;
-  title: string;
+  kicker?: string
+  title: string
 }
-const { kicker, title } = Astro.props;
+const { kicker, title } = Astro.props
 const isLatin = /^[\x20-\x7E]+$/.test(title);
 ---
 

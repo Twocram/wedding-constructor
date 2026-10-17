@@ -1,13 +1,13 @@
 ---
-import Sprig from './Sprig.astro';
+import Sprig from './Sprig.astro'
 // приветствие — письмо с террасы: арочное окно, текст курсивом, внизу балюстрада
 interface Props {
-  text: string;
-  groom: string;
-  bride: string;
+  text: string
+  groom: string
+  bride: string
 }
-const { text, groom, bride } = Astro.props;
-const balusterSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 48'><path fill='#c89b4c' d='M7 0h14l-2 5c6 5 7 12 3 18 4 5 6 12 1 18l2 7H6l2-7c-5-6-3-13 1-18-4-6-3-13 3-18Z'/><path fill='#fff' fill-opacity='.18' d='M9 7c-3 4-2 10 1 15-3 5-4 11-1 16l1-1c-2-5-1-10 2-15-3-5-4-10-1-14Z'/></svg>`;
+const { text, groom, bride } = Astro.props
+const balusterSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 48'><path fill='#c89b4c' d='M7 0h14l-2 5c6 5 7 12 3 18 4 5 6 12 1 18l2 7H6l2-7c-5-6-3-13 1-18-4-6-3-13 3-18Z'/><path fill='#fff' fill-opacity='.18' d='M9 7c-3 4-2 10 1 15-3 5-4 11-1 16l1-1c-2-5-1-10 2-15-3-5-4-10-1-14Z'/></svg>`
 const baluster = `url("data:image/svg+xml,${encodeURIComponent(balusterSvg)}")`;
 ---
 

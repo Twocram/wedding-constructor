@@ -1,37 +1,43 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import RsvpFields from './RsvpFields.astro';
+import type { CollectionEntry } from 'astro:content'
+import RsvpFields from './RsvpFields.astro'
 
 interface Props {
-  inv: CollectionEntry<'invitations'>['data'];
-  slug: string;
-  google?: string; // ссылка «Добавить в Google Календарь»; нет — нет и кнопок календаря
+  inv: CollectionEntry<'invitations'>['data']
+  slug: string
+  google?: string // ссылка «Добавить в Google Календарь»; нет — нет и кнопок календаря
 }
-const { inv, slug, google } = Astro.props;
+const { inv, slug, google } = Astro.props
 
 // один экран: сцены лежат стопкой, скролл по невидимой ленте шагов переключает активную
-type Scene = { key: string; label: string; photo?: string; frame?: number };
-const frames = inv.gallery ?? [];
+type Scene = { key: string, label: string, photo?: string, frame?: number }
+const frames = inv.gallery ?? []
 // текстовые сцены чередуются: приглушённое фото / чёрный интертитр, как в немом кино.
 // кадры в пуле задом наперёд — чтобы пролог не повторял фото «Кадра 01» сразу за ним
-const pool = [...frames].reverse().concat(inv.heroPhoto ?? []);
-let poolIdx = 0;
-let textIdx = 0;
-const nextPhoto = () => (textIdx++ % 2 === 0 && pool.length ? pool[poolIdx++ % pool.length] : undefined);
+const pool = [...frames].reverse().concat(inv.heroPhoto ?? [])
+let poolIdx = 0
+let textIdx = 0
+const nextPhoto = () => (textIdx++ % 2 === 0 && pool.length ? pool[poolIdx++ % pool.length] : undefined)
 
-const scenes: Scene[] = [{ key: 'title', label: 'Титры', photo: inv.heroPhoto ?? pool[0] }];
-if (inv.welcome) scenes.push({ key: 'welcome', label: 'Пролог', photo: nextPhoto() });
-frames.forEach((photo, i) => scenes.push({ key: 'frame', label: `Кадр ${String(i + 1).padStart(2, '0')}`, photo, frame: i + 1 }));
-scenes.push({ key: 'date', label: 'Премьера', photo: nextPhoto() });
-if (inv.venue) scenes.push({ key: 'venue', label: 'Локация', photo: nextPhoto() });
-if (inv.timeline) scenes.push({ key: 'timeline', label: 'Сценарий', photo: nextPhoto() });
-if (inv.dressCode) scenes.push({ key: 'dress', label: 'Костюмы', photo: nextPhoto() });
-if (inv.wishes || inv.transfer) scenes.push({ key: 'notes', label: 'Заметки', photo: nextPhoto() });
-if (inv.rsvp) scenes.push({ key: 'rsvp', label: 'Кастинг', photo: nextPhoto() });
-scenes.push({ key: 'credits', label: 'Финал', photo: nextPhoto() });
+const scenes: Scene[] = [{ key: 'title', label: 'Титры', photo: inv.heroPhoto ?? pool[0] }]
+if (inv.welcome)
+scenes.push({ key: 'welcome', label: 'Пролог', photo: nextPhoto() })
+frames.forEach((photo, i) => scenes.push({ key: 'frame', label: `Кадр ${String(i + 1).padStart(2, '0')}`, photo, frame: i + 1 }))
+scenes.push({ key: 'date', label: 'Премьера', photo: nextPhoto() })
+if (inv.venue)
+scenes.push({ key: 'venue', label: 'Локация', photo: nextPhoto() })
+if (inv.timeline)
+scenes.push({ key: 'timeline', label: 'Сценарий', photo: nextPhoto() })
+if (inv.dressCode)
+scenes.push({ key: 'dress', label: 'Костюмы', photo: nextPhoto() })
+if (inv.wishes || inv.transfer)
+scenes.push({ key: 'notes', label: 'Заметки', photo: nextPhoto() })
+if (inv.rsvp)
+scenes.push({ key: 'rsvp', label: 'Кастинг', photo: nextPhoto() })
+scenes.push({ key: 'credits', label: 'Финал', photo: nextPhoto() })
 
-const total = String(scenes.length).padStart(2, '0');
-const time = inv.countdown?.slice(11, 16);
+const total = String(scenes.length).padStart(2, '0')
+const time = inv.countdown?.slice(11, 16)
 const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}`;
 ---
 
@@ -212,116 +218,121 @@ const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent
 </div>
 
 <script>
-  import { pluralRu } from '../lib/plural';
+import { pluralRu } from '../lib/plural'
 
-  const root = document.querySelector<HTMLElement>('.cine');
-  if (root) {
-    const scenes = [...root.querySelectorAll<HTMLElement>('.scene')];
-    const steps = [...root.querySelectorAll<HTMLElement>('.cine-step')];
-    const hudNum = root.querySelector('[data-hud-num]')!;
-    const hudLabel = root.querySelector('[data-hud-label]')!;
-    const progress = root.querySelector<HTMLElement>('[data-progress]')!;
-    let current = 0;
-    const leaveTimers = new Map<HTMLElement, number>();
+const root = document.querySelector<HTMLElement>('.cine')
+if (root) {
+  const scenes = [...root.querySelectorAll<HTMLElement>('.scene')]
+  const steps = [...root.querySelectorAll<HTMLElement>('.cine-step')]
+  const hudNum = root.querySelector('[data-hud-num]')!
+  const hudLabel = root.querySelector('[data-hud-label]')!
+  const progress = root.querySelector<HTMLElement>('[data-progress]')!
+  let current = 0
+  const leaveTimers = new Map<HTMLElement, number>()
 
-    const show = (next: number) => {
-      if (next === current) return;
-      root.dataset.dir = next > current ? 'fwd' : 'back';
-      const prev = scenes[current];
-      // уходящая сцена остаётся под новой, пока та не «вытрет» её шторкой
-      scenes.forEach((s) => {
-        if (s !== prev) s.classList.remove('is-leaving');
-      });
-      prev.classList.remove('is-active');
-      prev.classList.add('is-leaving');
-      prev.inert = true;
-      prev.setAttribute('aria-hidden', 'true');
-      clearTimeout(leaveTimers.get(prev));
-      leaveTimers.set(prev, window.setTimeout(() => prev.classList.remove('is-leaving'), 1100));
+  const show = (next: number) => {
+    if (next === current)
+      return
+    root.dataset.dir = next > current ? 'fwd' : 'back'
+    const prev = scenes[current]
+    // уходящая сцена остаётся под новой, пока та не «вытрет» её шторкой
+    scenes.forEach((s) => {
+      if (s !== prev)
+        s.classList.remove('is-leaving')
+    })
+    prev.classList.remove('is-active')
+    prev.classList.add('is-leaving')
+    prev.inert = true
+    prev.setAttribute('aria-hidden', 'true')
+    clearTimeout(leaveTimers.get(prev))
+    leaveTimers.set(prev, window.setTimeout(() => prev.classList.remove('is-leaving'), 1100))
 
-      const el = scenes[next];
-      el.classList.remove('is-leaving');
-      el.classList.add('is-active');
-      el.inert = false;
-      el.removeAttribute('aria-hidden');
-      current = next;
-      hudNum.textContent = String(next + 1).padStart(2, '0');
-      hudLabel.textContent = el.dataset.label ?? '';
-    };
-
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        const h = steps[0].offsetHeight;
-        const max = document.documentElement.scrollHeight - innerHeight;
-        progress.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
-        show(Math.max(0, Math.min(scenes.length - 1, Math.round(scrollY / h))));
-      });
-    };
-    addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('resize', onScroll);
-    onScroll();
-
-    root.querySelectorAll<HTMLElement>('[data-go]').forEach((b) =>
-      b.addEventListener('click', () => steps[Number(b.dataset.go)]?.scrollIntoView({ behavior: 'smooth' }))
-    );
-
-    // таймкод 24 fps с момента открытия — «идёт запись»
-    const tc = root.querySelector('[data-tc]')!;
-    const t0 = performance.now();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    let lastFrame = -1;
-    const tick = (now: number) => {
-      const f = Math.floor(((now - t0) / 1000) * 24);
-      if (f !== lastFrame) {
-        lastFrame = f;
-        const s = Math.floor(f / 24);
-        tc.textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}:${pad(f % 24)}`;
-      }
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-
-    // обратный отсчёт в сцене «Премьера»
-    const cd = root.querySelector<HTMLElement>('.cd');
-    const target = cd ? new Date(cd.dataset.target ?? '').getTime() : NaN;
-    if (cd && !Number.isNaN(target)) {
-      const u = (k: string) => cd.querySelector(`[data-u="${k}"]`)!;
-      const w = (k: string) => cd.querySelector(`[data-w="${k}"]`);
-      const forms: Record<string, [string, string, string]> = {
-        d: ['день', 'дня', 'дней'],
-        h: ['час', 'часа', 'часов'],
-        m: ['минута', 'минуты', 'минут'],
-        s: ['секунда', 'секунды', 'секунд'],
-      };
-      const cells = { d: u('d'), h: u('h'), m: u('m'), s: u('s') };
-      const set = (k: string, n: number) => {
-        const label = w(k);
-        if (label) label.textContent = pluralRu(n, forms[k]);
-        return n;
-      };
-      const update = () => {
-        const diff = Math.max(0, target - Date.now());
-        cells.d.textContent = String(set('d', Math.floor(diff / 864e5)));
-        cells.h.textContent = pad(set('h', Math.floor(diff / 36e5) % 24));
-        cells.m.textContent = pad(set('m', Math.floor(diff / 6e4) % 60));
-        cells.s.textContent = pad(set('s', Math.floor(diff / 1e3) % 60));
-      };
-      update();
-      setInterval(update, 1000);
-    }
-
-    // анкета — в модальном листе: форма не влезает в сцену на телефоне
-    const sheet = root.querySelector<HTMLDialogElement>('.cine-sheet');
-    root.querySelector('[data-open-rsvp]')?.addEventListener('click', () => sheet?.showModal());
-    root.querySelector('[data-close-rsvp]')?.addEventListener('click', () => sheet?.close());
-    sheet?.addEventListener('click', (e) => {
-      if (e.target === sheet) sheet.close();
-    });
+    const el = scenes[next]
+    el.classList.remove('is-leaving')
+    el.classList.add('is-active')
+    el.inert = false
+    el.removeAttribute('aria-hidden')
+    current = next
+    hudNum.textContent = String(next + 1).padStart(2, '0')
+    hudLabel.textContent = el.dataset.label ?? ''
   }
+
+  let ticking = false
+  const onScroll = () => {
+    if (ticking)
+      return
+    ticking = true
+    requestAnimationFrame(() => {
+      ticking = false
+      const h = steps[0].offsetHeight
+      const max = document.documentElement.scrollHeight - innerHeight
+      progress.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`
+      show(Math.max(0, Math.min(scenes.length - 1, Math.round(scrollY / h))))
+    })
+  }
+  addEventListener('scroll', onScroll, { passive: true })
+  addEventListener('resize', onScroll)
+  onScroll()
+
+  root.querySelectorAll<HTMLElement>('[data-go]').forEach(b =>
+    b.addEventListener('click', () => steps[Number(b.dataset.go)]?.scrollIntoView({ behavior: 'smooth' })),
+  )
+
+  // таймкод 24 fps с момента открытия — «идёт запись»
+  const tc = root.querySelector('[data-tc]')!
+  const t0 = performance.now()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  let lastFrame = -1
+  const tick = (now: number) => {
+    const f = Math.floor(((now - t0) / 1000) * 24)
+    if (f !== lastFrame) {
+      lastFrame = f
+      const s = Math.floor(f / 24)
+      tc.textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}:${pad(f % 24)}`
+    }
+    requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+
+  // обратный отсчёт в сцене «Премьера»
+  const cd = root.querySelector<HTMLElement>('.cd')
+  const target = cd ? new Date(cd.dataset.target ?? '').getTime() : NaN
+  if (cd && !Number.isNaN(target)) {
+    const u = (k: string) => cd.querySelector(`[data-u="${k}"]`)!
+    const w = (k: string) => cd.querySelector(`[data-w="${k}"]`)
+    const forms: Record<string, [string, string, string]> = {
+      d: ['день', 'дня', 'дней'],
+      h: ['час', 'часа', 'часов'],
+      m: ['минута', 'минуты', 'минут'],
+      s: ['секунда', 'секунды', 'секунд'],
+    }
+    const cells = { d: u('d'), h: u('h'), m: u('m'), s: u('s') }
+    const set = (k: string, n: number) => {
+      const label = w(k)
+      if (label)
+        label.textContent = pluralRu(n, forms[k])
+      return n
+    }
+    const update = () => {
+      const diff = Math.max(0, target - Date.now())
+      cells.d.textContent = String(set('d', Math.floor(diff / 864e5)))
+      cells.h.textContent = pad(set('h', Math.floor(diff / 36e5) % 24))
+      cells.m.textContent = pad(set('m', Math.floor(diff / 6e4) % 60))
+      cells.s.textContent = pad(set('s', Math.floor(diff / 1e3) % 60))
+    }
+    update()
+    setInterval(update, 1000)
+  }
+
+  // анкета — в модальном листе: форма не влезает в сцену на телефоне
+  const sheet = root.querySelector<HTMLDialogElement>('.cine-sheet')
+  root.querySelector('[data-open-rsvp]')?.addEventListener('click', () => sheet?.showModal())
+  root.querySelector('[data-close-rsvp]')?.addEventListener('click', () => sheet?.close())
+  sheet?.addEventListener('click', (e) => {
+    if (e.target === sheet)
+      sheet.close()
+  })
+}
 </script>
 
 <style>

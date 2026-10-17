@@ -1,14 +1,15 @@
 ---
-import Section from './Section.astro';
-import TimelineIcon from './TimelineIcon.astro';
+import Section from './Section.astro'
+import TimelineIcon from './TimelineIcon.astro'
+
 interface Item {
-  time: string;
-  title: string;
-  text?: string;
-  icon?: string;
+  time: string
+  title: string
+  text?: string
+  icon?: string
 }
 interface Props {
-  items: Item[];
+  items: Item[]
 }
 const { items } = Astro.props;
 ---
@@ -18,9 +19,11 @@ const { items } = Astro.props;
     {items.map((item, i) => (
       <li class="fade-up" style={`--i:${i + 1}`}>
         <span class="tl-time">{item.time}</span>
-        {item.icon ? (
+        {item.icon
+? (
           <span class="tl-icon" aria-hidden="true"><TimelineIcon name={item.icon} /></span>
-        ) : (
+        )
+: (
           <span class="tl-dot" aria-hidden="true"></span>
         )}
         <div class="tl-body">

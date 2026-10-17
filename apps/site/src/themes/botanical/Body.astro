@@ -1,15 +1,15 @@
 ---
 // тема botanical — «гербарий»: крафт, прижатые листья, полароиды с подписями, программа-стебель
-import type { Props } from '../../components/ClassicBody.astro';
-import Countdown from '../../components/Countdown.astro';
-import AddToCalendar from '../../components/AddToCalendar.astro';
-import RsvpFields from '../../components/RsvpFields.astro';
-import MonthCal from '../../components/MonthCal.astro';
+import type { Props } from '../../components/ClassicBody.astro'
+import AddToCalendar from '../../components/AddToCalendar.astro'
+import Countdown from '../../components/Countdown.astro'
+import MonthCal from '../../components/MonthCal.astro'
+import RsvpFields from '../../components/RsvpFields.astro'
 
-const { inv, slug, cal } = Astro.props as Props;
+const { inv, slug, cal } = Astro.props as Props
 
-const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
-const captions = ['Из нашего сада', 'Собрано вместе', 'Летний лист', 'Между страниц', 'Цветение', 'Тепло'];
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : ''
+const captions = ['Из нашего сада', 'Собрано вместе', 'Летний лист', 'Между страниц', 'Цветение', 'Тепло']
 const sprig = 'M70 48 V10 M70 42 C 56 40, 46 32, 44 20 C 56 22, 66 30, 70 42 Z M70 42 C 84 40, 94 32, 96 20 C 84 22, 74 30, 70 42 Z M70 28 C 60 26, 54 20, 53 12 C 61 14, 67 20, 70 28 Z M70 28 C 80 26, 86 20, 87 12 C 79 14, 73 20, 70 28 Z';
 ---
 
@@ -120,14 +120,14 @@ const sprig = 'M70 48 V10 M70 42 C 56 40, 46 32, 44 20 C 56 22, 66 30, 70 42 Z M
         <h2 class="bt-h2">Пожелания</h2>
         <ol class="bt-seeds" role="list">
           {inv.wishes.map((w, i) => {
-            const item = typeof w === 'string' ? { text: w } : w;
+            const item = typeof w === 'string' ? { text: w } : w
             return (
             <li class="bt-card fade-up" style={`--i:${i}`}>
               <span class="bt-seed-n">№ {i + 1}</span>
               {item.title && <h3 class="wish-title">{item.title}</h3>}
               <p>{item.text}</p>
             </li>
-            );
+            )
           })}
         </ol>
       </div>
@@ -186,20 +186,20 @@ const sprig = 'M70 48 V10 M70 42 C 56 40, 46 32, 44 20 C 56 22, 66 30, 70 42 Z M
 </main>
 
 <script>
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    gsap.registerPlugin(ScrollTrigger);
-    const line = document.querySelector('.bt-stem-line');
-    if (line) {
-      gsap.to(line, {
-        scaleY: 1,
-        ease: 'none',
-        scrollTrigger: { trigger: '.bt-stem', start: 'top 78%', end: 'bottom 55%', scrub: 0.6 },
-      });
-    }
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  gsap.registerPlugin(ScrollTrigger)
+  const line = document.querySelector('.bt-stem-line')
+  if (line) {
+    gsap.to(line, {
+      scaleY: 1,
+      ease: 'none',
+      scrollTrigger: { trigger: '.bt-stem', start: 'top 78%', end: 'bottom 55%', scrub: 0.6 },
+    })
   }
+}
 </script>
 
 <style>

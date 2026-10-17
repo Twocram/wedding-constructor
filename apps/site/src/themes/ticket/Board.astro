@@ -1,19 +1,20 @@
 ---
 // программа дня как табло вылетов (Solari): буквы перещёлкиваются, когда табло попадает в кадр
-import Sign from './Sign.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  items: { time: string; title: string; text?: string }[];
-  code: string;
-  date: string;
+  items: { time: string, title: string, text?: string }[]
+  code: string
+  date: string
 }
-const { items, code, date } = Astro.props;
+const { items, code, date } = Astro.props
 const rows = items.map((it, i) => ({
   ...it,
   flight: `WD${101 + i * 2}`,
   dest: it.title.toUpperCase(),
-}));
+}))
 // слова отдельно, чтобы длинное направление переносилось по словам, а не по буквам
-const words = (s: string) => s.split(/\s+/).filter(Boolean).map((w) => [...w]);
+const words = (s: string) => s.split(/\s+/).filter(Boolean).map(w => [...w]);
 ---
 
 <section class="tk-sec board-sec fade-up">
@@ -34,14 +35,14 @@ const words = (s: string) => s.split(/\s+/).filter(Boolean).map((w) => [...w]);
       </div>
 
       <ol class="board-rows">
-        {rows.map((r) => (
+        {rows.map(r => (
           <li class="board-row">
             <span class="tk-sr">{r.time} — {r.title}{r.text ? `. ${r.text}` : ''}. Рейс {r.flight}, по расписанию.</span>
             <div class="row-vis" aria-hidden="true">
-              <span class="cell c-time">{[...r.time].map((c) => <span class="ch">{c}</span>)}</span>
-              <span class="cell c-flight">{[...r.flight].map((c) => <span class="ch">{c}</span>)}</span>
+              <span class="cell c-time">{[...r.time].map(c => <span class="ch">{c}</span>)}</span>
+              <span class="cell c-flight">{[...r.flight].map(c => <span class="ch">{c}</span>)}</span>
               <span class="cell c-dest">
-                {words(r.dest).map((w) => <span class="word">{w.map((c) => <span class="ch">{c}</span>)}</span>)}
+                {words(r.dest).map(w => <span class="word">{w.map(c => <span class="ch">{c}</span>)}</span>)}
               </span>
               <span class="cell c-status"><i class="lamp"></i><span class="st-full">По расписанию</span><span class="st-short">Вовремя</span></span>
               {r.text && <span class="cell c-note">{r.text}</span>}
@@ -54,41 +55,45 @@ const words = (s: string) => s.split(/\s+/).filter(Boolean).map((w) => [...w]);
 </section>
 
 <script>
-  // ponytail: один таймер на всё табло; буквы крутятся до своего «времени оседания», текст из SSR — финальный
-  const glyphs = 'АБВГДЕЖЗИКЛМНОПРСТУФХЭЮЯ0123456789';
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  document.querySelectorAll<HTMLElement>('.board').forEach((board) => {
-    if (reduce) return;
-    const tiles = [...board.querySelectorAll<HTMLElement>('.ch')].map((el) => {
-      const row = [...board.querySelectorAll('.board-row')].indexOf(el.closest('.board-row')!);
-      const col = [...el.closest('.board-row')!.querySelectorAll('.ch')].indexOf(el);
-      return { el, final: el.textContent ?? '', settle: 250 + row * 140 + col * 55 + Math.random() * 260 };
-    });
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      const start = performance.now();
-      const timer = setInterval(() => {
-        const t = performance.now() - start;
-        let busy = false;
-        for (const tile of tiles) {
-          if (tile.final === ':') continue;
-          if (t >= tile.settle) {
-            if (tile.el.textContent !== tile.final) {
-              tile.el.textContent = tile.final;
-              tile.el.classList.remove('rolling');
-            }
-            continue;
+// ponytail: один таймер на всё табло; буквы крутятся до своего «времени оседания», текст из SSR — финальный
+const glyphs = 'АБВГДЕЖЗИКЛМНОПРСТУФХЭЮЯ0123456789'
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+document.querySelectorAll<HTMLElement>('.board').forEach((board) => {
+  if (reduce)
+    return
+  const tiles = [...board.querySelectorAll<HTMLElement>('.ch')].map((el) => {
+    const row = [...board.querySelectorAll('.board-row')].indexOf(el.closest('.board-row')!)
+    const col = [...el.closest('.board-row')!.querySelectorAll('.ch')].indexOf(el)
+    return { el, final: el.textContent ?? '', settle: 250 + row * 140 + col * 55 + Math.random() * 260 }
+  })
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting)
+      return
+    io.disconnect()
+    const start = performance.now()
+    const timer = setInterval(() => {
+      const t = performance.now() - start
+      let busy = false
+      for (const tile of tiles) {
+        if (tile.final === ':')
+          continue
+        if (t >= tile.settle) {
+          if (tile.el.textContent !== tile.final) {
+            tile.el.textContent = tile.final
+            tile.el.classList.remove('rolling')
           }
-          busy = true;
-          tile.el.classList.add('rolling');
-          tile.el.textContent = glyphs[(Math.random() * glyphs.length) | 0];
+          continue
         }
-        if (!busy) clearInterval(timer);
-      }, 60);
-    }, { threshold: 0.35 });
-    io.observe(board);
-  });
+        busy = true
+        tile.el.classList.add('rolling')
+        tile.el.textContent = glyphs[(Math.random() * glyphs.length) | 0]
+      }
+      if (!busy)
+        clearInterval(timer)
+    }, 60)
+  }, { threshold: 0.35 })
+  io.observe(board)
+})
 </script>
 
 <style>

@@ -1,20 +1,20 @@
 ---
 // тема watercolor — «альбом акварелиста»: мягкие пятна, картины в рамах, мазки кисти вместо строк
-import type { Props } from '../../components/ClassicBody.astro';
-import Countdown from '../../components/Countdown.astro';
-import AddToCalendar from '../../components/AddToCalendar.astro';
-import RsvpFields from '../../components/RsvpFields.astro';
-import MonthCal from '../../components/MonthCal.astro';
+import type { Props } from '../../components/ClassicBody.astro'
+import AddToCalendar from '../../components/AddToCalendar.astro'
+import Countdown from '../../components/Countdown.astro'
+import MonthCal from '../../components/MonthCal.astro'
+import RsvpFields from '../../components/RsvpFields.astro'
 
-const { inv, slug, cal } = Astro.props as Props;
+const { inv, slug, cal } = Astro.props as Props
 
-const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : ''
 // органические мазки: каждому пункту программы своё «пятно»
 const blobs = [
   'M45 6 C 70 2, 92 14, 90 34 C 88 54, 66 64, 44 62 C 22 60, 4 48, 6 30 C 8 12, 24 9, 45 6 Z',
   'M50 4 C 74 6, 90 20, 86 40 C 82 58, 60 66, 40 62 C 20 58, 6 44, 10 26 C 14 10, 30 2, 50 4 Z',
   'M42 8 C 66 0, 88 12, 90 30 C 92 50, 72 64, 50 64 C 28 64, 8 52, 6 34 C 4 16, 20 14, 42 8 Z',
-];
+]
 const captions = ['Этюд первый', 'Набросок', 'Пленэр', 'Свет и вода', 'Свежая краска', 'Финальный лист'];
 ---
 
@@ -183,12 +183,12 @@ const captions = ['Этюд первый', 'Набросок', 'Пленэр', '
 </main>
 
 <script>
-  // пятна секций распускаются по мере доскролла до них
-  const io = new IntersectionObserver(
-    (entries) => entries.forEach((e) => e.isIntersecting && (e.target.classList.add('wc-in'), io.unobserve(e.target))),
-    { threshold: 0.15 }
-  );
-  document.querySelectorAll('.wc-sec').forEach((el) => io.observe(el));
+// пятна секций распускаются по мере доскролла до них
+const io = new IntersectionObserver(
+  entries => entries.forEach(e => e.isIntersecting && (e.target.classList.add('wc-in'), io.unobserve(e.target))),
+  { threshold: 0.15 },
+)
+document.querySelectorAll('.wc-sec').forEach(el => io.observe(el))
 </script>
 
 <style>

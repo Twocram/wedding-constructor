@@ -3,7 +3,7 @@ groom: Егор
 bride: Василиса
 date: 14 февраля 2027
 city: Москва
-countdown: "2027-02-14T16:00:00"
+countdown: '2027-02-14T16:00:00'
 heroPhoto: /photos/story/story-6.jpg
 gallery:
   - /photos/story/story-6.jpg
@@ -14,21 +14,21 @@ venue:
   name: Усадьба «Середниково»
   address: Московская обл., пос. Санатория Мцыри, 1
 timeline:
-  - time: "15:00"
+  - time: '15:00'
     title: Сбор гостей
     text: Лимонады, клубника и первые объятия.
     icon: glass
-  - time: "16:00"
+  - time: '16:00'
     title: Церемония
     text: Самый трогательный момент.
     icon: heart
-  - time: "17:30"
+  - time: '17:30'
     title: Ужин и танцы
     text: До самого вечера.
     icon: music
 dressCode:
   text: Будем рады пастели — розовой, голубой, сливочной. Белый, как всегда, только для невесты.
-  colors: ["#e8b4c2", "#d795a6", "#f0d9d5", "#b8c6d9", "#f5ead9"]
+  colors: ['#e8b4c2', '#d795a6', '#f0d9d5', '#b8c6d9', '#f5ead9']
 wishes:
   - title: Подарки
     text: Лучший подарок — ваше присутствие. Если хочется знака внимания — мы будем рады конверту.
@@ -44,6 +44,6 @@ rsvp:
     - Лимонады
 organizer:
   name: Аполлинария
-  phone: "+7 (900) 000-00-00"
+  phone: '+7 (900) 000-00-00'
 music: /music/song.mp3
 demo: true

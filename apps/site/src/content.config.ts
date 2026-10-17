@@ -1,5 +1,5 @@
-import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { glob } from 'astro/loaders'
+import { defineCollection, z } from 'astro:content'
 
 // ponytail: все поля кроме names/date опциональны — шаблон рендерит только заполненные секции
 const invitations = defineCollection({
@@ -51,6 +51,6 @@ const invitations = defineCollection({
     music: z.string().optional(), // путь к mp3
     demo: z.boolean().default(false), // демо каталога: карточка на витрине, поп-ап с ценами и форма заявки
   }),
-});
+})
 
-export const collections = { invitations };
+export const collections = { invitations }

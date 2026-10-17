@@ -1,11 +1,11 @@
 ---
 // заголовок секции как указатель в аэропорту: номер выхода, двуязычная табличка, стрелка
 interface Props {
-  code: string; // «A1», «B2» — номер «выхода»
-  label: string;
-  en: string;
-  title?: string;
-  guest?: string; // шаблон {g} для личного обращения
+  code: string // «A1», «B2» — номер «выхода»
+  label: string
+  en: string
+  title?: string
+  guest?: string // шаблон {g} для личного обращения
 }
 const { code, label, en, title, guest } = Astro.props;
 ---

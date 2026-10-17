@@ -1,9 +1,10 @@
 ---
-import Section from './Section.astro';
+import Section from './Section.astro'
+
 interface Props {
-  text: string;
-  colors?: (string | { image: string })[];
-  lookbook?: string[]; // образы гостей: карусель фото
+  text: string
+  colors?: (string | { image: string })[]
+  lookbook?: string[] // образы гостей: карусель фото
 }
 const { text, colors, lookbook } = Astro.props;
 ---
@@ -14,9 +15,11 @@ const { text, colors, lookbook } = Astro.props;
     <ul class="palette" role="list" aria-label="Оттенки дресс-кода">
       {colors.map((c, i) => (
         <li class="fade-up" style={`--i:${i + 1}`} title={typeof c === 'string' ? c : 'ткань'}>
-          {typeof c === 'string' ? (
+          {typeof c === 'string'
+? (
             <span class="swatch" style={`--c:${c}`}></span>
-          ) : (
+          )
+: (
             <span class="swatch swatch--img"><img src={c.image} alt="" loading="lazy" decoding="async" /></span>
           )}
         </li>
@@ -39,19 +42,20 @@ const { text, colors, lookbook } = Astro.props;
 </Section>
 
 <script>
-  // точки лукбука следуют за прокруткой карусели
-  document.querySelectorAll('.lookbook').forEach((lb) => {
-    const items = [...lb.querySelectorAll('.lookbook-track li')];
-    const dots = [...lb.querySelectorAll('.lookbook-dots i')];
-    const io = new IntersectionObserver(
-      (es) => es.forEach((e) => {
-        if (!e.isIntersecting) return;
-        dots.forEach((d, j) => d.classList.toggle('on', items[j] === e.target));
-      }),
-      { root: lb.querySelector('.lookbook-track'), threshold: 0.6 }
-    );
-    items.forEach((li) => io.observe(li));
-  });
+// точки лукбука следуют за прокруткой карусели
+document.querySelectorAll('.lookbook').forEach((lb) => {
+  const items = [...lb.querySelectorAll('.lookbook-track li')]
+  const dots = [...lb.querySelectorAll('.lookbook-dots i')]
+  const io = new IntersectionObserver(
+    es => es.forEach((e) => {
+      if (!e.isIntersecting)
+        return
+      dots.forEach((d, j) => d.classList.toggle('on', items[j] === e.target))
+    }),
+    { root: lb.querySelector('.lookbook-track'), threshold: 0.6 },
+  )
+  items.forEach(li => io.observe(li))
+})
 </script>
 
 <style>

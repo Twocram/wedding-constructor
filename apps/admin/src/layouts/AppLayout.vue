@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ChevronDownIcon, InboxIcon, LayoutDashboardIcon, LogOutIcon } from '@lucide/vue';
-import { Button } from '@/components/ui/button';
+import { ChevronDownIcon, InboxIcon, LayoutDashboardIcon, LogOutIcon } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,14 +8,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useNewLeadsCount } from '@/composables/useLeads';
-import { useLogout, useSession } from '@/composables/useSession';
+} from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useNewLeadsCount } from '@/composables/useLeads'
+import { useLogout, useSession } from '@/composables/useSession'
 
-const { data: user } = useSession();
-const { data: newCount } = useNewLeadsCount();
-const logout = useLogout();
+const { data: user } = useSession()
+const { data: newCount } = useNewLeadsCount()
+const logout = useLogout()
 </script>
 
 <template>
@@ -61,8 +61,12 @@ const logout = useLogout();
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="w-48">
               <DropdownMenuLabel class="font-normal">
-                <div class="text-sm font-medium">{{ user?.name }}</div>
-                <div class="text-xs text-muted-foreground">{{ user?.login }}</div>
+                <div class="text-sm font-medium">
+                  {{ user?.name }}
+                </div>
+                <div class="text-xs text-muted-foreground">
+                  {{ user?.login }}
+                </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem @select="logout.mutate()">

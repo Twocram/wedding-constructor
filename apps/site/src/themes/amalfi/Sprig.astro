@@ -1,13 +1,14 @@
 ---
 // маленькие акценты побережья: ветка лимона (в цвете) и оливковая веточка (золотая линия)
 interface Props {
-  kind?: 'lemon' | 'olive';
-  class?: string;
+  kind?: 'lemon' | 'olive'
+  class?: string
 }
 const { kind = 'lemon', class: cls } = Astro.props;
 ---
 
-{kind === 'lemon' ? (
+{kind === 'lemon'
+? (
   <svg class:list={['am-sprig', 'am-sprig--lemon', cls]} viewBox="0 0 96 64" aria-hidden="true">
     <path d="M6 22c14-4 30-4 44 4" fill="none" stroke="#8a7a3c" stroke-width="1.4" stroke-linecap="round" />
     <path d="M20 20c-6-10 2-17 12-16-1 9-5 14-12 16Z" fill="#5f7a3f" />
@@ -20,7 +21,8 @@ const { kind = 'lemon', class: cls } = Astro.props;
     <path d="M56 50c6 4 18 5 26-2" fill="none" stroke="#c99a27" stroke-width="1.6" stroke-linecap="round" opacity="0.7" />
     <path d="M58 36c5-3 12-3 17-1" fill="none" stroke="#fff6c9" stroke-width="2" stroke-linecap="round" opacity="0.75" />
   </svg>
-) : (
+)
+: (
   <svg class:list={['am-sprig', 'am-sprig--olive', cls]} viewBox="0 0 120 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true">
     <path d="M4 12c30-3 80-3 112 0" />
     <path d="M22 11c3-6 9-8 14-8-3 5-8 8-14 8Z" /><path d="M22 13c3 6 9 8 14 8-3-5-8-8-14-8Z" />

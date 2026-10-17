@@ -40,8 +40,25 @@ jobs:
               - 'packages/shared/**'
               - 'bun.lock'
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run typecheck
+
   site:
-    needs: changes
+    needs: [changes, lint]
     if: needs.changes.outputs.site == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +92,7 @@ jobs:
             apps/site/dist/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/wedding/"
 
   api:
-    needs: changes
+    needs: [changes, lint]
     # до первичной настройки сервера (deploy/README.md) задача выключена переменной репозитория
     if: vars.API_DEPLOY_ENABLED == 'true' && (needs.changes.outputs.api == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
@@ -87,7 +104,6 @@ jobs:
           bun-version-file: package.json
 
       - run: bun install --frozen-lockfile
-      - run: bun --filter @saywed/api typecheck
       # один исполняемый файл с рантаймом Bun внутри — на сервере не нужны ни Bun, ни node_modules
       - run: bun run build:api
 
@@ -113,10 +129,10 @@ jobs:
 
   admin:
     # после API: новая админка не должна выйти раньше эндпоинтов, которые она зовёт
-    needs: [changes, api]
+    needs: [changes, lint, api]
     # включается после настройки admin.saywed.ru (deploy/README.md, раздел «Админка»)
     if: >-
-      always() && vars.ADMIN_DEPLOY_ENABLED == 'true' &&
+      always() && vars.ADMIN_DEPLOY_ENABLED == 'true' && needs.lint.result == 'success' &&
       (needs.api.result == 'success' || needs.api.result == 'skipped') &&
       (needs.changes.outputs.admin == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest

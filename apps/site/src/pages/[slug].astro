@@ -1,59 +1,59 @@
 ---
-import { getCollection } from 'astro:content';
-import Base from '../layouts/Base.astro';
-import HeroCover from '../components/HeroCover.astro';
-import HeroBotanical from '../components/HeroBotanical.astro';
-import HeroWatercolor from '../components/HeroWatercolor.astro';
-import HeroLuxe from '../components/HeroLuxe.astro';
-import HeroVogue from '../components/HeroVogue.astro';
-import HeroEditorial from '../components/HeroEditorial.astro';
-import HeroAmalfi from '../components/HeroAmalfi.astro';
-import HeroDeco from '../components/HeroDeco.astro';
-import HeroTicket from '../components/HeroTicket.astro';
-import HeroCoquette from '../components/HeroCoquette.astro';
-import HeroToile from '../components/HeroToile.astro';
-import Envelope from '../components/Envelope.astro';
-import ClassicBody from '../components/ClassicBody.astro';
-import EditorialBody from '../themes/editorial/Body.astro';
-import BotanicalBody from '../themes/botanical/Body.astro';
-import WatercolorBody from '../themes/watercolor/Body.astro';
-import LuxeBody from '../themes/luxe/Body.astro';
-import VogueBody from '../themes/vogue/Body.astro';
-import AmalfiBody from '../themes/amalfi/Body.astro';
-import DecoBody from '../themes/deco/Body.astro';
-import TicketBody from '../themes/ticket/Body.astro';
-import CoquetteBody from '../themes/coquette/Body.astro';
-import ToileBody from '../themes/toile/Body.astro';
-import Footer from '../components/Footer.astro';
-import Cinema from '../components/Cinema.astro';
-import Stories from '../components/Stories.astro';
-import DemoInfo from '../components/DemoInfo.astro';
-import LeadForm from '../components/LeadForm.astro';
-import { calendarEvent } from '../lib/calendar';
-import { themes, leadFormEnabled } from '../site';
+import { getCollection } from 'astro:content'
+import Cinema from '../components/Cinema.astro'
+import ClassicBody from '../components/ClassicBody.astro'
+import DemoInfo from '../components/DemoInfo.astro'
+import Envelope from '../components/Envelope.astro'
+import Footer from '../components/Footer.astro'
+import HeroAmalfi from '../components/HeroAmalfi.astro'
+import HeroBotanical from '../components/HeroBotanical.astro'
+import HeroCoquette from '../components/HeroCoquette.astro'
+import HeroCover from '../components/HeroCover.astro'
+import HeroDeco from '../components/HeroDeco.astro'
+import HeroEditorial from '../components/HeroEditorial.astro'
+import HeroLuxe from '../components/HeroLuxe.astro'
+import HeroTicket from '../components/HeroTicket.astro'
+import HeroToile from '../components/HeroToile.astro'
+import HeroVogue from '../components/HeroVogue.astro'
+import HeroWatercolor from '../components/HeroWatercolor.astro'
+import LeadForm from '../components/LeadForm.astro'
+import Stories from '../components/Stories.astro'
+import Base from '../layouts/Base.astro'
+import { calendarEvent } from '../lib/calendar'
+import { leadFormEnabled, themes } from '../site'
+import AmalfiBody from '../themes/amalfi/Body.astro'
+import BotanicalBody from '../themes/botanical/Body.astro'
+import CoquetteBody from '../themes/coquette/Body.astro'
+import DecoBody from '../themes/deco/Body.astro'
+import EditorialBody from '../themes/editorial/Body.astro'
+import LuxeBody from '../themes/luxe/Body.astro'
+import TicketBody from '../themes/ticket/Body.astro'
+import ToileBody from '../themes/toile/Body.astro'
+import VogueBody from '../themes/vogue/Body.astro'
+import WatercolorBody from '../themes/watercolor/Body.astro'
 
 export async function getStaticPaths() {
-  const invitations = await getCollection('invitations');
-  return invitations.map((inv) => ({
+  const invitations = await getCollection('invitations')
+  return invitations.map(inv => ({
     params: { slug: inv.id },
     props: { inv: inv.data },
-  }));
+  }))
 }
 
-const { inv } = Astro.props;
-const title = `${inv.groom} & ${inv.bride}`;
-const slug = Astro.params.slug!;
-const cal = calendarEvent(inv, new URL(`/${slug}`, Astro.site).href);
-const heroes = { cover: HeroCover, botanical: HeroBotanical, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile };
+const { inv } = Astro.props
+const title = `${inv.groom} & ${inv.bride}`
+const slug = Astro.params.slug!
+const cal = calendarEvent(inv, new URL(`/${slug}`, Astro.site).href)
+const heroes = { cover: HeroCover, botanical: HeroBotanical, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile }
 // cinema и stories — отдельные одноэкранные форматы, у них нет hero и ленты секций
-const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme];
+const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme]
 // у каждой темы своё тело страницы; cover — базовая классика на общих секциях
-const bodies = { cover: ClassicBody, botanical: BotanicalBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody };
-const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null;
+const bodies = { cover: ClassicBody, botanical: BotanicalBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody }
+const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null
 // день недели к дате на первом экране: «суббота, 3 октября 2026» — из ISO-даты таймера
 const weekday = inv.countdown
   ? new Intl.DateTimeFormat('ru-RU', { weekday: 'long' }).format(new Date(inv.countdown))
-  : undefined;
+  : undefined
 const heroDate = weekday ? `${weekday}, ${inv.date}` : inv.date;
 ---
 
@@ -93,33 +93,37 @@ const heroDate = weekday ? `${weekday}, ${inv.date}` : inv.date;
 </Base>
 
 <script>
-  // личное обращение: /slug?g=Анна — подставляем имя в тексты с data-guest и в поле анкеты
-  const guest = new URLSearchParams(location.search).get('g')?.trim().slice(0, 80);
-  if (guest) {
-    document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => {
-      if (el.dataset.guest) el.textContent = el.dataset.guest.replace('{g}', guest);
-    });
-    document.querySelectorAll<HTMLInputElement>('input[data-guest-value]').forEach((el) => {
-      if (!el.value) el.value = guest;
-    });
-  }
+// личное обращение: /slug?g=Анна — подставляем имя в тексты с data-guest и в поле анкеты
+const guest = new URLSearchParams(location.search).get('g')?.trim().slice(0, 80)
+if (guest) {
+  document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => {
+    if (el.dataset.guest)
+      el.textContent = el.dataset.guest.replace('{g}', guest)
+  })
+  document.querySelectorAll<HTMLInputElement>('input[data-guest-value]').forEach((el) => {
+    if (!el.value)
+      el.value = guest
+  })
+}
 </script>
 
 <script>
-  const btn = document.getElementById('music-btn');
-  const audio = document.getElementById('music') as HTMLAudioElement | null;
-  const sync = () => {
-    if (!btn || !audio) return;
-    btn.classList.toggle('playing', !audio.paused);
-    btn.setAttribute('aria-pressed', String(!audio.paused));
-    btn.setAttribute('aria-label', audio.paused ? 'Включить музыку' : 'Выключить музыку');
-  };
-  btn?.addEventListener('click', () => {
-    if (!audio) return;
-    audio.paused ? audio.play().catch(() => {}) : audio.pause();
-  });
-  audio?.addEventListener('play', sync);
-  audio?.addEventListener('pause', sync);
+const btn = document.getElementById('music-btn')
+const audio = document.getElementById('music') as HTMLAudioElement | null
+function sync() {
+  if (!btn || !audio)
+    return
+  btn.classList.toggle('playing', !audio.paused)
+  btn.setAttribute('aria-pressed', String(!audio.paused))
+  btn.setAttribute('aria-label', audio.paused ? 'Включить музыку' : 'Выключить музыку')
+}
+btn?.addEventListener('click', () => {
+  if (!audio)
+    return
+  audio.paused ? audio.play().catch(() => {}) : audio.pause()
+})
+audio?.addEventListener('play', sync)
+audio?.addEventListener('pause', sync)
 </script>
 
 <style>

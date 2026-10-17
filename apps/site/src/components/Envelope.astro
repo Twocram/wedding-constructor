@@ -1,10 +1,10 @@
 ---
 interface Props {
-  groom: string;
-  bride: string;
-  photo?: string;
+  groom: string
+  bride: string
+  photo?: string
 }
-const { groom, bride, photo } = Astro.props;
+const { groom, bride, photo } = Astro.props
 const initials = `${groom[0]}${bride[0]}`;
 ---
 
@@ -28,20 +28,21 @@ const initials = `${groom[0]}${bride[0]}`;
 </div>
 
 <script>
-  const envelope = document.getElementById('envelope');
-  if (envelope) {
-    document.body.style.overflow = 'hidden';
-    envelope.querySelector('button')?.addEventListener('click', () => {
-      envelope.classList.add('opened');
-      document.body.style.overflow = '';
-      // тап = жест пользователя, можно включать музыку
-      const audio = document.getElementById('music') as HTMLAudioElement | null;
-      audio?.play().catch(() => {});
-      const btn = document.getElementById('music-btn');
-      if (btn && audio && !audio.paused) btn.classList.add('playing');
-      envelope.addEventListener('transitionend', () => envelope.remove(), { once: true });
-    });
-  }
+const envelope = document.getElementById('envelope')
+if (envelope) {
+  document.body.style.overflow = 'hidden'
+  envelope.querySelector('button')?.addEventListener('click', () => {
+    envelope.classList.add('opened')
+    document.body.style.overflow = ''
+    // тап = жест пользователя, можно включать музыку
+    const audio = document.getElementById('music') as HTMLAudioElement | null
+    audio?.play().catch(() => {})
+    const btn = document.getElementById('music-btn')
+    if (btn && audio && !audio.paused)
+      btn.classList.add('playing')
+    envelope.addEventListener('transitionend', () => envelope.remove(), { once: true })
+  })
+}
 </script>
 
 <style>

@@ -1,11 +1,12 @@
 ---
 // наземные службы: трансфер — корешок билета на шаттл, чат — рация «связь с экипажем»
-import Sign from './Sign.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  transfer?: string;
-  chat?: { url: string; text: string };
-  code: string;
-  serial: string;
+  transfer?: string
+  chat?: { url: string, text: string }
+  code: string
+  serial: string
 }
 const { transfer, chat, code, serial } = Astro.props;
 ---

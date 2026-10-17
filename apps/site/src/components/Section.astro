@@ -1,13 +1,14 @@
 ---
-import Ornament from './Ornament.astro';
+import Ornament from './Ornament.astro'
+
 interface Props {
-  title?: string;
-  eyebrow?: string;
-  eyebrowGuest?: string; // шаблон с {g}: заменяет eyebrow, если в ссылке есть ?g=Имя
-  variant?: 'plain' | 'surface' | 'photo';
-  photo?: string;
-  narrow?: boolean;
-  id?: string;
+  title?: string
+  eyebrow?: string
+  eyebrowGuest?: string // шаблон с {g}: заменяет eyebrow, если в ссылке есть ?g=Имя
+  variant?: 'plain' | 'surface' | 'photo'
+  photo?: string
+  narrow?: boolean
+  id?: string
 }
 const { title, eyebrow, eyebrowGuest, variant = 'plain', photo, narrow, id } = Astro.props;
 ---

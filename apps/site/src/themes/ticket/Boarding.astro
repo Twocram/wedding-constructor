@@ -1,21 +1,22 @@
 ---
 // «Посадка через»: перекидные цифры как на табло + «Сохранить рейс» (календарь)
-import Sign from './Sign.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  target: string; // ISO-дата
-  code: string;
-  flight: string;
-  city?: string;
-  slug: string;
-  google?: string;
+  target: string // ISO-дата
+  code: string
+  flight: string
+  city?: string
+  slug: string
+  google?: string
 }
-const { target, code, flight, city, slug, google } = Astro.props;
+const { target, code, flight, city, slug, google } = Astro.props
 const units = [
   { key: 'days', label: 'дней' },
   { key: 'hours', label: 'часов' },
   { key: 'minutes', label: 'минут' },
   { key: 'seconds', label: 'секунд' },
-];
+]
 const departs = target.slice(11, 16);
 ---
 
@@ -33,7 +34,7 @@ const departs = target.slice(11, 16);
       {/* для скринридера — статичная дата: ежесекундный отсчёт был бы шумом */}
       <p class="tk-sr">Вылет {target.slice(0, 10).split('-').reverse().join('.')} в {departs}</p>
       <div class="bd-grid" aria-hidden="true">
-        {units.map((u) => (
+        {units.map(u => (
           <div class="bd-unit">
             <div class="flip" data-unit={u.key}>
               <span class="half top"><span>–</span></span>
@@ -64,64 +65,69 @@ const departs = target.slice(11, 16);
 </section>
 
 <script>
-  import { pluralRu } from '../../lib/plural';
+import { pluralRu } from '../../lib/plural'
 
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const forms: Record<string, [string, string, string]> = {
-    days: ['день', 'дня', 'дней'],
-    hours: ['час', 'часа', 'часов'],
-    minutes: ['минута', 'минуты', 'минут'],
-    seconds: ['секунда', 'секунды', 'секунд'],
-  };
-  document.querySelectorAll<HTMLElement>('.boarding').forEach((root) => {
-    const target = new Date(root.dataset.target ?? '').getTime();
-    if (Number.isNaN(target)) return;
-    const cards = new Map<string, { el: HTMLElement; parts: HTMLElement[]; value: string }>();
-    root.querySelectorAll<HTMLElement>('.flip').forEach((el) => {
-      cards.set(el.dataset.unit!, { el, parts: [...el.querySelectorAll<HTMLElement>('.half > span')], value: '' });
-    });
-    const set = (unit: string, next: string) => {
-      const c = cards.get(unit);
-      if (!c || c.value === next) return;
-      const [top, bottom, flapTop, flapBottom] = c.parts;
-      c.el.dataset.len = String(next.length);
-      const prev = c.value;
-      c.value = next;
-      const still = reduce || !prev; // первый кадр и reduced-motion — без флажка
-      // статичная верхняя половина сразу новая, нижняя — старая, пока не упадёт флажок
-      top.textContent = next;
-      flapTop.textContent = prev;
-      flapBottom.textContent = next;
-      bottom.textContent = still ? next : prev;
-      if (still) return;
-      c.el.classList.remove('is-flipping');
-      void c.el.offsetWidth; // перезапуск анимации
-      c.el.classList.add('is-flipping');
-    };
-    root.querySelectorAll<HTMLElement>('.flip').forEach((el) => {
-      el.addEventListener('animationend', (e) => {
-        if (!(e.target as HTMLElement).classList.contains('bottom')) return;
-        el.classList.remove('is-flipping');
-        el.querySelector('.half.bottom:not(.flap) > span')!.textContent = cards.get(el.dataset.unit!)!.value;
-      });
-    });
-    const tick = () => {
-      const diff = Math.max(0, target - Date.now());
-      const values: Record<string, number> = {
-        days: Math.floor(diff / 864e5),
-        hours: Math.floor(diff / 36e5) % 24,
-        minutes: Math.floor(diff / 6e4) % 60,
-        seconds: Math.floor(diff / 1e3) % 60,
-      };
-      for (const [unit, n] of Object.entries(values)) {
-        set(unit, String(n).padStart(2, '0'));
-        const label = root.querySelector(`[data-word="${unit}"]`);
-        if (label) label.textContent = pluralRu(n, forms[unit]);
-      }
-    };
-    tick();
-    setInterval(tick, 1000);
-  });
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+const forms: Record<string, [string, string, string]> = {
+  days: ['день', 'дня', 'дней'],
+  hours: ['час', 'часа', 'часов'],
+  minutes: ['минута', 'минуты', 'минут'],
+  seconds: ['секунда', 'секунды', 'секунд'],
+}
+document.querySelectorAll<HTMLElement>('.boarding').forEach((root) => {
+  const target = new Date(root.dataset.target ?? '').getTime()
+  if (Number.isNaN(target))
+    return
+  const cards = new Map<string, { el: HTMLElement, parts: HTMLElement[], value: string }>()
+  root.querySelectorAll<HTMLElement>('.flip').forEach((el) => {
+    cards.set(el.dataset.unit!, { el, parts: [...el.querySelectorAll<HTMLElement>('.half > span')], value: '' })
+  })
+  const set = (unit: string, next: string) => {
+    const c = cards.get(unit)
+    if (!c || c.value === next)
+      return
+    const [top, bottom, flapTop, flapBottom] = c.parts
+    c.el.dataset.len = String(next.length)
+    const prev = c.value
+    c.value = next
+    const still = reduce || !prev // первый кадр и reduced-motion — без флажка
+    // статичная верхняя половина сразу новая, нижняя — старая, пока не упадёт флажок
+    top.textContent = next
+    flapTop.textContent = prev
+    flapBottom.textContent = next
+    bottom.textContent = still ? next : prev
+    if (still)
+      return
+    c.el.classList.remove('is-flipping')
+    void c.el.offsetWidth // перезапуск анимации
+    c.el.classList.add('is-flipping')
+  }
+  root.querySelectorAll<HTMLElement>('.flip').forEach((el) => {
+    el.addEventListener('animationend', (e) => {
+      if (!(e.target as HTMLElement).classList.contains('bottom'))
+        return
+      el.classList.remove('is-flipping')
+      el.querySelector('.half.bottom:not(.flap) > span')!.textContent = cards.get(el.dataset.unit!)!.value
+    })
+  })
+  const tick = () => {
+    const diff = Math.max(0, target - Date.now())
+    const values: Record<string, number> = {
+      days: Math.floor(diff / 864e5),
+      hours: Math.floor(diff / 36e5) % 24,
+      minutes: Math.floor(diff / 6e4) % 60,
+      seconds: Math.floor(diff / 1e3) % 60,
+    }
+    for (const [unit, n] of Object.entries(values)) {
+      set(unit, String(n).padStart(2, '0'))
+      const label = root.querySelector(`[data-word="${unit}"]`)
+      if (label)
+        label.textContent = pluralRu(n, forms[unit])
+    }
+  }
+  tick()
+  setInterval(tick, 1000)
+})
 </script>
 
 <style>

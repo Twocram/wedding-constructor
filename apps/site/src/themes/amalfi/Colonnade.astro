@@ -1,11 +1,11 @@
 ---
-import Head from './Head.astro';
-import Maiolica from './Maiolica.astro';
+import Head from './Head.astro'
+import Maiolica from './Maiolica.astro'
 // галерея-колоннада: ряд арочных окон; на телефоне — карусель со snap
 interface Props {
-  photos: string[];
+  photos: string[]
 }
-const { photos } = Astro.props;
+const { photos } = Astro.props
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
@@ -31,28 +31,30 @@ const pad = (n: number) => String(n).padStart(2, '0');
 </section>
 
 <script>
-  // счётчик «01 / 06» в карусели — по ближайшей к центру арке
-  document.querySelectorAll<HTMLElement>('.am-arcade').forEach((track) => {
-    const counter = track.parentElement?.querySelector('.am-arcade-count b');
-    const arches = [...track.querySelectorAll<HTMLElement>('.am-arch')];
-    if (!counter || !arches.length) return;
-    let raf = 0;
-    track.addEventListener(
-      'scroll',
-      () => {
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(() => {
-          const mid = track.scrollLeft + track.clientWidth / 2;
-          let best = 0;
-          arches.forEach((a, i) => {
-            if (Math.abs(a.offsetLeft + a.offsetWidth / 2 - mid) < Math.abs(arches[best].offsetLeft + arches[best].offsetWidth / 2 - mid)) best = i;
-          });
-          counter.textContent = String(best + 1).padStart(2, '0');
-        });
-      },
-      { passive: true }
-    );
-  });
+// счётчик «01 / 06» в карусели — по ближайшей к центру арке
+document.querySelectorAll<HTMLElement>('.am-arcade').forEach((track) => {
+  const counter = track.parentElement?.querySelector('.am-arcade-count b')
+  const arches = [...track.querySelectorAll<HTMLElement>('.am-arch')]
+  if (!counter || !arches.length)
+    return
+  let raf = 0
+  track.addEventListener(
+    'scroll',
+    () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const mid = track.scrollLeft + track.clientWidth / 2
+        let best = 0
+        arches.forEach((a, i) => {
+          if (Math.abs(a.offsetLeft + a.offsetWidth / 2 - mid) < Math.abs(arches[best].offsetLeft + arches[best].offsetWidth / 2 - mid))
+            best = i
+        })
+        counter.textContent = String(best + 1).padStart(2, '0')
+      })
+    },
+    { passive: true },
+  )
+})
 </script>
 
 <style>

@@ -1,21 +1,21 @@
 ---
 // amalfi — «вечер на итальянском побережье»: арки, майолика, ночное море и золото
-import type { Props } from '../../components/ClassicBody.astro';
-import AddToCalendar from '../../components/AddToCalendar.astro';
-import Letter from './Letter.astro';
-import Night from './Night.astro';
-import Colonnade from './Colonnade.astro';
-import Postcard from './Postcard.astro';
-import Voyage from './Voyage.astro';
-import Tiles from './Tiles.astro';
-import Menu from './Menu.astro';
-import Info from './Info.astro';
-import Reply from './Reply.astro';
-import Maiolica from './Maiolica.astro';
+import type { Props } from '../../components/ClassicBody.astro'
+import AddToCalendar from '../../components/AddToCalendar.astro'
+import Colonnade from './Colonnade.astro'
+import Info from './Info.astro'
+import Letter from './Letter.astro'
+import Maiolica from './Maiolica.astro'
+import Menu from './Menu.astro'
+import Night from './Night.astro'
+import Postcard from './Postcard.astro'
+import Reply from './Reply.astro'
+import Tiles from './Tiles.astro'
+import Voyage from './Voyage.astro'
 
-const { inv, slug, cal } = Astro.props as Props;
+const { inv, slug, cal } = Astro.props as Props
 // фото для открытки: последний кадр галереи (обычно пейзаж), иначе главное фото
-const postcardPhoto = inv.gallery?.at(-1) ?? inv.heroPhoto;
+const postcardPhoto = inv.gallery?.at(-1) ?? inv.heroPhoto
 const hasInfo = Boolean(inv.transfer || inv.telegramChat || inv.organizer);
 ---
 

@@ -1,32 +1,34 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Spinner } from '@/components/ui/spinner';
-import { useLogin } from '@/composables/useSession';
-import { ApiError } from '@/lib/api';
+import { reactive } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
+import { useLogin } from '@/composables/useSession'
+import { ApiError } from '@/lib/api'
 
-const route = useRoute();
-const router = useRouter();
-const login = useLogin();
-const form = reactive({ login: '', password: '' });
+const route = useRoute()
+const router = useRouter()
+const login = useLogin()
+const form = reactive({ login: '', password: '' })
 
-const submit = () =>
-  login.mutate(form, {
+function submit() {
+  return login.mutate(form, {
     onSuccess: () => {
       // только свои пути: «//host» и «/\host» браузер понял бы как другой сайт
-      const raw = route.query.next;
-      const next = typeof raw === 'string' && /^\/(?![/\\])/.test(raw) ? raw : '/';
-      void router.replace(next);
+      const raw = route.query.next
+      const next = typeof raw === 'string' && /^\/(?![/\\])/.test(raw) ? raw : '/'
+      void router.replace(next)
     },
-  });
+  })
+}
 
-const errorText = (error: unknown) =>
-  error instanceof ApiError && error.status === 429 ? 'Слишком много попыток. Попробуйте через 15 минут' : error instanceof Error ? error.message : 'Не удалось войти';
+function errorText(error: unknown) {
+  return error instanceof ApiError && error.status === 429 ? 'Слишком много попыток. Попробуйте через 15 минут' : error instanceof Error ? error.message : 'Не удалось войти'
+}
 </script>
 
 <template>
@@ -48,11 +50,15 @@ const errorText = (error: unknown) =>
                 <AlertDescription>{{ errorText(login.error.value) }}</AlertDescription>
               </Alert>
               <Field>
-                <FieldLabel for="login">Логин</FieldLabel>
+                <FieldLabel for="login">
+                  Логин
+                </FieldLabel>
                 <Input id="login" v-model="form.login" autocomplete="username" autofocus required />
               </Field>
               <Field>
-                <FieldLabel for="password">Пароль</FieldLabel>
+                <FieldLabel for="password">
+                  Пароль
+                </FieldLabel>
                 <Input id="password" v-model="form.password" type="password" autocomplete="current-password" required />
               </Field>
               <Button type="submit" class="w-full" :disabled="login.isPending.value">

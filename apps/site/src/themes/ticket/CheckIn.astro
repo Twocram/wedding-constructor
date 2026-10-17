@@ -1,20 +1,21 @@
 ---
+import RsvpFields from '../../components/RsvpFields.astro'
 // RSVP — онлайн-регистрация на рейс: стойка с данными рейса + бланк RsvpFields в моно-стилистике
-import Sign from './Sign.astro';
-import RsvpFields from '../../components/RsvpFields.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  deadline: string;
-  flight: string;
-  iata: string;
-  code: string;
-  drinks?: string[];
-  plusOne?: boolean;
+  deadline: string
+  flight: string
+  iata: string
+  code: string
+  drinks?: string[]
+  plusOne?: boolean
 }
-const { deadline, flight, iata, code, drinks, plusOne } = Astro.props;
-const rand = (seed: number) => {
-  const x = Math.sin(seed * 53.3) * 43758.5453;
-  return x - Math.floor(x);
-};
+const { deadline, flight, iata, code, drinks, plusOne } = Astro.props
+function rand(seed: number) {
+  const x = Math.sin(seed * 53.3) * 43758.5453
+  return x - Math.floor(x)
+}
 const bars = Array.from({ length: 40 }, (_, i) => 1 + Math.floor(rand(i + 7) * 3));
 ---
 
@@ -36,7 +37,7 @@ const bars = Array.from({ length: 40 }, (_, i) => 1 + Math.floor(rand(i + 7) * 3
           <span>Регистрация закрывается <b>{deadline}</b></span>
         </p>
         <p class="ci-note">Отметьтесь заранее — так мы успеем посчитать места и&nbsp;меню на&nbsp;борту.</p>
-        <div class="ci-bars" aria-hidden="true">{bars.map((w) => <i style={`width:${w}px`} />)}</div>
+        <div class="ci-bars" aria-hidden="true">{bars.map(w => <i style={`width:${w}px`} />)}</div>
       </aside>
 
       <div class="ci-form">

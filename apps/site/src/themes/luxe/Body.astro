@@ -1,14 +1,14 @@
 ---
 // тема luxe — «мрамор и золото»: строгая симметрия, волосяные линейки, овальные портреты, уголки на анкете
-import type { Props } from '../../components/ClassicBody.astro';
-import Countdown from '../../components/Countdown.astro';
-import AddToCalendar from '../../components/AddToCalendar.astro';
-import RsvpFields from '../../components/RsvpFields.astro';
-import MonthCal from '../../components/MonthCal.astro';
+import type { Props } from '../../components/ClassicBody.astro'
+import AddToCalendar from '../../components/AddToCalendar.astro'
+import Countdown from '../../components/Countdown.astro'
+import MonthCal from '../../components/MonthCal.astro'
+import RsvpFields from '../../components/RsvpFields.astro'
 
-const { inv, slug, cal } = Astro.props as Props;
+const { inv, slug, cal } = Astro.props as Props
 
-const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : ''
 const diamond = 'M4 0 8 4 4 8 0 4Z';
 ---
 
@@ -214,25 +214,26 @@ const diamond = 'M4 0 8 4 4 8 0 4Z';
 </main>
 
 <script>
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    gsap.registerPlugin(ScrollTrigger);
-    // глубина колоды: накрытая карточка чуть уменьшается под следующей.
-    // без filter:brightness — на мобильных GPU анимированный фильтр на полноэкранной
-    // sticky-секции даёт тёмные мерцания при скролле; глубину дают scale + тень карточки
-    document.querySelectorAll('.luxe > .lx-countdown, .luxe > .lx-sec').forEach((sec, i, all) => {
-      const next = all[i + 1];
-      if (!next) return;
-      gsap.to(sec, {
-        scale: 0.94,
-        transformOrigin: 'center top',
-        ease: 'none',
-        scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top', scrub: true },
-      });
-    });
-  }
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  gsap.registerPlugin(ScrollTrigger)
+  // глубина колоды: накрытая карточка чуть уменьшается под следующей.
+  // без filter:brightness — на мобильных GPU анимированный фильтр на полноэкранной
+  // sticky-секции даёт тёмные мерцания при скролле; глубину дают scale + тень карточки
+  document.querySelectorAll('.luxe > .lx-countdown, .luxe > .lx-sec').forEach((sec, i, all) => {
+    const next = all[i + 1]
+    if (!next)
+      return
+    gsap.to(sec, {
+      scale: 0.94,
+      transformOrigin: 'center top',
+      ease: 'none',
+      scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top', scrub: true },
+    })
+  })
+}
 </script>
 
 <style>

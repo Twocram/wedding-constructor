@@ -1,11 +1,11 @@
 ---
 // поля анкеты + отправка в Telegram; обёртку (секция, диалог) даёт вызывающий
 interface Props {
-  drinks?: string[]; // чекбоксы напитков
-  plusOne?: boolean; // чекбокс «приду с парой»
+  drinks?: string[] // чекбоксы напитков
+  plusOne?: boolean // чекбокс «приду с парой»
 }
-const { drinks, plusOne } = Astro.props;
-const botToken = import.meta.env.PUBLIC_TG_BOT_TOKEN ?? '';
+const { drinks, plusOne } = Astro.props
+const botToken = import.meta.env.PUBLIC_TG_BOT_TOKEN ?? ''
 const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
 ---
 
@@ -34,7 +34,7 @@ const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
       <fieldset class="field">
         <span>Что будете пить?</span>
         <div class="checks">
-          {drinks.map((d) => (
+          {drinks.map(d => (
             <label class="check">
               <input type="checkbox" name="drinks" value={d} />
               <i aria-hidden="true"></i>
@@ -66,44 +66,49 @@ const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
 </div>
 
 <script define:vars={{ botToken, chatId }}>
-  // ponytail: токен бота виден в клиенте, для MVP-демо ок; на этапе 3 — отправка через свой server endpoint
-  const form = document.getElementById('rsvp-form');
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const status = form.querySelector('.form-status');
-    if (!form.reportValidity()) {
-      status.textContent = 'Заполните имя и выберите ответ.';
-      return;
-    }
-    const button = form.querySelector('button[type="submit"]');
-    const data = new FormData(form);
-    const lines = [
-      'RSVP',
-      `Имя: ${data.get('name')}`,
-      `Ответ: ${data.get('attending')}`,
-    ];
-    const picked = data.getAll('drinks');
-    if (picked.length) lines.push(`Напитки: ${picked.join(', ')}`);
-    if (data.get('plusOne')) lines.push('С парой: да');
-    lines.push(`Пожелания: ${data.get('notes') || '—'}`);
-    const text = lines.join('\n');
-    button.disabled = true;
-    status.textContent = 'Отправляем…';
-    try {
-      const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text }),
-      });
-      if (!res.ok) throw new Error();
-      status.textContent = 'Спасибо. Ваш ответ получен.';
-      form.reset();
-    } catch {
-      status.textContent = 'Не удалось отправить. Попробуйте ещё раз.';
-    } finally {
-      button.disabled = false;
-    }
-  });
+// ponytail: токен бота виден в клиенте, для MVP-демо ок; на этапе 3 — отправка через свой server endpoint
+const form = document.getElementById('rsvp-form')
+form?.addEventListener('submit', async (e) => {
+  e.preventDefault()
+  const status = form.querySelector('.form-status')
+  if (!form.reportValidity()) {
+    status.textContent = 'Заполните имя и выберите ответ.'
+    return
+  }
+  const button = form.querySelector('button[type="submit"]')
+  const data = new FormData(form)
+  const lines = [
+    'RSVP',
+    `Имя: ${data.get('name')}`,
+    `Ответ: ${data.get('attending')}`,
+  ]
+  const picked = data.getAll('drinks')
+  if (picked.length)
+    lines.push(`Напитки: ${picked.join(', ')}`)
+  if (data.get('plusOne'))
+    lines.push('С парой: да')
+  lines.push(`Пожелания: ${data.get('notes') || '—'}`)
+  const text = lines.join('\n')
+  button.disabled = true
+  status.textContent = 'Отправляем…'
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    })
+    if (!res.ok)
+      throw new Error(`Telegram ${res.status}`)
+    status.textContent = 'Спасибо. Ваш ответ получен.'
+    form.reset()
+  }
+  catch {
+    status.textContent = 'Не удалось отправить. Попробуйте ещё раз.'
+  }
+  finally {
+    button.disabled = false
+  }
+})
 </script>
 
 <style>

@@ -1,14 +1,14 @@
 ---
 // приветствие — письмо авиапочтой: полосатая кайма, марка с фото, почтовый штемпель
 interface Props {
-  text: string;
-  groom: string;
-  bride: string;
-  city?: string;
-  date: string;
-  photo?: string;
+  text: string
+  groom: string
+  bride: string
+  city?: string
+  date: string
+  photo?: string
 }
-const { text, groom, bride, city, date, photo } = Astro.props;
+const { text, groom, bride, city, date, photo } = Astro.props
 const markText = `${(city ?? 'Wedding Airlines').toUpperCase()} · ${date.toUpperCase()} · `;
 ---
 

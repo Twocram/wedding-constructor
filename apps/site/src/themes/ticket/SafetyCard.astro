@@ -1,11 +1,12 @@
 ---
 // пожелания — карточка безопасности из кармана кресла: пронумерованные пункты с пиктограммами
-import Sign from './Sign.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  items: string[];
-  code: string;
+  items: string[]
+  code: string
 }
-const { items, code } = Astro.props;
+const { items, code } = Astro.props
 // простые линейные пиктограммы по кругу: чемодан-сердце, бутылка, авиарежим, нота, камера, бокалы
 const icons = [
   'M10 18h28v20H10zM18 18v-5h12v5M24 33l-5-5a3 3 0 0 1 5-3 3 3 0 0 1 5 3z',

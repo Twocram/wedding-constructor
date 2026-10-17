@@ -1,11 +1,12 @@
 ---
-import Section from './Section.astro';
-import RsvpFields from './RsvpFields.astro';
+import RsvpFields from './RsvpFields.astro'
+import Section from './Section.astro'
+
 interface Props {
-  deadline: string;
-  photo?: string;
-  drinks?: string[];
-  plusOne?: boolean;
+  deadline: string
+  photo?: string
+  drinks?: string[]
+  plusOne?: boolean
 }
 const { deadline, photo, drinks, plusOne } = Astro.props;
 ---

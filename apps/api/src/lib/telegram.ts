@@ -1,3 +1,4 @@
+import type { LeadRow } from '../db/schema'
 import {
   breakdownTotal,
   contactMethodLabels,
@@ -8,14 +9,14 @@ import {
   productLabels,
   rub,
   themes,
-} from '@saywed/shared';
-import type { LeadRow } from '../db/schema';
-import { env } from '../env';
+} from '@saywed/shared'
+import { env } from '../env'
 
-const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
-export const sendTelegram = async (html: string) => {
-  if (!env.tgBotToken || !env.tgChatId) return;
+export async function sendTelegram(html: string) {
+  if (!env.tgBotToken || !env.tgChatId)
+    return
   const res = await fetch(`https://api.telegram.org/bot${env.tgBotToken}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -26,21 +27,22 @@ export const sendTelegram = async (html: string) => {
       link_preview_options: { is_disabled: true },
     }),
     signal: AbortSignal.timeout(10_000),
-  });
-  if (!res.ok) throw new Error(`Telegram ${res.status}: ${await res.text()}`);
-};
+  })
+  if (!res.ok)
+    throw new Error(`Telegram ${res.status}: ${await res.text()}`)
+}
 
-export const notifyNewLead = (lead: LeadRow) => {
-  const theme = lead.themeSlug ? themes[lead.themeSlug]?.name ?? lead.themeSlug : undefined;
-  const estimate = estimateAmount(lead.product, lead.namedLinks);
-  const total = estimate && breakdownTotal(estimate);
-  const utm = [lead.utmSource, lead.utmMedium, lead.utmCampaign].filter(Boolean).join(' / ');
+export function notifyNewLead(lead: LeadRow) {
+  const theme = lead.themeSlug ? themes[lead.themeSlug]?.name ?? lead.themeSlug : undefined
+  const estimate = estimateAmount(lead.product, lead.namedLinks)
+  const total = estimate && breakdownTotal(estimate)
+  const utm = [lead.utmSource, lead.utmMedium, lead.utmCampaign].filter(Boolean).join(' / ')
   const contacts = env.tgNotifyContacts
     ? [
         `<b>${escape(lead.name)}</b>`,
         `${contactMethodLabels[lead.contactMethod]}: <a href="${contactUrl(lead.contactMethod, lead.contact)}">${escape(lead.contact)}</a>`,
       ]
-    : [`Связь: ${contactMethodLabels[lead.contactMethod]} — контакт в админке`];
+    : [`Связь: ${contactMethodLabels[lead.contactMethod]} — контакт в админке`]
   const lines = [
     `🆕 <b>Заявка #${lead.id}</b>`,
     '',
@@ -55,6 +57,6 @@ export const notifyNewLead = (lead: LeadRow) => {
     `Источник: ${leadSourceLabels[lead.source]}${lead.sourcePath ? ` (${escape(lead.sourcePath)})` : ''}`,
     utm ? `UTM: ${escape(utm)}` : '',
     `<a href="${env.adminUrl}/leads/${lead.id}">Открыть в админке</a>`,
-  ];
-  return sendTelegram(lines.filter((l, i, all) => l !== '' || all[i - 1] !== '').join('\n'));
-};
+  ]
+  return sendTelegram(lines.filter((l, i, all) => l !== '' || all[i - 1] !== '').join('\n'))
+}

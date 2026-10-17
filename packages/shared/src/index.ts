@@ -1,3 +1,3 @@
-export * from './catalog';
-export * from './lead';
-export * from './admin';
+export * from './admin'
+export * from './catalog'
+export * from './lead'

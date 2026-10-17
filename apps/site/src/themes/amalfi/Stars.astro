@@ -1,15 +1,15 @@
 ---
 // россыпь звёзд для ночных секций; псевдорандом детерминирован — SSR и клиент совпадают
 interface Props {
-  count?: number;
-  seed?: number;
-  top?: number; // нижняя граница неба в %: ниже — «море», звёзд нет
+  count?: number
+  seed?: number
+  top?: number // нижняя граница неба в %: ниже — «море», звёзд нет
 }
-const { count = 36, seed = 1, top = 90 } = Astro.props;
-const rand = (n: number) => {
-  const x = Math.sin((n + seed * 101) * 127.1) * 43758.5453;
-  return x - Math.floor(x);
-};
+const { count = 36, seed = 1, top = 90 } = Astro.props
+function rand(n: number) {
+  const x = Math.sin((n + seed * 101) * 127.1) * 43758.5453
+  return x - Math.floor(x)
+}
 const stars = Array.from({ length: count }, (_, i) => ({
   left: (rand(i * 3 + 1) * 96 + 2).toFixed(1),
   top: (rand(i * 3 + 2) * (top - 4) + 2).toFixed(1),
@@ -20,7 +20,7 @@ const stars = Array.from({ length: count }, (_, i) => ({
 ---
 
 <div class="am-stars" aria-hidden="true">
-  {stars.map((s) => (
+  {stars.map(s => (
     <i class:list={[{ big: s.big }]} style={`left:${s.left}%;top:${s.top}%;--d:${s.d}s;animation-delay:${s.delay}s`} />
   ))}
 </div>

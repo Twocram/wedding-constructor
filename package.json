@@ -1,7 +1,8 @@
 {
   "name": "saywed",
-  "packageManager": "bun@1.3.14",
+  "type": "module",
   "private": true,
+  "packageManager": "bun@1.3.14",
   "scripts": {
     "dev": "bun --filter @saywed/site dev",
     "dev:api": "bun --filter @saywed/api dev",
@@ -9,11 +10,17 @@
     "build": "bun --filter @saywed/site build",
     "build:api": "bun --filter @saywed/api build",
     "build:admin": "bun --filter @saywed/admin build",
-    "typecheck": "bun --filter '*' typecheck"
+    "typecheck": "bun --filter '*' typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
-  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "@antfu/eslint-config": "^9.5.1",
+    "eslint": "^10.13.0",
+    "eslint-plugin-astro": "^3.2.1"
+  }
 }

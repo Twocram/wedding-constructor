@@ -3,7 +3,7 @@ groom: Тимофей
 bride: Агата
 date: 5 сентября 2026
 city: Санкт-Петербург
-countdown: "2026-09-05T15:30:00"
+countdown: '2026-09-05T15:30:00'
 heroPhoto: /photos/story/story-10.jpg
 gallery:
   - /photos/story/story-10.jpg
@@ -14,21 +14,21 @@ venue:
   name: Дворец бракосочетания №1
   address: Английская наб., 28
 timeline:
-  - time: "15:00"
+  - time: '15:00'
     title: Сбор гостей
     text: Фуршет в синем зале.
     icon: glass
-  - time: "15:30"
+  - time: '15:30'
     title: Регистрация
     text: Тихо, торжественно, со слезами радости.
     icon: rings
-  - time: "17:00"
+  - time: '17:00'
     title: Банкет
     text: Ужин, тосты и вальс.
     icon: dinner
 dressCode:
   text: Вечер в цветах фарфора — будем счастливы видеть оттенки синего, кремового и белого (последний — в деталях).
-  colors: ["#3a5a80", "#7c97b5", "#e0dac8", "#f3f0e7", "#24344e"]
+  colors: ['#3a5a80', '#7c97b5', '#e0dac8', '#f3f0e7', '#24344e']
 wishes:
   - title: Цветы
     text: Не дарите букеты — замените их бутылкой хорошего вина для нашей коллекции.
@@ -43,6 +43,6 @@ rsvp:
     - Безалкогольное
 organizer:
   name: Аполлинария
-  phone: "+7 (900) 000-00-00"
+  phone: '+7 (900) 000-00-00'
 music: /music/song.mp3
 demo: true

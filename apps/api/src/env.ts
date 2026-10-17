@@ -1,7 +1,9 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes } from 'node:crypto'
+import process from 'node:process'
 
-const list = (value: string | undefined, fallback: string) =>
-  (value ?? fallback).split(',').map((s) => s.trim()).filter(Boolean);
+function list(value: string | undefined, fallback: string) {
+  return (value ?? fallback).split(',').map(s => s.trim()).filter(Boolean)
+}
 
 export const env = {
   isProd: process.env.NODE_ENV === 'production',
@@ -17,4 +19,4 @@ export const env = {
   allowedOrigins: list(process.env.ALLOWED_ORIGINS, 'https://saywed.ru,https://admin.saywed.ru'),
   // без постоянной соли хеши IP просто не сравнимы между перезапусками — для антиспама это не страшно
   ipSalt: process.env.IP_SALT || randomBytes(16).toString('hex'),
-};
+}

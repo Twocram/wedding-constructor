@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { leadStatusLabels, type LeadStatus } from '@saywed/shared';
-import { cn } from 'cn';
-import { statusTone } from '@/lib/status';
+import type { LeadStatus } from '@saywed/shared'
+import { leadStatusLabels } from '@saywed/shared'
+import { cn } from 'cn'
+import { statusTone } from '@/lib/status'
 
-defineProps<{ status: LeadStatus }>();
+defineProps<{ status: LeadStatus }>()
 </script>
 
 <template>

@@ -1,15 +1,16 @@
 ---
 // галерея — развороты паспорта: фото на уголках, поверх — визовые штампы, «ставятся» при появлении
-import Sign from './Sign.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  photos: string[];
-  code: string;
-  iata: string;
-  stampDate: string; // «18.04.27»
+  photos: string[]
+  code: string
+  iata: string
+  stampDate: string // «18.04.27»
 }
-const { photos, code, iata, stampDate } = Astro.props;
-const spreads: (string | null)[][] = [];
-for (let i = 0; i < photos.length; i += 2) spreads.push([photos[i], photos[i + 1] ?? null]);
+const { photos, code, iata, stampDate } = Astro.props
+const spreads: (string | null)[][] = []
+for (let i = 0; i < photos.length; i += 2) spreads.push([photos[i], photos[i + 1] ?? null])
 const stampKinds = ['round', 'rect', 'oval', 'visa'] as const;
 ---
 
@@ -21,16 +22,18 @@ const stampKinds = ['round', 'rect', 'oval', 'visa'] as const;
       {spreads.map((pages, s) => (
         <div class="passport" style={`--tilt:${s % 2 ? 1 : -1}`}>
           {pages.map((src, p) => {
-            const n = s * 2 + p;
-            const kind = stampKinds[n % stampKinds.length];
+            const n = s * 2 + p
+            const kind = stampKinds[n % stampKinds.length]
             return (
               <div class:list={['pp-page', p ? 'pp-page--r' : 'pp-page--l']}>
                 <p class="pp-head" aria-hidden="true"><span>Визы</span><span>Visas</span></p>
-                {src ? (
+                {src
+? (
                   <figure class="pp-photo" style={`--r:${[-3, 2.5, 2, -2.5][n % 4]}deg`}>
                     <img src={src} alt={`Фото пары ${n + 1}`} loading="lazy" decoding="async" />
                   </figure>
-                ) : (
+                )
+: (
                   <p class="pp-empty">Место для<br />новых штампов</p>
                 )}
 
@@ -75,7 +78,7 @@ const stampKinds = ['round', 'rect', 'oval', 'visa'] as const;
 
                 <span class="pp-num" aria-hidden="true">{String(n + 1).padStart(2, '0')}</span>
               </div>
-            );
+            )
           })}
         </div>
       ))}

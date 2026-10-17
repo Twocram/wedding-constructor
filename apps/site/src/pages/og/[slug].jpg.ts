@@ -1,18 +1,21 @@
-import type { APIRoute, GetStaticPaths } from 'astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
-import { readFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
-import { dirname, join } from 'node:path';
-import satori from 'satori';
-import sharp from 'sharp';
+import type { APIRoute, GetStaticPaths } from 'astro'
+import type { CollectionEntry } from 'astro:content'
+import { Buffer } from 'node:buffer'
+import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
+import { dirname, join } from 'node:path'
+import process from 'node:process'
+import { getCollection } from 'astro:content'
+import satori from 'satori'
+import sharp from 'sharp'
 
 // карточка-превью ссылки 1200×630: первое, что гость видит в Telegram/WhatsApp до открытия приглашения
-const W = 1200;
-const H = 630;
-const PHOTO_W = 470;
+const W = 1200
+const H = 630
+const PHOTO_W = 470
 
-type Theme = CollectionEntry<'invitations'>['data']['theme'];
-type Look = { bg: string; text: string; muted: string; accent: string; font: string; italic?: boolean; upper?: boolean };
+type Theme = CollectionEntry<'invitations'>['data']['theme']
+interface Look { bg: string, text: string, muted: string, accent: string, font: string, italic?: boolean, upper?: boolean }
 
 // цвета — те же токены, что в Base.astro; у Marcellus нет кириллицы, для deco берём Prata
 const looks: Record<Theme, Look> = {
@@ -29,19 +32,20 @@ const looks: Record<Theme, Look> = {
   cinema: { bg: '#0b0a09', text: '#f2ece1', muted: '#91887b', accent: '#e0b36a', font: 'Oswald', upper: true },
   coquette: { bg: '#faeef1', text: '#432a31', muted: '#8f6d76', accent: '#b25a70', font: 'Playfair Display', italic: true },
   toile: { bg: '#f3f0e7', text: '#24344e', muted: '#6d7a90', accent: '#3a5a80', font: 'Cormorant Garamond' },
-};
+}
 
-const require = createRequire(import.meta.url);
+const require = createRequire(import.meta.url)
 // пакеты шрифтов поднимаются в корневой node_modules воркспейса — ищем их через резолвер, а не от cwd
-const fontDir = (pkg: string) => join(dirname(require.resolve(`@fontsource/${pkg}/package.json`)), 'files');
-const load = async (pkg: string, name: string, weight: 400 | 500, style: 'normal' | 'italic') =>
-  Promise.all(['latin', 'cyrillic'].map(async (subset) => ({
+const fontDir = (pkg: string) => join(dirname(require.resolve(`@fontsource/${pkg}/package.json`)), 'files')
+async function load(pkg: string, name: string, weight: 400 | 500, style: 'normal' | 'italic') {
+  return Promise.all(['latin', 'cyrillic'].map(async subset => ({
     // satori хранит шрифты по имени — одно имя на два сабсета затирает первый
     name: subset === 'latin' ? name : `${name} Cyr`,
     weight,
     style,
     data: await readFile(join(fontDir(pkg), `${pkg}-${subset}-${weight}-${style}.woff`)),
-  })));
+  })))
+}
 
 const fonts = (await Promise.all([
   load('jost', 'Jost', 400, 'normal'),
@@ -50,23 +54,24 @@ const fonts = (await Promise.all([
   load('cormorant-garamond', 'Cormorant Garamond', 400, 'italic'),
   load('prata', 'Prata', 400, 'normal'),
   load('oswald', 'Oswald', 400, 'normal'),
-])).flat();
+])).flat()
 
 export const getStaticPaths = (async () => {
-  const invitations = await getCollection('invitations');
-  return invitations.map((inv) => ({ params: { slug: inv.id }, props: { inv: inv.data } }));
-}) satisfies GetStaticPaths;
+  const invitations = await getCollection('invitations')
+  return invitations.map(inv => ({ params: { slug: inv.id }, props: { inv: inv.data } }))
+}) satisfies GetStaticPaths
 
-const family = (name: string) => `'${name}', '${name} Cyr'`;
+const family = (name: string) => `'${name}', '${name} Cyr'`
 
-type El = { type: string; props: Record<string, unknown> };
-const h = (type: string, style: Record<string, unknown>, children?: unknown, extra: Record<string, unknown> = {}): El =>
-  ({ type, props: { style, children, ...extra } });
+interface El { type: string, props: Record<string, unknown> }
+function h(type: string, style: Record<string, unknown>, children?: unknown, extra: Record<string, unknown> = {}): El {
+  return { type, props: { style, children, ...extra } }
+}
 
 export const GET: APIRoute = async ({ props }) => {
-  const { inv } = props as { inv: CollectionEntry<'invitations'>['data'] };
-  const look = looks[inv.theme];
-  const photo = inv.heroPhoto ?? inv.gallery?.[0];
+  const { inv } = props as { inv: CollectionEntry<'invitations'>['data'] }
+  const look = looks[inv.theme]
+  const photo = inv.heroPhoto ?? inv.gallery?.[0]
 
   const photoEl = photo
     ? h('img', { width: PHOTO_W, height: H, objectFit: 'cover' }, undefined, {
@@ -77,7 +82,7 @@ export const GET: APIRoute = async ({ props }) => {
         width: PHOTO_W,
         height: H,
       })
-    : null;
+    : null
 
   const nameStyle = {
     fontFamily: family(look.font),
@@ -87,8 +92,8 @@ export const GET: APIRoute = async ({ props }) => {
     letterSpacing: look.upper ? 4 : 0,
     textTransform: look.upper ? 'uppercase' : 'none',
     color: look.text,
-  };
-  const small = { fontFamily: family('Jost'), fontWeight: 500, fontSize: 22, letterSpacing: 5, textTransform: 'uppercase' };
+  }
+  const small = { fontFamily: family('Jost'), fontWeight: 500, fontSize: 22, letterSpacing: 5, textTransform: 'uppercase' }
 
   const text = h('div', {
     display: 'flex',
@@ -106,12 +111,12 @@ export const GET: APIRoute = async ({ props }) => {
     h('div', { width: 64, height: 1, background: look.accent, margin: '38px 0 26px' }),
     h('div', { fontFamily: family('Jost'), fontSize: 30, color: look.text }, inv.date),
     inv.city ? h('div', { ...small, fontWeight: 400, fontSize: 18, color: look.muted, marginTop: 10 }, inv.city) : null,
-  ].filter(Boolean));
+  ].filter(Boolean))
 
   const svg = await satori(
     h('div', { display: 'flex', width: W, height: H, background: look.bg }, [photoEl, text].filter(Boolean)) as never,
     { width: W, height: H, fonts },
-  );
-  const jpg = await sharp(Buffer.from(svg)).jpeg({ quality: 86, mozjpeg: true }).toBuffer();
-  return new Response(new Uint8Array(jpg), { headers: { 'Content-Type': 'image/jpeg' } });
-};
+  )
+  const jpg = await sharp(Buffer.from(svg)).jpeg({ quality: 86, mozjpeg: true }).toBuffer()
+  return new Response(new Uint8Array(jpg), { headers: { 'Content-Type': 'image/jpeg' } })
+}

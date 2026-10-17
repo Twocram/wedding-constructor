@@ -1,10 +1,11 @@
 ---
-import Section from './Section.astro';
+import Section from './Section.astro'
+
 interface Props {
-  name: string;
-  phone: string;
+  name: string
+  phone: string
 }
-const { name, phone } = Astro.props;
+const { name, phone } = Astro.props
 const tel = phone.replace(/[^+\d]/g, '');
 ---
 

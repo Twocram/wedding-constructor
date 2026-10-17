@@ -1,24 +1,24 @@
 ---
 // общий набор секций листающегося приглашения (тема cover); остальные темы собирают тело сами в src/themes/<theme>/Body.astro
-import type { CollectionEntry } from 'astro:content';
-import Section from './Section.astro';
-import Timeline from './Timeline.astro';
-import DressCode from './DressCode.astro';
-import RsvpForm from './RsvpForm.astro';
-import Countdown from './Countdown.astro';
-import Gallery from './Gallery.astro';
-import Venue from './Venue.astro';
-import Wishes from './Wishes.astro';
-import MonthCal from './MonthCal.astro';
-import Telegram from './Telegram.astro';
-import Organizer from './Organizer.astro';
-import AddToCalendar from './AddToCalendar.astro';
-import type { calendarEvent } from '../lib/calendar';
+import type { CollectionEntry } from 'astro:content'
+import type { calendarEvent } from '../lib/calendar'
+import AddToCalendar from './AddToCalendar.astro'
+import Countdown from './Countdown.astro'
+import DressCode from './DressCode.astro'
+import Gallery from './Gallery.astro'
+import MonthCal from './MonthCal.astro'
+import Organizer from './Organizer.astro'
+import RsvpForm from './RsvpForm.astro'
+import Section from './Section.astro'
+import Telegram from './Telegram.astro'
+import Timeline from './Timeline.astro'
+import Venue from './Venue.astro'
+import Wishes from './Wishes.astro'
 
 export interface Props {
-  inv: CollectionEntry<'invitations'>['data'];
-  slug: string;
-  cal: ReturnType<typeof calendarEvent>;
+  inv: CollectionEntry<'invitations'>['data']
+  slug: string
+  cal: ReturnType<typeof calendarEvent>
 }
 const { inv, slug, cal } = Astro.props;
 ---

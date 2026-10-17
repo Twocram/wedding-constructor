@@ -1,14 +1,14 @@
 ---
-import Head from './Head.astro';
+import Head from './Head.astro'
 // полезное для гостей: трансфер — корешок билета на паром, чат и организатор — маленькие карточки
 interface Props {
-  transfer?: string;
-  telegram?: { url: string; text: string };
-  organizer?: { name: string; phone: string };
+  transfer?: string
+  telegram?: { url: string, text: string }
+  organizer?: { name: string, phone: string }
 }
-const { transfer, telegram, organizer } = Astro.props;
+const { transfer, telegram, organizer } = Astro.props
 // время отправления вытаскиваем из текста, чтобы вынести его на корешок
-const departure = transfer?.match(/\b([01]?\d|2[0-3])[:.][0-5]\d\b/)?.[0]?.replace('.', ':');
+const departure = transfer?.match(/\b([01]?\d|2[0-3])[:.][0-5]\d\b/)?.[0]?.replace('.', ':')
 const tel = organizer?.phone.replace(/[^+\d]/g, '');
 ---
 
@@ -27,12 +27,14 @@ const tel = organizer?.phone.replace(/[^+\d]/g, '');
           <p class="am-ferry-text">{transfer}</p>
         </div>
         <div class="am-ferry-stub">
-          {departure ? (
+          {departure
+? (
             <>
               <span class="am-ferry-label">отплытие</span>
               <strong>{departure}</strong>
             </>
-          ) : (
+          )
+: (
             <span class="am-ferry-label">посадка по приглашению</span>
           )}
           <span class="am-ferry-no" aria-hidden="true">posto libero</span>

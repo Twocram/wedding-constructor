@@ -1,11 +1,12 @@
 ---
-import Section from './Section.astro';
+import Section from './Section.astro'
+
 interface Props {
-  name: string;
-  address: string;
-  mapIframe?: string;
+  name: string
+  address: string
+  mapIframe?: string
 }
-const { name, address, mapIframe } = Astro.props;
+const { name, address, mapIframe } = Astro.props
 const routeUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(`${name}, ${address}`)}`;
 ---
 

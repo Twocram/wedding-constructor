@@ -1,15 +1,16 @@
 ---
-import HeroMedia from './HeroMedia.astro';
-import ScrollHint from './ScrollHint.astro';
+import HeroMedia from './HeroMedia.astro'
+import ScrollHint from './ScrollHint.astro'
+
 interface Props {
-  groom: string;
-  bride: string;
-  date: string;
-  city?: string;
-  heroPhoto?: string;
-  heroVideo?: string;
+  groom: string
+  bride: string
+  date: string
+  city?: string
+  heroPhoto?: string
+  heroVideo?: string
 }
-const { groom, bride, date, city, heroPhoto , heroVideo} = Astro.props;
+const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
 ---
 
 <header class="hero-wc">

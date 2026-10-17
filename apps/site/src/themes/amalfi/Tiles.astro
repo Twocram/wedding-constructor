@@ -1,19 +1,19 @@
 ---
-import Head from './Head.astro';
+import Head from './Head.astro'
 // дресс-код — расписные керамические плитки: каждый цвет палитры — своя плитка с узором
 interface Props {
-  text: string;
-  colors?: string[];
+  text: string
+  colors?: string[]
 }
-const { text, colors = [] } = Astro.props;
+const { text, colors = [] } = Astro.props
 
 // узор рисуем светлой или тёмной «глазурью» — в зависимости от яркости плитки
-const isLight = (hex: string) => {
-  const h = hex.replace('#', '');
-  const full = h.length === 3 ? [...h].map((c) => c + c).join('') : h;
-  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55;
-};
+function isLight(hex: string) {
+  const h = hex.replace('#', '')
+  const full = h.length === 3 ? [...h].map(c => c + c).join('') : h
+  const [r, g, b] = [0, 2, 4].map(i => parseInt(full.slice(i, i + 2), 16) / 255)
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55
+}
 const motifs = [
   // четырёхлистник с угловыми дугами
   (c: string) => `<g fill='none' stroke='${c}' stroke-width='2.2' stroke-linecap='round'><path d='M50 18c10 12 10 20 0 32-10-12-10-20 0-32ZM50 82c10-12 10-20 0-32-10 12-10 20 0 32ZM18 50c12-10 20-10 32 0-12 10-20 10-32 0ZM82 50c-12-10-20-10-32 0 12 10 20 10 32 0Z'/><path d='M0 16a16 16 0 0 0 16-16M84 0a16 16 0 0 0 16 16M100 84a16 16 0 0 0-16 16M16 100A16 16 0 0 0 0 84'/></g><circle cx='50' cy='50' r='4' fill='${c}'/>`,
@@ -21,13 +21,13 @@ const motifs = [
   (c: string) => `<g fill='none' stroke='${c}' stroke-width='2.2' stroke-linejoin='round'><path d='M50 10 90 50 50 90 10 50Z'/><path d='M50 28 72 50 50 72 28 50Z'/></g><g fill='${c}'><circle cx='50' cy='50' r='5'/><circle cx='10' cy='10' r='3'/><circle cx='90' cy='10' r='3'/><circle cx='90' cy='90' r='3'/><circle cx='10' cy='90' r='3'/></g>`,
   // лимонная ветвь по диагонали
   (c: string) => `<g fill='none' stroke='${c}' stroke-width='2.2' stroke-linecap='round'><path d='M18 82C38 62 62 38 82 18'/><path d='M34 66c-2-10 4-16 12-16-1 9-6 14-12 16ZM50 50c-1-10 5-16 13-16-1 9-6 14-13 16ZM66 34c10 2 14 9 12 16-8-1-12-8-12-16ZM50 50c10 2 14 9 12 16-8-1-12-8-12-16Z'/><circle cx='26' cy='74' r='7'/></g>`,
-];
+]
 const tiles = colors.map((hex, i) => {
-  const ink = isLight(hex) ? 'rgba(20,40,70,.55)' : 'rgba(239,230,210,.5)';
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>${motifs[i % motifs.length](ink)}</svg>`;
+  const ink = isLight(hex) ? 'rgba(20,40,70,.55)' : 'rgba(239,230,210,.5)'
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>${motifs[i % motifs.length](ink)}</svg>`
   // «ручная» раскладка: лёгкий детерминированный поворот
-  const tilt = (((i * 37) % 7) - 3) * 0.6;
-  return { hex, bg: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, tilt };
+  const tilt = (((i * 37) % 7) - 3) * 0.6
+  return { hex, bg: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, tilt }
 });
 ---
 

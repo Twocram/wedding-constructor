@@ -1,12 +1,13 @@
 ---
 // дресс-код — таможенная декларация: пункты бланка, палитра наклейками на чемодан, штамп «досмотрено»
-import Sign from './Sign.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  text: string;
-  colors?: string[];
-  code: string;
+  text: string
+  colors?: string[]
+  code: string
 }
-const { text, colors, code } = Astro.props;
+const { text, colors, code } = Astro.props
 const tilts = [-6, 4, -2, 7, -4, 3];
 ---
 

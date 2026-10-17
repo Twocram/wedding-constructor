@@ -1,49 +1,54 @@
 ---
 // тема deco — «Великий Гэтсби, 1925»: чёрное с золотом, ступенчатые рамки, веера и лучи.
 // шрифты: Forum — цифры, имена и «&»; Poiret One — русские заголовки в разрядку; Jost — текст
-import type { Props } from '../../components/ClassicBody.astro';
-import RsvpFields from '../../components/RsvpFields.astro';
-import Frame from './Frame.astro';
-import Heading from './Heading.astro';
-import Dial from './Dial.astro';
+import type { Props } from '../../components/ClassicBody.astro'
+import RsvpFields from '../../components/RsvpFields.astro'
+import Dial from './Dial.astro'
+import Frame from './Frame.astro'
+import Heading from './Heading.astro'
 
-const { inv, slug, cal } = Astro.props;
+const { inv, slug, cal } = Astro.props
 
-const roman = (n: number) => {
-  const map: [number, string][] = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
-  let out = '';
-  for (const [v, s] of map) while (n >= v) { out += s; n -= v; }
-  return out;
-};
+function roman(n: number) {
+  const map: [number, string][] = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]
+  let out = ''
+  for (const [v, s] of map) {
+ while (n >= v) {
+   out += s
+   n -= v
+ }
+}
+  return out
+}
 
 // дата гравировкой: V · XII · MMXXVI; без ISO-даты — только год из строки
-const iso = inv.countdown ? new Date(inv.countdown.slice(0, 19)) : null;
-const validIso = iso && !Number.isNaN(iso.getTime()) ? iso : null;
-const yearMatch = inv.date.match(/\d{4}/);
+const iso = inv.countdown ? new Date(inv.countdown.slice(0, 19)) : null
+const validIso = iso && !Number.isNaN(iso.getTime()) ? iso : null
+const yearMatch = inv.date.match(/\d{4}/)
 const engraved = validIso
   ? `${roman(validIso.getDate())} · ${roman(validIso.getMonth() + 1)} · ${roman(validIso.getFullYear())}`
-  : yearMatch ? roman(Number(yearMatch[0])) : '';
+  : yearMatch ? roman(Number(yearMatch[0])) : ''
 
-const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : ''
 
 // веер дресс-кода: каждый цвет — сегмент полукруга, раскрываются по очереди
-const fanColors = inv.dressCode?.colors ?? [];
-const fanPt = (deg: number, r: number) => {
-  const a = (deg * Math.PI) / 180;
-  return `${(150 + r * Math.cos(a)).toFixed(2)} ${(150 + r * Math.sin(a)).toFixed(2)}`;
-};
-const fanStep = fanColors.length ? 180 / fanColors.length : 0;
+const fanColors = inv.dressCode?.colors ?? []
+function fanPt(deg: number, r: number) {
+  const a = (deg * Math.PI) / 180
+  return `${(150 + r * Math.cos(a)).toFixed(2)} ${(150 + r * Math.sin(a)).toFixed(2)}`
+}
+const fanStep = fanColors.length ? 180 / fanColors.length : 0
 const fanBlades = fanColors.map((color, i) => {
-  const a0 = 180 + i * fanStep;
-  const a1 = a0 + fanStep;
+  const a0 = 180 + i * fanStep
+  const a1 = a0 + fanStep
   return {
     color,
     angle: i * fanStep,
     d: `M${fanPt(a0, 30)}L${fanPt(a0, 138)}A138 138 0 0 1 ${fanPt(a1, 138)}L${fanPt(a1, 30)}A30 30 0 0 0 ${fanPt(a0, 30)}Z`,
-  };
-});
+  }
+})
 
-const arrowIcon = 'M4 12 12 4M6 4h6v6';
+const arrowIcon = 'M4 12 12 4M6 4h6v6'
 const calIcon = 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4';
 ---
 
@@ -78,9 +83,9 @@ const calIcon = 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4';
         <Frame class="dc-card fade-up">
           <svg class="dc-sunburst" viewBox="0 0 160 80" fill="none" stroke="currentColor" aria-hidden="true">
             {Array.from({ length: 19 }, (_, i) => {
-              const a = Math.PI + (i * Math.PI) / 18;
-              const r = i % 2 ? 58 : 76;
-              return <line x1={80 + 16 * Math.cos(a)} y1={78 + 16 * Math.sin(a)} x2={80 + r * Math.cos(a)} y2={78 + r * Math.sin(a)} stroke-width={i % 2 ? 0.6 : 1} />;
+              const a = Math.PI + (i * Math.PI) / 18
+              const r = i % 2 ? 58 : 76
+              return <line x1={80 + 16 * Math.cos(a)} y1={78 + 16 * Math.sin(a)} x2={80 + r * Math.cos(a)} y2={78 + r * Math.sin(a)} stroke-width={i % 2 ? 0.6 : 1} />
             })}
             <path d="M68 78a12 12 0 0 1 24 0" stroke-width="1" />
             <path d="M2 78.5h156" stroke-width="1" />
@@ -199,10 +204,13 @@ const calIcon = 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4';
                 <svg viewBox="0 0 80 80">
                   <circle cx="40" cy="40" r="38" />
                   <circle cx="40" cy="40" r="33" class="thin" />
-                  <path class="rays" d={Array.from({ length: 24 }, (_, k) => {
-                    const a = (k * Math.PI) / 12;
-                    return `M${(40 + 33 * Math.cos(a)).toFixed(2)} ${(40 + 33 * Math.sin(a)).toFixed(2)}L${(40 + 38 * Math.cos(a)).toFixed(2)} ${(40 + 38 * Math.sin(a)).toFixed(2)}`;
-                  }).join('')} />
+                  <path
+                    class="rays"
+                    d={Array.from({ length: 24 }, (_, k) => {
+                    const a = (k * Math.PI) / 12
+                    return `M${(40 + 33 * Math.cos(a)).toFixed(2)} ${(40 + 33 * Math.sin(a)).toFixed(2)}L${(40 + 38 * Math.cos(a)).toFixed(2)} ${(40 + 38 * Math.sin(a)).toFixed(2)}`
+                  }).join('')}
+                  />
                 </svg>
                 <b>{roman(i + 1)}</b>
               </span>

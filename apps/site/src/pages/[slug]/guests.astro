@@ -1,15 +1,15 @@
 ---
-import { getCollection } from 'astro:content';
-import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content'
+import Base from '../../layouts/Base.astro'
 
 // служебная страница пары: список гостей → личные ссылки вида /slug?g=Имя
 export async function getStaticPaths() {
-  const invitations = await getCollection('invitations');
-  return invitations.map((inv) => ({ params: { slug: inv.id }, props: { inv: inv.data } }));
+  const invitations = await getCollection('invitations')
+  return invitations.map(inv => ({ params: { slug: inv.id }, props: { inv: inv.data } }))
 }
 
-const { inv } = Astro.props;
-const { slug } = Astro.params;
+const { inv } = Astro.props
+const { slug } = Astro.params
 const base = new URL(`/${slug}`, Astro.site).href;
 ---
 
@@ -48,59 +48,70 @@ const base = new URL(`/${slug}`, Astro.site).href;
 </Base>
 
 <script>
-  const root = document.querySelector<HTMLElement>('.guests')!;
-  const base = root.dataset.base!;
-  const key = `guests:${root.dataset.slug}`;
-  const input = document.getElementById('guest-names') as HTMLTextAreaElement;
-  const list = document.getElementById('guest-links')!;
-  const bar = document.querySelector<HTMLElement>('.guests-bar')!;
-  const count = document.getElementById('guest-count')!;
-  const status = document.querySelector('.guests-status')!;
+const root = document.querySelector<HTMLElement>('.guests')!
+const base = root.dataset.base!
+const key = `guests:${root.dataset.slug}`
+const input = document.getElementById('guest-names') as HTMLTextAreaElement
+const list = document.getElementById('guest-links')!
+const bar = document.querySelector<HTMLElement>('.guests-bar')!
+const count = document.getElementById('guest-count')!
+const status = document.querySelector('.guests-status')!
 
-  const linkFor = (name: string) => `${base}?${new URLSearchParams({ g: name })}`;
-  const names = () => [...new Set(input.value.split('\n').map((n) => n.trim()).filter(Boolean))];
+const linkFor = (name: string) => `${base}?${new URLSearchParams({ g: name })}`
+const names = () => [...new Set(input.value.split('\n').map(n => n.trim()).filter(Boolean))]
 
-  const flash = (msg: string) => {
-    status.textContent = msg;
-    setTimeout(() => { if (status.textContent === msg) status.textContent = ''; }, 2000);
-  };
-  const copy = (text: string) =>
-    navigator.clipboard.writeText(text).then(() => flash('Скопировано'), () => flash('Не удалось скопировать'));
+function flash(msg: string) {
+  status.textContent = msg
+  setTimeout(() => {
+    if (status.textContent === msg)
+      status.textContent = ''
+  }, 2000)
+}
+function copy(text: string) {
+  return navigator.clipboard.writeText(text).then(() => flash('Скопировано'), () => flash('Не удалось скопировать'))
+}
 
-  const icon = (d: string) =>
-    `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="${d}"/></svg>`;
+function icon(d: string) {
+  return `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="${d}"/></svg>`
+}
 
-  const render = () => {
-    const all = names();
-    try { localStorage.setItem(key, input.value); } catch {}
-    bar.hidden = all.length === 0;
-    count.textContent = `Ссылок: ${all.length}`;
-    list.replaceChildren(...all.map((name) => {
-      const url = linkFor(name);
-      const msg = `${name}, приглашаем вас на нашу свадьбу!`;
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <div class="gl-text"><strong></strong><small></small></div>
-        <div class="gl-actions">
-          <button type="button" class="gl-btn" data-copy aria-label="Скопировать ссылку">${icon('M5 5V3h8v8h-2M3 5h8v8H3z')}</button>
-          <a class="gl-btn" target="_blank" rel="noopener" data-tg aria-label="Отправить в Telegram">TG</a>
-          <a class="gl-btn" target="_blank" rel="noopener" data-wa aria-label="Отправить в WhatsApp">WA</a>
-        </div>`;
-      // имена — пользовательский ввод: только textContent/атрибуты, без HTML
-      li.querySelector('strong')!.textContent = name;
-      li.querySelector('small')!.textContent = url;
-      li.querySelector<HTMLAnchorElement>('[data-tg]')!.href = `https://t.me/share/url?${new URLSearchParams({ url, text: msg })}`;
-      li.querySelector<HTMLAnchorElement>('[data-wa]')!.href = `https://wa.me/?${new URLSearchParams({ text: `${msg}\n${url}` })}`;
-      li.querySelector('[data-copy]')!.addEventListener('click', () => copy(url));
-      return li;
-    }));
-  };
+function render() {
+  const all = names()
+  try {
+    localStorage.setItem(key, input.value)
+  }
+  catch {}
+  bar.hidden = all.length === 0
+  count.textContent = `Ссылок: ${all.length}`
+  list.replaceChildren(...all.map((name) => {
+    const url = linkFor(name)
+    const msg = `${name}, приглашаем вас на нашу свадьбу!`
+    const li = document.createElement('li')
+    li.innerHTML = `
+      <div class="gl-text"><strong></strong><small></small></div>
+      <div class="gl-actions">
+        <button type="button" class="gl-btn" data-copy aria-label="Скопировать ссылку">${icon('M5 5V3h8v8h-2M3 5h8v8H3z')}</button>
+        <a class="gl-btn" target="_blank" rel="noopener" data-tg aria-label="Отправить в Telegram">TG</a>
+        <a class="gl-btn" target="_blank" rel="noopener" data-wa aria-label="Отправить в WhatsApp">WA</a>
+      </div>`
+    // имена — пользовательский ввод: только textContent/атрибуты, без HTML
+    li.querySelector('strong')!.textContent = name
+    li.querySelector('small')!.textContent = url
+    li.querySelector<HTMLAnchorElement>('[data-tg]')!.href = `https://t.me/share/url?${new URLSearchParams({ url, text: msg })}`
+    li.querySelector<HTMLAnchorElement>('[data-wa]')!.href = `https://wa.me/?${new URLSearchParams({ text: `${msg}\n${url}` })}`
+    li.querySelector('[data-copy]')!.addEventListener('click', () => copy(url))
+    return li
+  }))
+}
 
-  try { input.value = localStorage.getItem(key) ?? ''; } catch {}
-  input.addEventListener('input', render);
-  document.getElementById('copy-all')!.addEventListener('click', () =>
-    copy(names().map((n) => `${n} — ${linkFor(n)}`).join('\n')));
-  render();
+try {
+  input.value = localStorage.getItem(key) ?? ''
+}
+catch {}
+input.addEventListener('input', render)
+document.getElementById('copy-all')!.addEventListener('click', () =>
+  copy(names().map(n => `${n} — ${linkFor(n)}`).join('\n')))
+render()
 </script>
 
 <style>

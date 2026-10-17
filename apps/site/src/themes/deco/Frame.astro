@@ -1,16 +1,16 @@
 ---
 // двойная золотая рамка со ступенчатыми («зиккурат») углами — главный повтор темы
 interface Props {
-  class?: string;
-  style?: string;
-  tag?: 'div' | 'article' | 'figure' | 'aside';
+  class?: string
+  style?: string
+  tag?: 'div' | 'article' | 'figure' | 'aside'
 }
-const { class: cls, style, tag: Tag = 'div' } = Astro.props;
+const { class: cls, style, tag: Tag = 'div' } = Astro.props
 const corners = ['tl', 'tr', 'br', 'bl'];
 ---
 
 <Tag class:list={['dc-frame', cls]} style={style}>
-  {corners.map((c) => (
+  {corners.map(c => (
     <svg class={`dc-corner dc-corner--${c}`} viewBox="0 0 28 28" aria-hidden="true">
       {/* прячем прямые углы внутренней рамки, внешние срезает clip-path, поверх рисуем ступени */}
       <rect class="dc-corner-card" x="1.5" y="1.5" width="21" height="21" />

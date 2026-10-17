@@ -1,13 +1,13 @@
 ---
-import Head from './Head.astro';
+import Head from './Head.astro'
 // программа — маршрут лодки вдоль побережья: пунктирная волна от «порта» к «порту»
 interface Props {
-  items: { time: string; title: string; text?: string }[];
+  items: { time: string, title: string, text?: string }[]
 }
-const { items } = Astro.props;
-const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+const { items } = Astro.props
+const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
 // на десктопе маршрут идёт горизонтально, если остановок немного; иначе — вертикально, как на телефоне
-const across = items.length >= 2 && items.length <= 5;
+const across = items.length >= 2 && items.length <= 5
 const icon = (i: number) => (i === 0 ? 'boat' : i === items.length - 1 ? 'moon' : 'anchor');
 ---
 

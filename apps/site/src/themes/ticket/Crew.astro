@@ -1,12 +1,13 @@
 ---
 // организатор — служебный бейдж экипажа на ленте: «старший бортпроводник» с номером телефона
-import Sign from './Sign.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  name: string;
-  phone: string;
-  code: string;
+  name: string
+  phone: string
+  code: string
 }
-const { name, phone, code } = Astro.props;
+const { name, phone, code } = Astro.props
 const tel = phone.replace(/[^+\d]/g, '');
 ---
 

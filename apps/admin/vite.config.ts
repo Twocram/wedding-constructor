@@ -1,7 +1,7 @@
-import { fileURLToPath, URL } from 'node:url';
-import tailwindcss from '@tailwindcss/vite';
-import vue from '@vitejs/plugin-vue';
-import { defineConfig } from 'vite';
+import { fileURLToPath, URL } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
+import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
@@ -10,4 +10,4 @@ export default defineConfig({
   },
   // локально API — apps/api на :3000 (npm run dev:api)
   server: { port: 5173, proxy: { '/api': 'http://127.0.0.1:3000' } },
-});
+})

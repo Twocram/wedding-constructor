@@ -1,24 +1,34 @@
 ---
 // editorial — приглашение свёрстано как свадебный выпуск журнала: выходные данные, оглавление, рубрики с номерами полос
-import type { Props } from '../../components/ClassicBody.astro';
-import RsvpFields from '../../components/RsvpFields.astro';
-import SectionHead from './SectionHead.astro';
-import StyleNotes from './StyleNotes.astro';
+import type { Props } from '../../components/ClassicBody.astro'
+import RsvpFields from '../../components/RsvpFields.astro'
+import SectionHead from './SectionHead.astro'
+import StyleNotes from './StyleNotes.astro'
 
-const { inv, slug, cal } = Astro.props as Props;
+const { inv, slug, cal } = Astro.props as Props
 
 // «12 сентября 2027» → «Сентябрь 2027» для выходных данных номера
 const monthNames: Record<string, string> = {
-  января: 'Январь', февраля: 'Февраль', марта: 'Март', апреля: 'Апрель', мая: 'Май', июня: 'Июнь',
-  июля: 'Июль', августа: 'Август', сентября: 'Сентябрь', октября: 'Октябрь', ноября: 'Ноябрь', декабря: 'Декабрь',
-};
-const dateWords = inv.date.toLowerCase().split(/\s+/);
-const month = dateWords.map((w) => monthNames[w]).find(Boolean);
-const year = inv.date.match(/\d{4}/)?.[0];
-const issueDate = [month, year].filter(Boolean).join(' ') || inv.date;
-const couple = `${inv.groom} & ${inv.bride}`;
+  января: 'Январь',
+февраля: 'Февраль',
+марта: 'Март',
+апреля: 'Апрель',
+мая: 'Май',
+июня: 'Июнь',
+  июля: 'Июль',
+августа: 'Август',
+сентября: 'Сентябрь',
+октября: 'Октябрь',
+ноября: 'Ноябрь',
+декабря: 'Декабрь',
+}
+const dateWords = inv.date.toLowerCase().split(/\s+/)
+const month = dateWords.map(w => monthNames[w]).find(Boolean)
+const year = inv.date.match(/\d{4}/)?.[0]
+const issueDate = [month, year].filter(Boolean).join(' ') || inv.date
+const couple = `${inv.groom} & ${inv.bride}`
 
-const hasInfo = Boolean(inv.transfer || inv.telegramChat || inv.organizer);
+const hasInfo = Boolean(inv.transfer || inv.telegramChat || inv.organizer)
 // рубрики нумеруются по факту: пустые секции не оставляют дыр в оглавлении
 const chapters = [
   inv.welcome && { id: 'ed-letter', label: 'Письмо' },
@@ -29,24 +39,24 @@ const chapters = [
   inv.wishes?.length && { id: 'ed-wishes', label: 'Просьбы' },
   hasInfo && { id: 'ed-info', label: 'Полезное' },
   inv.rsvp && { id: 'ed-reply', label: 'Ответ' },
-].filter(Boolean) as { id: string; label: string }[];
-const folio = (id: string) => String(chapters.findIndex((c) => c.id === id) + 1).padStart(2, '0');
+].filter(Boolean) as { id: string, label: string }[]
+const folio = (id: string) => String(chapters.findIndex(c => c.id === id) + 1).padStart(2, '0')
 
 // вынос-цитата — первая фраза письма, как в журнальной колонке; у одной фразы выноса нет
-const sentences = inv.welcome?.split(/(?<=[.!?…])\s+/).filter(Boolean) ?? [];
-const pullQuote = sentences.length > 1 ? sentences[0] : null;
+const sentences = inv.welcome?.split(/(?<=[.!?…])\s+/).filter(Boolean) ?? []
+const pullQuote = sentences.length > 1 ? sentences[0] : null
 
 // строка под счётчиком: «суббота, 18 сентября 2027 · 15:30»; время «плавающее», как в календаре
-const countStart = inv.countdown ? new Date(`${inv.countdown.slice(0, 19)}Z`) : null;
-const countValid = countStart && !Number.isNaN(countStart.getTime());
-const weekday = countValid ? countStart.toLocaleDateString('ru-RU', { weekday: 'long', timeZone: 'UTC' }) : '';
-const startTime = countValid ? inv.countdown!.slice(11, 16) : '';
+const countStart = inv.countdown ? new Date(`${inv.countdown.slice(0, 19)}Z`) : null
+const countValid = countStart && !Number.isNaN(countStart.getTime())
+const weekday = countValid ? countStart.toLocaleDateString('ru-RU', { weekday: 'long', timeZone: 'UTC' }) : ''
+const startTime = countValid ? inv.countdown!.slice(11, 16) : ''
 
-const captions = ['Кадр из нашей истории', 'Из семейного архива', 'Мгновение вдвоём', 'Между кадрами', 'Где-то по дороге'];
+const captions = ['Кадр из нашей истории', 'Из семейного архива', 'Мгновение вдвоём', 'Между кадрами', 'Где-то по дороге']
 
 const routeUrl = inv.venue
   ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}`
-  : '';
+  : ''
 const arrow = 'M3 8h10M9 4l4 4-4 4';
 ---
 
@@ -306,37 +316,40 @@ const arrow = 'M3 8h10M9 4l4 4-4 4';
 </main>
 
 <script>
-  // обратный отсчёт с согласованием слов: «1 день», «3 дня», «11 дней»
-  document.querySelectorAll<HTMLElement>('.ed .ed-count').forEach((root) => {
-    const target = new Date(root.dataset.target ?? '').getTime();
-    if (Number.isNaN(target)) return;
-    const rules = new Intl.PluralRules('ru-RU');
-    const forms: Record<string, [string, string, string]> = {
-      days: ['день', 'дня', 'дней'],
-      hours: ['час', 'часа', 'часов'],
-      minutes: ['минута', 'минуты', 'минут'],
-      seconds: ['секунда', 'секунды', 'секунд'],
-    };
-    const word = (n: number, [one, few, many]: [string, string, string]) => {
-      const rule = rules.select(n);
-      return rule === 'one' ? one : rule === 'few' ? few : many;
-    };
-    const set = (unit: string, n: number) => {
-      const num = root.querySelector(`[data-unit="${unit}"]`);
-      const label = root.querySelector(`[data-word="${unit}"]`);
-      if (num) num.textContent = String(n);
-      if (label) label.textContent = word(n, forms[unit]);
-    };
-    const tick = () => {
-      const diff = Math.max(0, target - Date.now());
-      set('days', Math.floor(diff / 864e5));
-      set('hours', Math.floor(diff / 36e5) % 24);
-      set('minutes', Math.floor(diff / 6e4) % 60);
-      set('seconds', Math.floor(diff / 1e3) % 60);
-    };
-    tick();
-    setInterval(tick, 1000);
-  });
+// обратный отсчёт с согласованием слов: «1 день», «3 дня», «11 дней»
+document.querySelectorAll<HTMLElement>('.ed .ed-count').forEach((root) => {
+  const target = new Date(root.dataset.target ?? '').getTime()
+  if (Number.isNaN(target))
+    return
+  const rules = new Intl.PluralRules('ru-RU')
+  const forms: Record<string, [string, string, string]> = {
+    days: ['день', 'дня', 'дней'],
+    hours: ['час', 'часа', 'часов'],
+    minutes: ['минута', 'минуты', 'минут'],
+    seconds: ['секунда', 'секунды', 'секунд'],
+  }
+  const word = (n: number, [one, few, many]: [string, string, string]) => {
+    const rule = rules.select(n)
+    return rule === 'one' ? one : rule === 'few' ? few : many
+  }
+  const set = (unit: string, n: number) => {
+    const num = root.querySelector(`[data-unit="${unit}"]`)
+    const label = root.querySelector(`[data-word="${unit}"]`)
+    if (num)
+      num.textContent = String(n)
+    if (label)
+      label.textContent = word(n, forms[unit])
+  }
+  const tick = () => {
+    const diff = Math.max(0, target - Date.now())
+    set('days', Math.floor(diff / 864e5))
+    set('hours', Math.floor(diff / 36e5) % 24)
+    set('minutes', Math.floor(diff / 6e4) % 60)
+    set('seconds', Math.floor(diff / 1e3) % 60)
+  }
+  tick()
+  setInterval(tick, 1000)
+})
 </script>
 
 <style>

@@ -1,8 +1,8 @@
-import type { QueryClient } from '@tanstack/vue-query';
-import { createRouter, createWebHistory } from 'vue-router';
-import { loadSession } from '@/composables/useSession';
+import type { QueryClient } from '@tanstack/vue-query'
+import { createRouter, createWebHistory } from 'vue-router'
+import { loadSession } from '@/composables/useSession'
 
-export const createAppRouter = (queryClient: QueryClient) => {
+export function createAppRouter(queryClient: QueryClient) {
   const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -23,13 +23,15 @@ export const createAppRouter = (queryClient: QueryClient) => {
       },
       { path: '/:pathMatch(.*)*', redirect: { name: 'leads' } },
     ],
-  });
+  })
 
   router.beforeEach(async (to) => {
-    const user = await loadSession(queryClient);
-    if (!to.meta.public && !user) return { name: 'login', query: to.fullPath !== '/' ? { next: to.fullPath } : {} };
-    if (to.name === 'login' && user) return { name: 'leads' };
-  });
+    const user = await loadSession(queryClient)
+    if (!to.meta.public && !user)
+      return { name: 'login', query: to.fullPath !== '/' ? { next: to.fullPath } : {} }
+    if (to.name === 'login' && user)
+      return { name: 'leads' }
+  })
 
-  return router;
-};
+  return router
+}

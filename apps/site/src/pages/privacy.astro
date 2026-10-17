@@ -1,8 +1,9 @@
 ---
-import Base from '../layouts/Base.astro';
-import { leadFormEnabled, legal, orderTelegram } from '../site';
+import Base from '../layouts/Base.astro'
+import { leadFormEnabled, legal, orderTelegram } from '../site'
 
-if (!leadFormEnabled) return Astro.redirect('/');
+if (!leadFormEnabled)
+return Astro.redirect('/')
 
 const sections = [
   {
@@ -46,7 +47,7 @@ const sections = [
   {
     title: 'Ваши права',
     body: [
-      'Вы можете узнать, какие данные о вас у нас есть, попросить их уточнить или удалить, а также отозвать согласие. Пишите на ' + legal.email + ` или в Telegram @${orderTelegram} — ответим в течение 10 рабочих дней.`,
+      `Вы можете узнать, какие данные о вас у нас есть, попросить их уточнить или удалить, а также отозвать согласие. Пишите на ${legal.email} или в Telegram @${orderTelegram} — ответим в течение 10 рабочих дней.`,
     ],
   },
 ];
@@ -60,10 +61,10 @@ const sections = [
         <h1>Политика обработки персональных данных</h1>
         <p class="privacy-updated">Редакция от {legal.updated}</p>
       </header>
-      {sections.map((s) => (
+      {sections.map(s => (
         <section>
           <h2>{s.title}</h2>
-          {s.body.map((p) => <p>{p}</p>)}
+          {s.body.map(p => <p>{p}</p>)}
         </section>
       ))}
       <p class="privacy-back"><a href="/">← На главную</a></p>

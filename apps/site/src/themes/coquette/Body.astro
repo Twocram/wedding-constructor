@@ -1,13 +1,13 @@
 ---
 // тема coquette — «банты и жемчуг»: секции общие (ClassicBody), поверх — пудрово-розовая обёртка
-import type { CollectionEntry } from 'astro:content';
-import ClassicBody from '../../components/ClassicBody.astro';
-import type { calendarEvent } from '../../lib/calendar';
+import type { CollectionEntry } from 'astro:content'
+import type { calendarEvent } from '../../lib/calendar'
+import ClassicBody from '../../components/ClassicBody.astro'
 
 interface Props {
-  inv: CollectionEntry<'invitations'>['data'];
-  slug: string;
-  cal: ReturnType<typeof calendarEvent>;
+  inv: CollectionEntry<'invitations'>['data']
+  slug: string
+  cal: ReturnType<typeof calendarEvent>
 }
 const { inv, slug, cal } = Astro.props;
 ---

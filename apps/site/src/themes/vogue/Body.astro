@@ -1,13 +1,13 @@
 ---
 // тема vogue — «ч/б глянец»: огромные номера глав, асимметричная сетка, программа как call sheet показа
-import type { Props } from '../../components/ClassicBody.astro';
-import Countdown from '../../components/Countdown.astro';
-import AddToCalendar from '../../components/AddToCalendar.astro';
-import RsvpFields from '../../components/RsvpFields.astro';
+import type { Props } from '../../components/ClassicBody.astro'
+import AddToCalendar from '../../components/AddToCalendar.astro'
+import Countdown from '../../components/Countdown.astro'
+import RsvpFields from '../../components/RsvpFields.astro'
 
-const { inv, slug, cal } = Astro.props as Props;
+const { inv, slug, cal } = Astro.props as Props
 
-const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : '';
+const routeUrl = inv.venue ? `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}` : ''
 // главы нумеруются по факту: пустых секций в нумерации нет
 const chapters = [
   inv.welcome && 'letter',
@@ -19,7 +19,7 @@ const chapters = [
   inv.transfer && 'transfer',
   (inv.telegramChat || inv.organizer) && 'contacts',
   inv.rsvp && 'rsvp',
-].filter(Boolean) as string[];
+].filter(Boolean) as string[]
 const num = (id: string) => String(chapters.indexOf(id) + 1).padStart(2, '0');
 ---
 
@@ -209,24 +209,25 @@ const num = (id: string) => String(chapters.indexOf(id) + 1).padStart(2, '0');
 </main>
 
 <script>
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-  gsap.registerPlugin(ScrollTrigger);
-  const mm = gsap.matchMedia();
-  mm.add('(min-width: 720px) and (prefers-reduced-motion: no-preference)', () => {
-    const track = document.querySelector('.vg-runway-track');
-    const section = document.querySelector('.vg-runway');
-    if (!track || !section) return;
-    const dist = () => Math.max(0, track.scrollWidth - section.clientWidth + 40);
-    const st = { trigger: section, start: 'top top', end: () => `+=${dist()}`, scrub: 0.5, invalidateOnRefresh: true };
-    gsap.to(track, {
-      x: () => -dist(),
-      ease: 'none',
-      scrollTrigger: { ...st, pin: true },
-    });
-    gsap.to('.vg-progress i', { scaleX: 1, ease: 'none', scrollTrigger: st });
-  });
+gsap.registerPlugin(ScrollTrigger)
+const mm = gsap.matchMedia()
+mm.add('(min-width: 720px) and (prefers-reduced-motion: no-preference)', () => {
+  const track = document.querySelector('.vg-runway-track')
+  const section = document.querySelector('.vg-runway')
+  if (!track || !section)
+    return
+  const dist = () => Math.max(0, track.scrollWidth - section.clientWidth + 40)
+  const st = { trigger: section, start: 'top top', end: () => `+=${dist()}`, scrub: 0.5, invalidateOnRefresh: true }
+  gsap.to(track, {
+    x: () => -dist(),
+    ease: 'none',
+    scrollTrigger: { ...st, pin: true },
+  })
+  gsap.to('.vg-progress i', { scaleX: 1, ease: 'none', scrollTrigger: st })
+})
 </script>
 
 <style>

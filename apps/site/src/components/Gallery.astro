@@ -1,7 +1,8 @@
 ---
-import Section from './Section.astro';
+import Section from './Section.astro'
+
 interface Props {
-  photos: string[];
+  photos: string[]
 }
 const { photos } = Astro.props;
 ---
@@ -17,22 +18,24 @@ const { photos } = Astro.props;
 </Section>
 
 <script>
-  // карточки «ложатся» на стопку по одной, когда доскроллили до каждой
-  const cards = document.querySelectorAll('.stack .card');
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    cards.forEach((c) => c.classList.add('landed'));
-  } else {
-    const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          e.target.classList.add('landed');
-          io.unobserve(e.target);
-        }),
-      { threshold: 0.3, rootMargin: '0px 0px -10% 0px' }
-    );
-    cards.forEach((c) => io.observe(c));
-  }
+// карточки «ложатся» на стопку по одной, когда доскроллили до каждой
+const cards = document.querySelectorAll('.stack .card')
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  cards.forEach(c => c.classList.add('landed'))
+}
+else {
+  const io = new IntersectionObserver(
+    entries =>
+      entries.forEach((e) => {
+        if (!e.isIntersecting)
+          return
+        e.target.classList.add('landed')
+        io.unobserve(e.target)
+      }),
+    { threshold: 0.3, rootMargin: '0px 0px -10% 0px' },
+  )
+  cards.forEach(c => io.observe(c))
+}
 </script>
 
 <style>

@@ -1,22 +1,23 @@
 ---
 // место — багажная бирка: трёхбуквенный код города, люверс с верёвочкой, штрих-код и маршрут
-import Sign from './Sign.astro';
+import Sign from './Sign.astro'
+
 interface Props {
-  name: string;
-  address: string;
-  mapIframe?: string;
-  iata: string;
-  city?: string;
-  flight: string;
-  date: string;
-  code: string;
+  name: string
+  address: string
+  mapIframe?: string
+  iata: string
+  city?: string
+  flight: string
+  date: string
+  code: string
 }
-const { name, address, mapIframe, iata, city, flight, date, code } = Astro.props;
-const routeUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(`${name}, ${address}`)}`;
-const rand = (seed: number) => {
-  const x = Math.sin(seed * 91.7) * 43758.5453;
-  return x - Math.floor(x);
-};
+const { name, address, mapIframe, iata, city, flight, date, code } = Astro.props
+const routeUrl = `https://yandex.ru/maps/?text=${encodeURIComponent(`${name}, ${address}`)}`
+function rand(seed: number) {
+  const x = Math.sin(seed * 91.7) * 43758.5453
+  return x - Math.floor(x)
+}
 const bars = Array.from({ length: 34 }, (_, i) => 1 + Math.floor(rand(i + 3) * 3));
 ---
 
@@ -56,7 +57,7 @@ const bars = Array.from({ length: 34 }, (_, i) => 1 + Math.floor(rand(i + 3) * 3
           </dl>
 
           <div class="tag-foot">
-            <div class="tag-bars" aria-hidden="true">{bars.map((w) => <i style={`width:${w}px`} />)}</div>
+            <div class="tag-bars" aria-hidden="true">{bars.map(w => <i style={`width:${w}px`} />)}</div>
             <a class="tag-route" href={routeUrl} target="_blank" rel="noopener">
               Построить маршрут
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg>

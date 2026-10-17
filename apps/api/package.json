@@ -1,7 +1,7 @@
 {
   "name": "@saywed/api",
-  "private": true,
   "type": "module",
+  "private": true,
   "exports": {
     "./app": "./src/app.ts"
   },

@@ -122,6 +122,7 @@ bun run dev:api        # API на :3000, база в apps/api/data/
 bun run dev            # сайт на :4321, /api проксируется на API, форма включена
 bun run dev:admin      # админка на :5173, /api проксируется на API
 bun --filter @saywed/api cli create-user artyom "Артём"
+bun run lint           # ESLint (@antfu/eslint-config); bun run lint:fix — исправить и отформатировать
 ```
 
 Изменили схему в `apps/api/src/db/schema.ts` → `bun --filter @saywed/api db:generate` → закоммитить новый файл из `apps/api/drizzle/`. Миграции применяются при старте API.

@@ -1,13 +1,13 @@
 ---
-import { orderUrl, prices, rub } from '../site';
+import { orderUrl, prices, rub } from '../site'
 
 // поп-ап демо: что меняется в шаблоне и сколько стоит; оформляется токенами текущей темы
 interface Props {
-  slug: string;
-  theme: string;
-  themeName: string;
+  slug: string
+  theme: string
+  themeName: string
 }
-const { slug, theme, themeName } = Astro.props;
+const { slug, theme, themeName } = Astro.props
 
 const editable = [
   'Все фото и тексты, видео и музыку',
@@ -31,7 +31,7 @@ const editable = [
 
       <h3>Что можно изменить?</h3>
       <ul class="demo-info-list">
-        {editable.map((item) => <li>{item}</li>)}
+        {editable.map(item => <li>{item}</li>)}
       </ul>
       <p class="demo-info-warn">Шрифты в шаблоне не меняются — они часть дизайна</p>
 
@@ -57,30 +57,36 @@ const editable = [
 </dialog>
 
 <script>
-  const dialog = document.querySelector<HTMLDialogElement>('.demo-info');
-  if (dialog) {
-    const seenKey = `demo-info:${dialog.dataset.slug}`;
-    // Stories ставит автопролистывание на паузу, пока открыт любой диалог
-    const announce = () => document.dispatchEvent(new CustomEvent('overlay'));
-    const open = () => {
-      if (dialog.open) return;
-      dialog.showModal();
-      announce();
-    };
-
-    dialog.querySelectorAll('[data-close-demo-info]').forEach((b) => b.addEventListener('click', () => dialog.close()));
-    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
-    dialog.addEventListener('close', () => announce());
-    document.querySelectorAll('[data-open-demo-info]').forEach((b) => b.addEventListener('click', open));
-
-    // сам открывается при первом заходе в демо за сессию; по личной ссылке ?g= сначала показываем имя гостя
-    let seen = false;
-    try {
-      seen = sessionStorage.getItem(seenKey) === '1';
-      sessionStorage.setItem(seenKey, '1');
-    } catch {}
-    if (!seen && !new URLSearchParams(location.search).has('g')) setTimeout(open, 900);
+const dialog = document.querySelector<HTMLDialogElement>('.demo-info')
+if (dialog) {
+  const seenKey = `demo-info:${dialog.dataset.slug}`
+  // Stories ставит автопролистывание на паузу, пока открыт любой диалог
+  const announce = () => document.dispatchEvent(new CustomEvent('overlay'))
+  const open = () => {
+    if (dialog.open)
+      return
+    dialog.showModal()
+    announce()
   }
+
+  dialog.querySelectorAll('[data-close-demo-info]').forEach(b => b.addEventListener('click', () => dialog.close()))
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog)
+      dialog.close()
+  })
+  dialog.addEventListener('close', () => announce())
+  document.querySelectorAll('[data-open-demo-info]').forEach(b => b.addEventListener('click', open))
+
+  // сам открывается при первом заходе в демо за сессию; по личной ссылке ?g= сначала показываем имя гостя
+  let seen = false
+  try {
+    seen = sessionStorage.getItem(seenKey) === '1'
+    sessionStorage.setItem(seenKey, '1')
+  }
+  catch {}
+  if (!seen && !new URLSearchParams(location.search).has('g'))
+    setTimeout(open, 900)
+}
 </script>
 
 <style>

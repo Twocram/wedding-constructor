@@ -1,13 +1,13 @@
 ---
-import RsvpFields from '../../components/RsvpFields.astro';
-import Stars from './Stars.astro';
+import RsvpFields from '../../components/RsvpFields.astro'
+import Stars from './Stars.astro'
 // анкета — открытка-ответ «Risposta» на кремовой бумаге посреди ночного неба; логика отправки — в RsvpFields
 interface Props {
-  deadline: string;
-  groom: string;
-  bride: string;
-  drinks?: string[];
-  plusOne?: boolean;
+  deadline: string
+  groom: string
+  bride: string
+  drinks?: string[]
+  plusOne?: boolean
 }
 const { deadline, groom, bride, drinks, plusOne } = Astro.props;
 ---

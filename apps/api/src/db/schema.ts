@@ -1,8 +1,9 @@
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { contactMethods, eventTypes, leadSources, leadStatuses, products, type AmountBreakdown } from '@saywed/shared';
+import type { AmountBreakdown } from '@saywed/shared'
+import { contactMethods, eventTypes, leadSources, leadStatuses, products } from '@saywed/shared'
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
-const timestamp = (name: string) => integer(name, { mode: 'timestamp_ms' });
-const createdAt = () => timestamp('created_at').notNull().$defaultFn(() => new Date());
+const timestamp = (name: string) => integer(name, { mode: 'timestamp_ms' })
+const createdAt = () => timestamp('created_at').notNull().$defaultFn(() => new Date())
 
 export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -10,7 +11,7 @@ export const users = sqliteTable('users', {
   name: text('name').notNull(),
   passwordHash: text('password_hash').notNull(),
   createdAt: createdAt(),
-});
+})
 
 export const sessions = sqliteTable(
   'sessions',
@@ -21,8 +22,8 @@ export const sessions = sqliteTable(
     expiresAt: timestamp('expires_at').notNull(),
     createdAt: createdAt(),
   },
-  (t) => [index('sessions_user_idx').on(t.userId)],
-);
+  t => [index('sessions_user_idx').on(t.userId)],
+)
 
 export const leads = sqliteTable(
   'leads',
@@ -57,14 +58,14 @@ export const leads = sqliteTable(
     // имя, контакт и комментарий в нижнем регистре: lower() в SQLite не знает кириллицу, поэтому считаем в приложении
     search: text('search').notNull().default(''),
   },
-  (t) => [
+  t => [
     index('leads_status_idx').on(t.status),
     index('leads_created_idx').on(t.createdAt),
     index('leads_completed_idx').on(t.completedAt),
   ],
-);
+)
 
-export const leadEventTypes = ['created', 'status', 'comment', 'edit'] as const;
+export const leadEventTypes = ['created', 'status', 'comment', 'edit'] as const
 
 export const leadEvents = sqliteTable(
   'lead_events',
@@ -78,8 +79,8 @@ export const leadEvents = sqliteTable(
     authorId: integer('author_id').references(() => users.id, { onDelete: 'set null' }),
     createdAt: createdAt(),
   },
-  (t) => [index('lead_events_lead_idx').on(t.leadId)],
-);
+  t => [index('lead_events_lead_idx').on(t.leadId)],
+)
 
-export type LeadRow = typeof leads.$inferSelect;
-export type UserRow = typeof users.$inferSelect;
+export type LeadRow = typeof leads.$inferSelect
+export type UserRow = typeof users.$inferSelect

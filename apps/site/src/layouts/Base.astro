@@ -1,14 +1,14 @@
 ---
 interface Props {
-  title: string;
-  description?: string;
-  theme?: 'cover' | 'botanical' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories' | 'coquette' | 'toile';
-  image?: string;
-  noindex?: boolean;
+  title: string
+  description?: string
+  theme?: 'cover' | 'botanical' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories' | 'coquette' | 'toile'
+  image?: string
+  noindex?: boolean
 }
-const { title, description = 'Приглашение на свадьбу', theme = 'cover', image, noindex } = Astro.props;
+const { title, description = 'Приглашение на свадьбу', theme = 'cover', image, noindex } = Astro.props
 // og:image мессенджеры берут только по абсолютному URL
-const ogImage = image && Astro.site ? new URL(image, Astro.site).href : image;
+const ogImage = image && Astro.site ? new URL(image, Astro.site).href : image
 // каждая тема — свой набор гарнитур; Jost — общий текстовый шрифт
 const fontSets: Record<string, string> = {
   cover:
@@ -37,7 +37,7 @@ const fontSets: Record<string, string> = {
     'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap',
   cinema:
     'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@300;400;500&display=swap',
-};
+}
 // favicon: «&» в акцентном цвете темы
 const accents: Record<string, [string, string]> = {
   cover: ['%23f6f2ea', '%2378865a'],
@@ -53,9 +53,9 @@ const accents: Record<string, [string, string]> = {
   stories: ['%23b24f78', '%23ffffff'],
   coquette: ['%23faeef1', '%23b25a70'],
   toile: ['%23f3f0e7', '%233a5a80'],
-};
-const [favBg, favFg] = accents[theme];
-const themeColors: Record<string, string> = { cover: '#f6f2ea', botanical: '#f3f1e8', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000', coquette: '#faeef1', toile: '#f3f0e7' };
+}
+const [favBg, favFg] = accents[theme]
+const themeColors: Record<string, string> = { cover: '#f6f2ea', botanical: '#f3f1e8', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000', coquette: '#faeef1', toile: '#f3f0e7' }
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -86,75 +86,76 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     <slot />
     <div class="grain" aria-hidden="true"></div>
     <script>
-      // появление секций при скролле; --i задаёт каскад внутри группы
-      const io = new IntersectionObserver(
-        (entries) =>
-          entries.forEach((e) => {
-            if (!e.isIntersecting) return;
-            e.target.classList.add('visible');
-            io.unobserve(e.target);
-          }),
-        { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
-      );
-      document.querySelectorAll('.fade-up').forEach((el) => io.observe(el));
-    </script>
+// появление секций при скролле; --i задаёт каскад внутри группы
+const io = new IntersectionObserver(
+  entries =>
+    entries.forEach((e) => {
+      if (!e.isIntersecting)
+        return
+      e.target.classList.add('visible')
+      io.unobserve(e.target)
+    }),
+  { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
+)
+document.querySelectorAll('.fade-up').forEach(el => io.observe(el))
+</script>
     <script>
-      // GSAP только для scroll-linked параллакса (CSS так не умеет); reveals остаются на IO выше
-      import gsap from 'gsap';
-      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+// GSAP только для scroll-linked параллакса (CSS так не умеет); reveals остаются на IO выше
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        gsap.registerPlugin(ScrollTrigger);
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  gsap.registerPlugin(ScrollTrigger)
 
-        // hero-фото: глушим CSS-зум (конфликт transform), GSAP совмещает зум + параллакс
-        const hero = document.querySelector('header.hero, header.hero-ed, header.hero-am, header.hero-deco');
-        const heroImg = hero?.querySelector<HTMLElement>('.hero-photo, .hero-ed-arch img, .hero-am-frame img');
-        if (heroImg && hero) {
-          heroImg.style.animation = 'none';
-          gsap.fromTo(heroImg, { scale: 1 }, {
-            scale: 1.07,
-            duration: 24,
-            yoyo: true,
-            repeat: -1,
-            ease: 'sine.inOut',
-            // стопим вечный зум, пока hero за экраном
-            scrollTrigger: { trigger: hero, start: 'top bottom', end: 'bottom top', toggleActions: 'play pause resume pause' },
-          });
-          // сдвиг только у полноэкранного фото — у рамок-арок он рвёт рамку
-          if (heroImg.classList.contains('hero-photo')) {
-            gsap.to(heroImg, {
-              yPercent: 10,
-              ease: 'none',
-              scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
-            });
-          }
-        }
+  // hero-фото: глушим CSS-зум (конфликт transform), GSAP совмещает зум + параллакс
+  const hero = document.querySelector('header.hero, header.hero-ed, header.hero-am, header.hero-deco')
+  const heroImg = hero?.querySelector<HTMLElement>('.hero-photo, .hero-ed-arch img, .hero-am-frame img')
+  if (heroImg && hero) {
+    heroImg.style.animation = 'none'
+    gsap.fromTo(heroImg, { scale: 1 }, {
+      scale: 1.07,
+      duration: 24,
+      yoyo: true,
+      repeat: -1,
+      ease: 'sine.inOut',
+      // стопим вечный зум, пока hero за экраном
+      scrollTrigger: { trigger: hero, start: 'top bottom', end: 'bottom top', toggleActions: 'play pause resume pause' },
+    })
+    // сдвиг только у полноэкранного фото — у рамок-арок он рвёт рамку
+    if (heroImg.classList.contains('hero-photo')) {
+      gsap.to(heroImg, {
+        yPercent: 10,
+        ease: 'none',
+        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
+      })
+    }
+  }
 
-        // контент hero уплывает вверх и тает при скролле
-        const heroContent = hero?.querySelector<HTMLElement>('.hero-content, .hero-ed-text, .hero-am-text, .hero-deco-content');
-        if (hero && heroContent) {
-          // ждём CSS-интро: fill-режим анимации перекрывает inline-стили GSAP
-          gsap.delayedCall(2, () => {
-            heroContent.style.animation = 'none';
-            gsap.to(heroContent, {
-              y: -60,
-              opacity: 0,
-              ease: 'none',
-              scrollTrigger: { trigger: hero, start: 'top top', end: '70% top', scrub: true },
-            });
-          });
-        }
+  // контент hero уплывает вверх и тает при скролле
+  const heroContent = hero?.querySelector<HTMLElement>('.hero-content, .hero-ed-text, .hero-am-text, .hero-deco-content')
+  if (hero && heroContent) {
+    // ждём CSS-интро: fill-режим анимации перекрывает inline-стили GSAP
+    gsap.delayedCall(2, () => {
+      heroContent.style.animation = 'none'
+      gsap.to(heroContent, {
+        y: -60,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: { trigger: hero, start: 'top top', end: '70% top', scrub: true },
+      })
+    })
+  }
 
-        // лёгкий параллакс размытых фонов фото-секций
-        document.querySelectorAll('.section--photo .section-bg').forEach((bg) => {
-          gsap.fromTo(bg, { yPercent: -4 }, {
-            yPercent: 4,
-            ease: 'none',
-            scrollTrigger: { trigger: bg.parentElement!, start: 'top bottom', end: 'bottom top', scrub: true },
-          });
-        });
-      }
-    </script>
+  // лёгкий параллакс размытых фонов фото-секций
+  document.querySelectorAll('.section--photo .section-bg').forEach((bg) => {
+    gsap.fromTo(bg, { yPercent: -4 }, {
+      yPercent: 4,
+      ease: 'none',
+      scrollTrigger: { trigger: bg.parentElement!, start: 'top bottom', end: 'bottom top', scrub: true },
+    })
+  })
+}
+</script>
   </body>
 </html>
 

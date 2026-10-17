@@ -1,0 +1,23 @@
+[Unit]
+Description=saywed API (заявки, админка)
+After=network.target
+
+[Service]
+Type=simple
+User=saywed
+Group=saywed
+WorkingDirectory=/opt/saywed-api
+EnvironmentFile=/etc/saywed/api.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=on-failure
+RestartSec=3
+
+# процесс видит только свою базу и код
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/saywed
+
+[Install]
+WantedBy=multi-user.target

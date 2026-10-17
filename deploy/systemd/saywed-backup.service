@@ -1,0 +1,10 @@
+[Unit]
+Description=saywed: ночная копия базы
+
+[Service]
+Type=oneshot
+User=saywed
+Group=saywed
+WorkingDirectory=/opt/saywed-api
+EnvironmentFile=/etc/saywed/api.env
+ExecStart=/opt/saywed-api/backup.sh

@@ -1,6 +1,6 @@
 # Деплой
 
-Сайт (`apps/site`) — статика в `/var/www/wedding`, как и раньше. API (`apps/api`) — Node-процесс под systemd за nginx, база SQLite в `/var/lib/saywed`. Админка (`apps/admin`) — статика в `/var/www/admin` на `admin.saywed.ru`, ходит в тот же API.
+Сайт (`apps/site`) — статика в `/var/www/wedding`, как и раньше. API (`apps/api`) — один исполняемый файл (ElysiaJS, собран `bun build --compile`) под systemd за nginx, база SQLite в `/var/lib/saywed`. Админка (`apps/admin`) — статика в `/var/www/admin` на `admin.saywed.ru`, ходит в тот же API.
 
 GitHub Actions (`.github/workflows/deploy.yml`) при пуше в main деплоит только изменившееся приложение. Задачи API и админки выключены, пока не выполнена первичная настройка ниже: их включают переменные репозитория `API_DEPLOY_ENABLED` и `ADMIN_DEPLOY_ENABLED`.
 
@@ -8,13 +8,12 @@ GitHub Actions (`.github/workflows/deploy.yml`) при пуше в main депл
 
 Команды — от root. `deploy` ниже — пользователь из секрета `VPS_USER`, под которым CI заходит по SSH.
 
-### 1. Node 24 и пользователь сервиса
+### 1. Пользователь сервиса
+
+Ни Node, ни Bun на сервер ставить не нужно: рантайм Bun встроен в сам файл `saywed-api`.
 
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
-apt-get install -y nodejs
-node -v   # v24.x — та же мажорная версия, что в CI: от неё зависит бинарник better-sqlite3
-uname -m  # x86_64 — CI собирает better-sqlite3 под linux-x64; на arm64 нужен arm-раннер в CI
+uname -m  # x86_64 — CI собирает под bun-linux-x64; для arm64 поменять --target в apps/api/package.json
 
 useradd --system --home /var/lib/saywed --shell /usr/sbin/nologin saywed
 install -d -o saywed -g saywed -m 750 /var/lib/saywed
@@ -80,7 +79,7 @@ curl -s https://saywed.ru/api/health      # {"ok":true}
 
 ```bash
 cd /opt/saywed-api
-sudo -u saywed --preserve-env bash -c 'set -a; . /etc/saywed/api.env; node dist/cli.js create-user artyom "Артём"'
+sudo -u saywed --preserve-env bash -c 'set -a; . /etc/saywed/api.env; ./saywed-api create-user artyom "Артём"'
 ```
 
 Пароль выводится один раз. Сброс — `reset-password <login>`, список — `list-users`, последние заявки — `leads 20`.
@@ -117,12 +116,12 @@ RCLONE_REMOTE=s3:saywed-backups
 ## Локальная разработка
 
 ```bash
-npm install
-cp apps/api/.env.example apps/api/.env
-npm run dev:api        # API на :3000, база в apps/api/data/
-npm run dev            # сайт на :4321, /api проксируется на API, форма включена
-npm run dev:admin      # админка на :5173, /api проксируется на API
-npm run cli -w @saywed/api -- create-user artyom "Артём"
+bun install
+cp apps/api/.env.example apps/api/.env   # Bun читает .env сам
+bun run dev:api        # API на :3000, база в apps/api/data/
+bun run dev            # сайт на :4321, /api проксируется на API, форма включена
+bun run dev:admin      # админка на :5173, /api проксируется на API
+bun --filter @saywed/api cli create-user artyom "Артём"
 ```
 
-Изменили схему в `apps/api/src/db/schema.ts` → `npm run db:generate -w @saywed/api` → закоммитить новый файл из `apps/api/drizzle/`. Миграции применяются при старте API.
+Изменили схему в `apps/api/src/db/schema.ts` → `bun --filter @saywed/api db:generate` → закоммитить новый файл из `apps/api/drizzle/`. Миграции применяются при старте API.

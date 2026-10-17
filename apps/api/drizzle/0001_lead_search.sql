@@ -1,0 +1,1 @@
+ALTER TABLE `leads` ADD `search` text DEFAULT '' NOT NULL;

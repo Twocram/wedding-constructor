@@ -6,28 +6,21 @@
     "./app": "./src/app.ts"
   },
   "scripts": {
-    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
-    "cli": "tsx --env-file-if-exists=.env src/cli.ts",
+    "dev": "bun --watch src/main.ts",
+    "cli": "bun src/main.ts",
     "db:generate": "drizzle-kit generate",
-    "build": "node build.mjs",
-    "start": "node dist/server.js",
+    "build": "bun build src/main.ts --compile --minify --sourcemap --target=bun-linux-x64 --outfile dist/saywed-api",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/node-server": "^2.1.5",
-    "@hono/zod-validator": "^0.9.1",
-    "@saywed/shared": "*",
-    "better-sqlite3": "^13.0.3",
+    "@saywed/shared": "workspace:*",
     "drizzle-orm": "^0.45.4",
-    "hono": "^4.13.13",
+    "elysia": "^1.4.30",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^9.6.0",
-    "@types/node": "^26.6.5",
+    "@types/bun": "^1.4.3",
     "drizzle-kit": "^0.31.11",
-    "esbuild": "^0.28.2",
-    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }
 }

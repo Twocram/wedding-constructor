@@ -7,9 +7,9 @@ DIR=/var/lib/saywed/backups
 FILE="$DIR/saywed-$(date +%F).db"
 mkdir -p "$DIR"
 
-node /opt/saywed-api/dist/cli.js backup "$FILE"
+/opt/saywed-api/saywed-api backup "$FILE"
 # срок хранения из /privacy: отказные заявки старше 12 месяцев удаляем
-node /opt/saywed-api/dist/cli.js purge-lost 12
+/opt/saywed-api/saywed-api purge-lost 12
 gzip -f "$FILE"
 find "$DIR" -name 'saywed-*.db.gz' -mtime +30 -delete
 

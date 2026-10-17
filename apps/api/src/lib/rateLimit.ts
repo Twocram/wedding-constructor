@@ -1,13 +1,13 @@
-import { createHash } from 'node:crypto';
-import { getConnInfo } from '@hono/node-server/conninfo';
-import type { Context } from 'hono';
-import { createMiddleware } from 'hono/factory';
 import { env } from '../env';
 
-// API слушает только 127.0.0.1, поэтому X-Real-IP выставляет наш nginx, а не клиент
-export const clientIp = (c: Context) => c.req.header('x-real-ip') ?? getConnInfo(c).remote.address ?? 'unknown';
+type Server = { requestIP: (request: Request) => { address: string } | null } | null;
 
-export const ipHash = (c: Context) => createHash('sha256').update(env.ipSalt + clientIp(c)).digest('hex').slice(0, 32);
+// API слушает только 127.0.0.1, поэтому X-Real-IP выставляет наш nginx, а не клиент
+export const clientIp = (request: Request, server: Server) =>
+  request.headers.get('x-real-ip') ?? server?.requestIP(request)?.address ?? 'unknown';
+
+export const ipHash = (request: Request, server: Server) =>
+  new Bun.CryptoHasher('sha256').update(env.ipSalt + clientIp(request, server)).digest('hex').slice(0, 32);
 
 // процесс один, поэтому счётчики в памяти; nginx limit_req — первый рубеж
 export const rateLimit = ({ name, windowMs, max }: { name: string; windowMs: number; max: number }) => {
@@ -17,16 +17,16 @@ export const rateLimit = ({ name, windowMs, max }: { name: string; windowMs: num
     for (const [key, times] of hits) if (times.every((t) => now - t > windowMs)) hits.delete(key);
   }, windowMs).unref();
 
-  return createMiddleware(async (c, next) => {
-    const key = `${name}:${clientIp(c)}`;
+  return ({ request, server, set }: { request: Request; server: Server; set: { status?: number | string; headers: Record<string, string | number> } }) => {
+    const key = `${name}:${clientIp(request, server)}`;
     const now = Date.now();
     const recent = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
     if (recent.length >= max) {
-      c.header('Retry-After', String(Math.ceil((windowMs - (now - recent[0])) / 1000)));
-      return c.json({ ok: false, error: 'too_many_requests' }, 429);
+      set.status = 429;
+      set.headers['retry-after'] = String(Math.ceil((windowMs - (now - recent[0])) / 1000));
+      return { ok: false as const, error: 'too_many_requests' };
     }
     recent.push(now);
     hits.set(key, recent);
-    await next();
-  });
+  };
 };

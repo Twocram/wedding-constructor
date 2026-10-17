@@ -54,6 +54,8 @@ export const leads = sqliteTable(
     consentAt: timestamp('consent_at').notNull(),
     ipHash: text('ip_hash'),
     userAgent: text('user_agent'),
+    // имя, контакт и комментарий в нижнем регистре: lower() в SQLite не знает кириллицу, поэтому считаем в приложении
+    search: text('search').notNull().default(''),
   },
   (t) => [
     index('leads_status_idx').on(t.status),

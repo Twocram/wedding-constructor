@@ -23,6 +23,16 @@ export const leadListQuery = z.object({
 });
 export type LeadListQuery = z.input<typeof leadListQuery>;
 
+export const statsPeriods = ['month', 'quarter', 'year', 'all'] as const;
+export type StatsPeriod = (typeof statsPeriods)[number];
+export const statsPeriodLabels: Record<StatsPeriod, string> = {
+  month: 'Этот месяц',
+  quarter: '3 месяца',
+  year: '12 месяцев',
+  all: 'Всё время',
+};
+export const statsQuery = z.object({ period: z.enum(statsPeriods).default('month') });
+
 const money = z.number().int('Целое число рублей').min(0, 'Не меньше нуля').max(10_000_000, 'Слишком большая сумма');
 
 export const amountBreakdownSchema = z.object({

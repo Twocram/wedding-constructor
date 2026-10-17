@@ -1,18 +1,19 @@
 {
   "name": "saywed",
+  "packageManager": "bun@1.3.14",
   "private": true,
+  "scripts": {
+    "dev": "bun --filter @saywed/site dev",
+    "dev:api": "bun --filter @saywed/api dev",
+    "dev:admin": "bun --filter @saywed/admin dev",
+    "build": "bun --filter @saywed/site build",
+    "build:api": "bun --filter @saywed/api build",
+    "build:admin": "bun --filter @saywed/admin build",
+    "typecheck": "bun --filter '*' typecheck"
+  },
   "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "scripts": {
-    "dev": "npm run dev -w @saywed/site",
-    "dev:api": "npm run dev -w @saywed/api",
-    "dev:admin": "npm run dev -w @saywed/admin",
-    "build": "npm run build -w @saywed/site",
-    "build:api": "npm run build -w @saywed/api",
-    "build:admin": "npm run build -w @saywed/admin",
-    "typecheck": "npm run typecheck --workspaces --if-present"
-  }
+  ]
 }

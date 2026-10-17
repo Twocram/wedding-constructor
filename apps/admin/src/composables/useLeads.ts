@@ -16,11 +16,11 @@ export type LeadFilters = {
 
 const fetchLeads = (f: LeadFilters) =>
   unwrap(
-    api.admin.leads.$get({
+    api.admin.leads.get({
       query: {
         status: f.status,
-        page: String(f.page),
-        ...(f.pageSize && { pageSize: String(f.pageSize) }),
+        page: f.page,
+        pageSize: f.pageSize ?? 50,
         ...(f.q && { q: f.q }),
         ...(f.source && { source: f.source }),
         ...(f.product && { product: f.product }),
@@ -30,7 +30,7 @@ const fetchLeads = (f: LeadFilters) =>
     }),
   );
 
-const fetchLead = (id: number) => unwrap(api.admin.leads[':id'].$get({ param: { id: String(id) } }));
+const fetchLead = (id: number) => unwrap(api.admin.leads({ id }).get());
 
 export type LeadsPage = Awaited<ReturnType<typeof fetchLeads>>;
 export type LeadItem = LeadsPage['items'][number];
@@ -73,7 +73,7 @@ export const useUpdateLead = (id: MaybeRefOrGetter<number>) => {
   const invalidate = useInvalidateLead(id);
   return useMutation({
     mutationFn: (patch: LeadPatch) =>
-      unwrap(api.admin.leads[':id'].$patch({ param: { id: String(toValue(id)) }, json: patch })),
+      unwrap(api.admin.leads({ id: toValue(id) }).patch(patch)),
     onSuccess: invalidate,
   });
 };
@@ -82,7 +82,7 @@ export const useAddComment = (id: MaybeRefOrGetter<number>) => {
   const invalidate = useInvalidateLead(id);
   return useMutation({
     mutationFn: (text: string) =>
-      unwrap(api.admin.leads[':id'].comments.$post({ param: { id: String(toValue(id)) }, json: { text } })),
+      unwrap(api.admin.leads({ id: toValue(id) }).comments.post({ text })),
     onSuccess: invalidate,
   });
 };

@@ -1,5 +1,5 @@
 // Скриншоты первого экрана каждой темы для витрины: public/previews/<slug>.webp
-// Запуск: npm run build && npm run previews (поднимает astro preview сам)
+// Запуск: bun run build && bun run previews (поднимает astro preview сам)
 import { spawn } from 'node:child_process';
 import { readdir, mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';

@@ -256,7 +256,7 @@ import { orderTelegram } from '../site';
         }
         const body = await res.json().catch(() => ({}));
         if (res.status === 422 && body.errors) {
-          const rest = showErrors(body.errors);
+          const rest = showErrors(body.errors.fieldErrors ?? {});
           status.textContent = rest.length ? `Проверьте поля формы: ${rest.join('; ')}` : 'Проверьте поля формы';
         } else if (res.status === 429) {
           status.textContent = 'Слишком много попыток. Попробуйте позже или напишите нам в Telegram';

@@ -8,7 +8,8 @@ User=saywed
 Group=saywed
 WorkingDirectory=/opt/saywed-api
 EnvironmentFile=/etc/saywed/api.env
-ExecStart=/usr/bin/node dist/server.js
+# собранный bun build --compile: рантайм внутри файла
+ExecStart=/opt/saywed-api/saywed-api
 Restart=on-failure
 RestartSec=3
 

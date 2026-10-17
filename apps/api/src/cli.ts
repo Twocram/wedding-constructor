@@ -1,23 +1,25 @@
 // Служебные команды на сервере:
-//   node cli.js create-user <login> <имя>   — создать, пароль сгенерируется и выведется один раз
-//   node cli.js reset-password <login>      — новый пароль, все сессии пользователя сбрасываются
-//   node cli.js list-users
-//   node cli.js leads [N]                   — последние заявки с контактами (пока нет админки)
-//   node cli.js backup <файл>               — консистентная копия базы на ходу, без остановки API
-//   node cli.js purge-lost [месяцев]        — удалить отказные заявки старше N месяцев (по умолчанию 12)
+//   saywed-api create-user <login> <имя>   — создать, пароль сгенерируется и выведется один раз
+//   saywed-api reset-password <login>      — новый пароль, все сессии пользователя сбрасываются
+//   saywed-api list-users
+//   saywed-api leads [N]                   — последние заявки с контактами (пока нет админки)
+//   saywed-api backup <файл>               — консистентная копия базы на ходу, без остановки API
+//   saywed-api purge-lost [месяцев]        — удалить отказные заявки старше N месяцев (по умолчанию 12)
 import { and, desc, eq, lt } from 'drizzle-orm';
 import { contactMethodLabels, leadStatusLabels, productLabels } from '@saywed/shared';
 import { db, runMigrations, sqlite } from './db';
 import { leads, sessions, users } from './db/schema';
-import { generatePassword, hashPassword } from './lib/password';
 
-const [command, arg, ...rest] = process.argv.slice(2);
-const login = arg?.trim().toLowerCase();
+// пароль выводится один раз; хеш — argon2id из Bun.password
+const generatePassword = () => Buffer.from(crypto.getRandomValues(new Uint8Array(12))).toString('base64url');
 
 const fail = (message: string) => {
   console.error(message);
   process.exitCode = 1;
 };
+
+export const runCli = async ([command, arg, ...rest]: string[]) => {
+const login = arg?.trim().toLowerCase();
 
 // ночные задачи не трогают схему: таймер может сработать между выкладкой релиза и рестартом API
 if (command !== 'backup' && command !== 'purge-lost') runMigrations();
@@ -28,7 +30,7 @@ if (command === 'create-user') {
   else if (db.select().from(users).where(eq(users.login, login)).get()) fail(`Пользователь ${login} уже есть`);
   else {
     const password = generatePassword();
-    db.insert(users).values({ login, name, passwordHash: await hashPassword(password) }).run();
+    db.insert(users).values({ login, name, passwordHash: await Bun.password.hash(password) }).run();
     console.log(`Создан ${login} (${name}). Пароль: ${password}`);
   }
 } else if (command === 'reset-password') {
@@ -36,7 +38,7 @@ if (command === 'create-user') {
   if (!user) fail('Использование: reset-password <login> — пользователь не найден');
   else {
     const password = generatePassword();
-    db.update(users).set({ passwordHash: await hashPassword(password) }).where(eq(users.id, user.id)).run();
+    db.update(users).set({ passwordHash: await Bun.password.hash(password) }).where(eq(users.id, user.id)).run();
     db.delete(sessions).where(eq(sessions.userId, user.id)).run();
     console.log(`Новый пароль для ${login}: ${password}`);
   }
@@ -52,17 +54,19 @@ if (command === 'create-user') {
 } else if (command === 'backup') {
   if (!arg) fail('Использование: backup <файл>');
   else {
-    await sqlite.backup(arg);
+    // VACUUM INTO — целостная копия на ходу, API можно не останавливать
+    sqlite.run('VACUUM INTO ?', [arg]);
     console.log(`Копия базы: ${arg}`);
   }
 } else if (command === 'purge-lost') {
   const months = Number(arg) || 12;
   const before = new Date();
   before.setMonth(before.getMonth() - months);
-  const { changes } = db.delete(leads).where(and(eq(leads.status, 'lost'), lt(leads.updatedAt, before))).run();
-  console.log(`Удалено отказных заявок старше ${months} мес.: ${changes}`);
+  const removed = db.delete(leads).where(and(eq(leads.status, 'lost'), lt(leads.updatedAt, before))).returning({ id: leads.id }).all();
+  console.log(`Удалено отказных заявок старше ${months} мес.: ${removed.length}`);
 } else {
   fail('Команды: create-user <login> <имя> | reset-password <login> | list-users | leads [N] | backup <файл> | purge-lost [месяцев]');
 }
 
 sqlite.close();
+};

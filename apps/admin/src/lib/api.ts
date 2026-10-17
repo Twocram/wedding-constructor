@@ -1,14 +1,17 @@
-import type { AppType } from '@saywed/api/app';
-import { hc, type ClientResponse } from 'hono/client';
+import { treaty } from '@elysia/eden';
+import type { App } from '@saywed/api/app';
 
-// тот же origin: /api проксирует nginx (в dev — Vite), cookie сессии уходит сама
-export const api = hc<AppType>('/').api;
+// тот же origin: /api проксирует nginx (в dev — Vite), cookie сессии уходит сама.
+// parseDate выключен: иначе Eden превращает в Date любую похожую строку, включая дату события «2027-06-14»
+export const api = treaty<App>(window.location.origin, { parseDate: false }).api;
 
 type FieldErrors = Record<string, string[] | undefined>;
 
 const errorCodes: Record<string, string> = {
   not_found: 'Не найдено',
   unauthorized: 'Нужно войти заново',
+  forbidden: 'Запрос отклонён',
+  bad_request: 'Неверный запрос',
   too_many_requests: 'Слишком много попыток, попробуйте позже',
   internal_error: 'Ошибка сервера, попробуйте ещё раз',
 };
@@ -28,23 +31,15 @@ export const setUnauthorizedHandler = (fn: () => void) => {
   onUnauthorized = fn;
 };
 
-type Body<R> = R extends ClientResponse<infer T, number, string> ? T : never;
+type TreatyResult = { data: unknown; error: { value: unknown } | null; status: number };
 
-// успешное тело ответа или исключение с ошибками полей — компонентам не нужно разбирать коды
-export const unwrap = async <R extends ClientResponse<unknown, number, string>>(request: Promise<R>) => {
-  const res = await request;
-  const body = (await res.json().catch(() => ({}))) as {
-    ok?: boolean;
-    error?: string;
-    errors?: FieldErrors | { formErrors?: string[]; fieldErrors?: FieldErrors };
-  };
-  if (res.ok) return body as Extract<Body<R>, { ok: true }>;
-  if (res.status === 401) onUnauthorized();
-  const errors = body.errors ?? {};
-  if ('fieldErrors' in errors || 'formErrors' in errors) {
-    const e = errors as { formErrors?: string[]; fieldErrors?: FieldErrors };
-    throw new ApiError(res.status, e.fieldErrors, e.formErrors);
-  }
-  const message = typeof body.error === 'string' ? errorCodes[body.error] ?? body.error : undefined;
-  throw new ApiError(res.status, errors as FieldErrors, message ? [message] : []);
+// успешный ответ или исключение с ошибками полей — компонентам не нужно разбирать коды
+export const unwrap = async <R extends TreatyResult>(request: Promise<R>): Promise<NonNullable<R['data']>> => {
+  const { data, error, status } = await request;
+  if (!error) return data as NonNullable<R['data']>;
+  if (status === 401) onUnauthorized();
+  const body = (error.value ?? {}) as { error?: unknown; errors?: { formErrors?: string[]; fieldErrors?: FieldErrors } };
+  if (body.errors) throw new ApiError(status, body.errors.fieldErrors, body.errors.formErrors);
+  const message = typeof body.error === 'string' ? (errorCodes[body.error] ?? body.error) : undefined;
+  throw new ApiError(status, {}, message ? [message] : []);
 };

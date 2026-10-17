@@ -1,12 +1,10 @@
-import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
-import { Hono } from 'hono';
+import { Elysia, type Cookie } from 'elysia';
 import * as z from 'zod';
 import { db } from '../db';
 import { users } from '../db/schema';
-import { hashPassword, verifyPassword } from '../lib/password';
 import { rateLimit } from '../lib/rateLimit';
-import { endSession, requireAuth, startSession, type AuthEnv } from '../lib/session';
+import { auth, endSession, startSession } from '../lib/session';
 
 const credentials = z.object({
   login: z.string().trim().toLowerCase().min(1).max(64),
@@ -14,20 +12,24 @@ const credentials = z.object({
 });
 
 // сверяем и с несуществующим логином, чтобы по времени ответа нельзя было перебрать логины
-const dummyHash = hashPassword('timing-equalizer');
+const dummyHash = await Bun.password.hash('timing-equalizer');
 
-export const authRoutes = new Hono<AuthEnv>()
-  .post('/login', rateLimit({ name: 'login', windowMs: 15 * 60 * 1000, max: 10 }), zValidator('json', credentials), async (c) => {
-    const { login, password } = c.req.valid('json');
-    const user = db.select().from(users).where(eq(users.login, login)).get();
-    const ok = await verifyPassword(password, user?.passwordHash ?? (await dummyHash));
-    if (!user || !ok) return c.json({ ok: false as const, error: 'Неверный логин или пароль' }, 401);
+export const authRoutes = new Elysia({ prefix: '/auth' })
+  .use(auth)
+  .post(
+    '/login',
+    async ({ body: { login, password }, cookie, status }) => {
+      const user = db.select().from(users).where(eq(users.login, login)).get();
+      const ok = await Bun.password.verify(password, user?.passwordHash ?? dummyHash);
+      if (!user || !ok) return status(401, { ok: false as const, error: 'Неверный логин или пароль' });
 
-    startSession(c, user.id);
-    return c.json({ ok: true as const, user: { id: user.id, login: user.login, name: user.name } });
+      startSession(cookie.saywed_session as Cookie<string | undefined>, user.id);
+      return { ok: true as const, user: { id: user.id, login: user.login, name: user.name } };
+    },
+    { body: credentials, beforeHandle: rateLimit({ name: 'login', windowMs: 15 * 60 * 1000, max: 10 }) },
+  )
+  .post('/logout', ({ cookie }) => {
+    endSession(cookie.saywed_session as Cookie<string | undefined>);
+    return { ok: true as const };
   })
-  .post('/logout', (c) => {
-    endSession(c);
-    return c.json({ ok: true as const });
-  })
-  .get('/me', requireAuth, (c) => c.json({ ok: true as const, user: c.var.user }));
+  .get('/me', ({ user }) => ({ ok: true as const, user }), { auth: true });

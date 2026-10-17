@@ -1,25 +1,18 @@
-import { Hono } from 'hono';
-import { csrf } from 'hono/csrf';
-import { HTTPException } from 'hono/http-exception';
-import { env } from './env';
+import { Elysia } from 'elysia';
+import { errorHandler, originGuard } from './lib/http';
 import { adminRoutes } from './routes/admin';
 import { authRoutes } from './routes/auth';
 import { publicRoutes } from './routes/public';
+import { statsRoutes } from './routes/stats';
 
-export const app = new Hono()
-  .basePath('/api')
-  .use(csrf({ origin: env.allowedOrigins }))
-  .get('/health', (c) => c.json({ ok: true as const }))
-  .route('/public', publicRoutes)
-  .route('/auth', authRoutes)
-  .route('/admin', adminRoutes);
+export const app = new Elysia({ prefix: '/api' })
+  .use(errorHandler)
+  .use(originGuard)
+  .get('/health', () => ({ ok: true as const }))
+  .use(publicRoutes)
+  .use(authRoutes)
+  .use(adminRoutes)
+  .use(statsRoutes);
 
-app.notFound((c) => c.json({ ok: false, error: 'not_found' }, 404));
-app.onError((err, c) => {
-  if (err instanceof HTTPException) return err.getResponse();
-  console.error(`[api] ${c.req.method} ${c.req.path}:`, err);
-  return c.json({ ok: false, error: 'internal_error' }, 500);
-});
-
-// типы маршрутов для RPC-клиента админки: hc<AppType>
-export type AppType = typeof app;
+// типы маршрутов для Eden Treaty в админке: treaty<App>()
+export type App = typeof app;

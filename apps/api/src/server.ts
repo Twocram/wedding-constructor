@@ -1,19 +1,17 @@
-import { serve } from '@hono/node-server';
 import { app } from './app';
 import { runMigrations, sqlite } from './db';
 import { env } from './env';
 
+export const startServer = () => {
 runMigrations();
 
-const server = serve({ fetch: app.fetch, hostname: env.host, port: env.port }, (info) =>
-  console.log(`[api] слушаю http://${info.address}:${info.port}`),
-);
+app.listen({ hostname: env.host, port: env.port }, ({ hostname, port }) => console.log(`[api] слушаю http://${hostname}:${port}`));
 
-const shutdown = () => {
-  server.close(() => {
-    sqlite.close();
-    process.exit(0);
-  });
+const shutdown = async () => {
+  await app.stop();
+  sqlite.close();
+  process.exit(0);
 };
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
+};

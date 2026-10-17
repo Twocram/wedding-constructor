@@ -27,18 +27,18 @@ jobs:
             site:
               - 'apps/site/**'
               - 'packages/shared/**'
-              - 'package-lock.json'
+              - 'bun.lock'
             api:
               - 'apps/api/**'
               - 'deploy/backup.sh'
               - 'packages/shared/**'
-              - 'package-lock.json'
+              - 'bun.lock'
             admin:
               - 'apps/admin/**'
               # типы маршрутов API проверяются при сборке админки
               - 'apps/api/src/**'
               - 'packages/shared/**'
-              - 'package-lock.json'
+              - 'bun.lock'
 
   site:
     needs: changes
@@ -47,13 +47,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      # astro, vite и vue-tsc запускаются под Node
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
 
-      - run: npm ci
-      - run: npm run build
+      - run: bun install --frozen-lockfile
+      - run: bun run build
         env:
           PUBLIC_SITE_URL: https://saywed.ru
           # форма заявки включается переменной репозитория, когда API уже поднят на сервере
@@ -78,26 +82,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # та же мажорная версия Node, что на сервере: от неё зависит бинарник better-sqlite3
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 24
-          cache: npm
+          bun-version-file: package.json
 
-      - run: npm ci
-      - run: npm run typecheck -w @saywed/api
-      - run: npm run build:api
+      - run: bun install --frozen-lockfile
+      - run: bun --filter @saywed/api typecheck
+      # один исполняемый файл с рантаймом Bun внутри — на сервере не нужны ни Bun, ни node_modules
+      - run: bun run build:api
 
       - name: Assemble release
         run: |
           mkdir -p release
-          cp -r apps/api/dist apps/api/drizzle deploy/backup.sh release/
-          node -e "
-            const { version } = require('./node_modules/better-sqlite3/package.json');
-            const out = { name: 'saywed-api', private: true, type: 'module', dependencies: { 'better-sqlite3': version } };
-            require('fs').writeFileSync('release/package.json', JSON.stringify(out, null, 2));
-          "
-          cd release && npm install --omit=dev --no-audit --no-fund
+          cp apps/api/dist/saywed-api deploy/backup.sh release/
+          cp -r apps/api/drizzle release/
 
       - name: Rsync release and restart
         env:
@@ -125,13 +123,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      # astro, vite и vue-tsc запускаются под Node
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
 
-      - run: npm ci
-      - run: npm run build:admin
+      - run: bun install --frozen-lockfile
+      - run: bun run build:admin
 
       - name: Rsync dist to VPS
         env:

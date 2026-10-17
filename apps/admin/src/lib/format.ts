@@ -6,16 +6,18 @@ const dateTimeYear = new Intl.DateTimeFormat('ru-RU', { timeZone: TZ, day: 'nume
 const dateOnly = new Intl.DateTimeFormat('ru-RU', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' });
 const relative = new Intl.RelativeTimeFormat('ru-RU', { numeric: 'auto' });
 
-export const formatDateTime = (iso: string) => {
-  const d = new Date(iso);
+type DateLike = string | Date;
+
+export const formatDateTime = (value: DateLike) => {
+  const d = new Date(value);
   return (d.getFullYear() === new Date().getFullYear() ? dateTime : dateTimeYear).format(d);
 };
 
 // дата события хранится как YYYY-MM-DD без времени
 export const formatEventDate = (ymd: string) => dateOnly.format(new Date(`${ymd}T12:00:00+03:00`));
 
-export const formatAgo = (iso: string) => {
-  const minutes = Math.round((new Date(iso).getTime() - Date.now()) / 60000);
+export const formatAgo = (value: DateLike) => {
+  const minutes = Math.round((new Date(value).getTime() - Date.now()) / 60000);
   if (Math.abs(minutes) < 60) return relative.format(minutes, 'minute');
   const hours = Math.round(minutes / 60);
   if (Math.abs(hours) < 24) return relative.format(hours, 'hour');

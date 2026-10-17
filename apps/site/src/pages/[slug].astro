@@ -1,0 +1,234 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import HeroCover from '../components/HeroCover.astro';
+import HeroBotanical from '../components/HeroBotanical.astro';
+import HeroWatercolor from '../components/HeroWatercolor.astro';
+import HeroLuxe from '../components/HeroLuxe.astro';
+import HeroVogue from '../components/HeroVogue.astro';
+import HeroEditorial from '../components/HeroEditorial.astro';
+import HeroAmalfi from '../components/HeroAmalfi.astro';
+import HeroDeco from '../components/HeroDeco.astro';
+import HeroTicket from '../components/HeroTicket.astro';
+import HeroCoquette from '../components/HeroCoquette.astro';
+import HeroToile from '../components/HeroToile.astro';
+import Envelope from '../components/Envelope.astro';
+import ClassicBody from '../components/ClassicBody.astro';
+import EditorialBody from '../themes/editorial/Body.astro';
+import BotanicalBody from '../themes/botanical/Body.astro';
+import WatercolorBody from '../themes/watercolor/Body.astro';
+import LuxeBody from '../themes/luxe/Body.astro';
+import VogueBody from '../themes/vogue/Body.astro';
+import AmalfiBody from '../themes/amalfi/Body.astro';
+import DecoBody from '../themes/deco/Body.astro';
+import TicketBody from '../themes/ticket/Body.astro';
+import CoquetteBody from '../themes/coquette/Body.astro';
+import ToileBody from '../themes/toile/Body.astro';
+import Footer from '../components/Footer.astro';
+import Cinema from '../components/Cinema.astro';
+import Stories from '../components/Stories.astro';
+import DemoInfo from '../components/DemoInfo.astro';
+import LeadForm from '../components/LeadForm.astro';
+import { calendarEvent } from '../lib/calendar';
+import { themes, leadFormEnabled } from '../site';
+
+export async function getStaticPaths() {
+  const invitations = await getCollection('invitations');
+  return invitations.map((inv) => ({
+    params: { slug: inv.id },
+    props: { inv: inv.data },
+  }));
+}
+
+const { inv } = Astro.props;
+const title = `${inv.groom} & ${inv.bride}`;
+const slug = Astro.params.slug!;
+const cal = calendarEvent(inv, new URL(`/${slug}`, Astro.site).href);
+const heroes = { cover: HeroCover, botanical: HeroBotanical, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile };
+// cinema и stories — отдельные одноэкранные форматы, у них нет hero и ленты секций
+const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme];
+// у каждой темы своё тело страницы; cover — базовая классика на общих секциях
+const bodies = { cover: ClassicBody, botanical: BotanicalBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody };
+const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null;
+// день недели к дате на первом экране: «суббота, 3 октября 2026» — из ISO-даты таймера
+const weekday = inv.countdown
+  ? new Intl.DateTimeFormat('ru-RU', { weekday: 'long' }).format(new Date(inv.countdown))
+  : undefined;
+const heroDate = weekday ? `${weekday}, ${inv.date}` : inv.date;
+---
+
+<Base title={title} theme={inv.theme} image={`/og/${slug}.jpg`} description={`${title} — приглашение на свадьбу, ${inv.date}`}>
+  {inv.envelope && <Envelope groom={inv.groom} bride={inv.bride} photo={inv.envelopePhoto} />}
+  {/* без JS конверт бы навсегда закрыл страницу */}
+  {inv.envelope && <noscript><style is:inline>.envelope{display:none!important}</style></noscript>}
+
+  {inv.theme === 'cinema' && <Cinema inv={inv} slug={slug} google={cal?.google} />}
+  {inv.theme === 'stories' && <Stories inv={inv} slug={slug} google={cal?.google} />}
+
+  {Hero && <Hero groom={inv.groom} bride={inv.bride} date={heroDate} city={inv.city} heroPhoto={inv.heroPhoto} heroVideo={inv.heroVideo} />}
+
+  {Body && <Body inv={inv} slug={slug} cal={cal} />}
+
+  {Hero && <Footer groom={inv.groom} bride={inv.bride} date={inv.date} />}
+  {inv.demo && (
+    <nav class="demo-nav" aria-label="Демо">
+      <a class="back-home" href="/">← все темы</a>
+      <button type="button" class="demo-nav-info" data-open-demo-info>
+        <span aria-hidden="true">?</span>Цены
+      </button>
+    </nav>
+  )}
+  {inv.demo && <DemoInfo slug={slug} theme={inv.theme} themeName={themes[inv.theme].name} />}
+  {inv.demo && leadFormEnabled && <LeadForm />}
+
+  {inv.music && (
+    <button id="music-btn" aria-label="Включить музыку" aria-pressed="false">
+      <svg class="icon icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+        <path d="M9 18V5l11-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="17" cy="16" r="3" />
+      </svg>
+      <span class="icon icon-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    </button>
+    <audio id="music" src={inv.music} loop preload="none" />
+  )}
+</Base>
+
+<script>
+  // личное обращение: /slug?g=Анна — подставляем имя в тексты с data-guest и в поле анкеты
+  const guest = new URLSearchParams(location.search).get('g')?.trim().slice(0, 80);
+  if (guest) {
+    document.querySelectorAll<HTMLElement>('[data-guest]').forEach((el) => {
+      if (el.dataset.guest) el.textContent = el.dataset.guest.replace('{g}', guest);
+    });
+    document.querySelectorAll<HTMLInputElement>('input[data-guest-value]').forEach((el) => {
+      if (!el.value) el.value = guest;
+    });
+  }
+</script>
+
+<script>
+  const btn = document.getElementById('music-btn');
+  const audio = document.getElementById('music') as HTMLAudioElement | null;
+  const sync = () => {
+    if (!btn || !audio) return;
+    btn.classList.toggle('playing', !audio.paused);
+    btn.setAttribute('aria-pressed', String(!audio.paused));
+    btn.setAttribute('aria-label', audio.paused ? 'Включить музыку' : 'Выключить музыку');
+  };
+  btn?.addEventListener('click', () => {
+    if (!audio) return;
+    audio.paused ? audio.play().catch(() => {}) : audio.pause();
+  });
+  audio?.addEventListener('play', sync);
+  audio?.addEventListener('pause', sync);
+</script>
+
+<style>
+  .demo-nav {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    left: 20px;
+    z-index: calc(var(--z-envelope) + 1); /* над конвертом: цены доступны до его открытия */
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .back-home {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: inherit;
+    opacity: 0.5;
+    padding: 12px;
+    margin: -12px; /* тап-зона 40px+ при прежней визуальной позиции */
+    transition: opacity 0.3s;
+  }
+  .back-home:hover { opacity: 1; }
+  .demo-nav-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px 5px 5px;
+    border-radius: 99px;
+    border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    color: inherit;
+    font: inherit;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.3s, border-color 0.3s;
+  }
+  .demo-nav-info span {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.72rem;
+    letter-spacing: 0;
+  }
+  .demo-nav-info:hover { opacity: 1; border-color: var(--accent); }
+  /* пока закрыт фото-конверт — светлая навигация поверх тёмного снимка */
+  :global(body:has(.envelope-photo)) .demo-nav { color: #fbf7ef; }
+  :global(body:has(.envelope-photo)) .demo-nav-info { background: rgb(0 0 0 / 0.28); }
+
+  /* плавающая стеклянная кнопка музыки */
+  #music-btn {
+    position: fixed;
+    left: max(20px, env(safe-area-inset-left));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: var(--z-music);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    /* почти непрозрачный фон вместо backdrop-filter: блюр подложки на fixed-элементе пересчитывается каждый кадр скролла */
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    color: var(--text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.6s var(--ease), background-color 0.4s var(--ease);
+  }
+  #music-btn:hover { transform: translateY(-2px); }
+  #music-btn:active { transform: scale(0.96); }
+  #music-btn.playing { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  #music-btn .icon {
+    position: absolute;
+    inset: 0;
+    margin: auto; /* иначе svg с фикс. размером прилипает к левому верхнему углу */
+    display: grid;
+    place-items: center;
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+  }
+  #music-btn svg { width: 20px; height: 20px; }
+  #music-btn .icon-bars {
+    opacity: 0;
+    transform: scale(0.6);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    padding-bottom: 17px;
+  }
+  #music-btn .icon-bars i {
+    width: 2px;
+    height: 14px;
+    background: currentColor;
+    border-radius: 1px;
+    transform-origin: bottom;
+    animation: eq 1s ease-in-out infinite alternate;
+  }
+  #music-btn .icon-bars i:nth-child(2) { animation-delay: -0.3s; }
+  #music-btn .icon-bars i:nth-child(3) { animation-delay: -0.6s; }
+  #music-btn .icon-bars i:nth-child(4) { animation-delay: -0.15s; }
+  @keyframes eq { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+  #music-btn.playing .icon-play { opacity: 0; transform: scale(0.6); }
+  #music-btn.playing .icon-bars { opacity: 1; transform: scale(1); }
+</style>

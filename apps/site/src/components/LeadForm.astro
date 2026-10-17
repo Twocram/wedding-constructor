@@ -1,0 +1,415 @@
+---
+import { contactMethodLabels, contactMethods, eventTypeLabels, eventTypes, prices, productLabels, products, themes } from '@saywed/shared';
+import { orderTelegram } from '../site';
+
+// диалог заявки: открывается любой кнопкой с data-lead, контекст кнопки (тема, продукт, источник) подставляется в поля
+---
+
+<dialog class="lead" aria-labelledby="lead-title" data-prices={JSON.stringify(prices)}>
+  <div class="plate">
+    <div class="plate-inner lead-body" tabindex="-1" autofocus>
+      <button type="button" class="lead-close" data-close-lead aria-label="Закрыть">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" /></svg>
+      </button>
+
+      <form class="lead-form" novalidate>
+        <p class="lead-kicker">Заявка</p>
+        <h2 id="lead-title">Расскажите о празднике</h2>
+        <p class="lead-intro">Ответим в течение дня и соберём приглашение под вас.</p>
+
+        <div class="lead-seg" role="radiogroup" aria-label="Что нужно">
+          {products.map((p) => (
+            <label><input type="radio" name="product" value={p} checked={p === 'unsure'} /><span>{productLabels[p]}</span></label>
+          ))}
+        </div>
+
+        <label class="field">
+          <span>Имя</span>
+          <input name="name" type="text" required maxlength="80" autocomplete="name" placeholder="Как к вам обращаться" />
+          <small class="lead-err" data-err="name"></small>
+        </label>
+
+        <div class="field">
+          <span id="lead-method-label">Где удобнее ответить</span>
+          <div class="lead-seg lead-seg--sm" role="radiogroup" aria-labelledby="lead-method-label">
+            {contactMethods.map((m) => (
+              <label><input type="radio" name="contactMethod" value={m} checked={m === 'telegram'} /><span>{contactMethodLabels[m]}</span></label>
+            ))}
+          </div>
+        </div>
+
+        <label class="field">
+          <span data-contact-label>Ник или телефон</span>
+          <input name="contact" type="text" required maxlength="80" autocomplete="off" placeholder="@username или +7 999 000-00-00" />
+          <small class="lead-err" data-err="contact"></small>
+        </label>
+
+        <details class="lead-more">
+          <summary>Подробнее о празднике <span>необязательно</span></summary>
+          <div class="lead-more-in">
+            <label class="field" data-only="template">
+              <span>Дизайн</span>
+              <select name="themeSlug">
+                <option value="">Ещё выбираю</option>
+                {Object.entries(themes).map(([key, t]) => <option value={key}>{t.name}</option>)}
+              </select>
+            </label>
+            <div class="lead-row">
+              <label class="field">
+                <span>Событие</span>
+                <select name="eventType">
+                  {eventTypes.map((e) => <option value={e}>{eventTypeLabels[e]}</option>)}
+                </select>
+              </label>
+              <label class="field">
+                <span>Дата</span>
+                <input name="eventDate" type="date" />
+                <small class="lead-err" data-err="eventDate"></small>
+              </label>
+            </div>
+            <label class="field">
+              <span>Гостей с именными ссылками</span>
+              <input name="namedLinks" type="number" min="0" max="1000" inputmode="numeric" placeholder="0" />
+              <small class="lead-hint" data-estimate></small>
+              <small class="lead-err" data-err="namedLinks"></small>
+            </label>
+            <label class="field">
+              <span>Комментарий</span>
+              <textarea name="message" rows="3" maxlength="2000" placeholder="Идея, пожелания, вопросы"></textarea>
+            </label>
+          </div>
+        </details>
+
+        <label class="lead-consent">
+          <input type="checkbox" name="consent" required />
+          <i aria-hidden="true"></i>
+          <span>Соглашаюсь на <a href="/privacy" target="_blank" rel="noopener">обработку персональных данных</a></span>
+        </label>
+        <small class="lead-err" data-err="consent"></small>
+
+        <input class="lead-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+        <button type="submit" class="btn btn--block">
+          Отправить заявку
+          <span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 8h10M9 4l4 4-4 4" /></svg></span>
+        </button>
+        <p class="lead-status" role="status"></p>
+        <p class="lead-alt">Или напишите в Telegram — <a href={`https://t.me/${orderTelegram}`} target="_blank" rel="noopener">@{orderTelegram}</a></p>
+      </form>
+
+      <div class="lead-done" hidden>
+        <span class="lead-done-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+        </span>
+        <h2>Заявка отправлена</h2>
+        <p>Свяжемся с вами в течение дня. Если не терпится — пишите в Telegram <a href={`https://t.me/${orderTelegram}`} target="_blank" rel="noopener">@{orderTelegram}</a>.</p>
+        <button type="button" class="btn" data-close-lead>Хорошо</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  type Prices = { template: number; custom: number; named: number };
+  const UTM_KEY = 'saywed:utm';
+
+  // метки рекламы и внешний источник перехода запоминаем при первом заходе: заявку оставят позже, с другой страницы
+  try {
+    const params = new URLSearchParams(location.search);
+    const external = document.referrer && new URL(document.referrer).host !== location.host ? document.referrer : undefined;
+    if (!sessionStorage.getItem(UTM_KEY) && (params.has('utm_source') || external)) {
+      sessionStorage.setItem(UTM_KEY, JSON.stringify({
+        utmSource: params.get('utm_source') ?? undefined,
+        utmMedium: params.get('utm_medium') ?? undefined,
+        utmCampaign: params.get('utm_campaign') ?? undefined,
+        referrer: external,
+      }));
+    }
+  } catch {}
+
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.lead');
+  if (dialog) {
+    const form = dialog.querySelector<HTMLFormElement>('.lead-form')!;
+    const done = dialog.querySelector<HTMLElement>('.lead-done')!;
+    const status = form.querySelector<HTMLElement>('.lead-status')!;
+    const submit = form.querySelector<HTMLButtonElement>('[type="submit"]')!;
+    const more = form.querySelector<HTMLDetailsElement>('.lead-more')!;
+    const contact = form.elements.namedItem('contact') as HTMLInputElement;
+    const named = form.elements.namedItem('namedLinks') as HTMLInputElement;
+    const theme = form.elements.namedItem('themeSlug') as HTMLSelectElement;
+    const estimate = form.querySelector<HTMLElement>('[data-estimate]')!;
+    const prices: Prices = JSON.parse(dialog.dataset.prices!);
+    let source = 'other';
+    let openedAt = 0;
+
+    const value = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | RadioNodeList).value.trim();
+    const setRadio = (name: string, v: string | undefined) => {
+      const input = form.querySelector<HTMLInputElement>(`input[name="${name}"][value="${v}"]`);
+      if (input) input.checked = true;
+    };
+    // возвращает ошибки полей, для которых в форме нет места, — их показываем в строке статуса
+    const showErrors = (errors: Record<string, string[] | undefined>) => {
+      const slots = new Set<string>();
+      form.querySelectorAll<HTMLElement>('[data-err]').forEach((el) => {
+        slots.add(el.dataset.err!);
+        el.textContent = errors[el.dataset.err!]?.[0] ?? '';
+      });
+      if (Object.keys(errors).some((k) => slots.has(k) && ['eventDate', 'namedLinks'].includes(k))) more.open = true;
+      return Object.entries(errors).filter(([k]) => !slots.has(k)).flatMap(([, v]) => v ?? []);
+    };
+
+    const sync = () => {
+      const product = value('product');
+      form.querySelectorAll<HTMLElement>('[data-only]').forEach((el) => { el.hidden = el.dataset.only !== product; });
+      const method = value('contactMethod');
+      form.querySelector('[data-contact-label]')!.textContent = method === 'telegram' ? 'Ник или телефон' : 'Номер телефона';
+      contact.placeholder = method === 'telegram' ? '@username или +7 999 000-00-00' : '+7 999 000-00-00';
+      contact.inputMode = method === 'telegram' ? 'text' : 'tel';
+      contact.autocomplete = method === 'telegram' ? 'off' : 'tel';
+      const n = Math.max(0, Math.round(Number(named.value) || 0));
+      estimate.textContent = product === 'template' && n > 0
+        ? `Ориентир: ${(prices.template + n * prices.named).toLocaleString('ru-RU')} ₽ — шаблон и ${n} именных ссылок`
+        : `+${prices.named} ₽ за гостя`;
+    };
+    form.addEventListener('input', sync);
+    form.addEventListener('change', sync);
+
+    const open = (data: DOMStringMap) => {
+      document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach((d) => d !== dialog && d.close());
+      form.hidden = false;
+      done.hidden = true;
+      status.textContent = '';
+      showErrors({});
+      source = data.leadSource ?? 'other';
+      // контекст прошлой кнопки не переносим: «Написать нам» после карточки темы — уже без темы
+      setRadio('product', data.leadProduct ?? 'unsure');
+      theme.value = data.leadTheme ?? '';
+      named.value = data.leadNamed ?? '';
+      more.open = Boolean(data.leadTheme || data.leadNamed);
+      sync();
+      // время заполнения — с первого открытия за визит: случайно закрытую и открытую заново форму не считаем ботом
+      openedAt ||= Date.now();
+      dialog.showModal();
+      document.dispatchEvent(new CustomEvent('overlay'));
+    };
+
+    document.addEventListener('click', (e) => {
+      const trigger = (e.target as Element).closest<HTMLElement>('[data-lead]');
+      // Ctrl/Cmd-клик — открыть Telegram в новой вкладке, как обычную ссылку
+      if (!trigger || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      // калькулятор цен передаёт текущее число гостей
+      const calc = trigger.dataset.leadNamedFrom ? document.querySelector<HTMLInputElement>(trigger.dataset.leadNamedFrom) : null;
+      open(calc ? { ...trigger.dataset, leadNamed: calc.value } : trigger.dataset);
+    });
+    dialog.querySelectorAll('[data-close-lead]').forEach((b) => b.addEventListener('click', () => dialog.close()));
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => document.dispatchEvent(new CustomEvent('overlay')));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errors: Record<string, string[]> = {};
+      if (value('name').length < 2) errors.name = ['Как к вам обращаться?'];
+      if (value('contact').length < 3) errors.contact = ['Укажите контакт'];
+      if (!(form.elements.namedItem('consent') as HTMLInputElement).checked) errors.consent = ['Нужно согласие на обработку данных'];
+      showErrors(errors);
+      if (Object.keys(errors).length) {
+        form.querySelector<HTMLElement>('[data-err]:not(:empty)')?.closest('label')?.querySelector<HTMLElement>('input')?.focus();
+        return;
+      }
+
+      let utm = {};
+      try { utm = JSON.parse(sessionStorage.getItem(UTM_KEY) ?? '{}'); } catch {}
+      const product = value('product');
+      const n = Math.round(Number(named.value) || 0);
+      const payload = {
+        name: value('name'),
+        contactMethod: value('contactMethod'),
+        contact: value('contact'),
+        product,
+        eventType: value('eventType'),
+        eventDate: value('eventDate') || undefined,
+        themeSlug: product === 'template' && theme.value ? theme.value : undefined,
+        namedLinks: n > 0 ? n : undefined,
+        message: value('message') || undefined,
+        source,
+        sourcePath: location.pathname,
+        consent: true,
+        website: value('website') || undefined,
+        elapsedMs: Date.now() - openedAt,
+        ...utm,
+      };
+
+      submit.disabled = true;
+      status.textContent = 'Отправляем…';
+      try {
+        const res = await fetch('/api/public/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          form.reset();
+          form.hidden = true;
+          done.hidden = false;
+          return;
+        }
+        const body = await res.json().catch(() => ({}));
+        if (res.status === 422 && body.errors) {
+          const rest = showErrors(body.errors);
+          status.textContent = rest.length ? `Проверьте поля формы: ${rest.join('; ')}` : 'Проверьте поля формы';
+        } else if (res.status === 429) {
+          status.textContent = 'Слишком много попыток. Попробуйте позже или напишите нам в Telegram';
+        } else {
+          throw new Error(String(res.status));
+        }
+      } catch {
+        status.textContent = 'Не получилось отправить. Напишите нам в Telegram — ответим так же быстро';
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .lead {
+    width: min(100% - 32px, 480px);
+    max-height: calc(100dvh - 32px);
+    padding: 0;
+    margin: auto;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    overflow: visible;
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+    transition: opacity 0.45s var(--ease), transform 0.6s var(--ease), overlay 0.6s allow-discrete, display 0.6s allow-discrete;
+  }
+  .lead[open] { opacity: 1; transform: none; }
+  @starting-style {
+    .lead[open] { opacity: 0; transform: translateY(16px) scale(0.97); }
+  }
+  .lead::backdrop {
+    background: color-mix(in srgb, #0d0b09 55%, transparent);
+    opacity: 0;
+    transition: opacity 0.45s var(--ease), overlay 0.45s allow-discrete, display 0.45s allow-discrete;
+  }
+  .lead[open]::backdrop { opacity: 1; }
+  @starting-style {
+    .lead[open]::backdrop { opacity: 0; }
+  }
+
+  .lead-body {
+    position: relative;
+    max-height: calc(100dvh - 46px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .lead-body:focus { outline: none; }
+  .lead-form { display: grid; gap: 16px; }
+  .lead-form[hidden], .lead-done[hidden], .lead [data-only][hidden] { display: none; }
+
+  .lead-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s var(--ease), transform 0.4s var(--ease);
+  }
+  .lead-close:hover { background: color-mix(in srgb, var(--text) 6%, transparent); transform: rotate(90deg); }
+  .lead-close svg { width: 14px; height: 14px; }
+
+  .lead-kicker { margin: 0 48px -10px 0; font-family: var(--font-label); font-size: 0.68rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--muted); }
+  .lead h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(1.8rem, 7vw, 2.2rem); line-height: 1.1; color: var(--accent); padding-right: 40px; }
+  .lead-intro { margin: -6px 0 4px; color: var(--text-2); font-size: 0.95rem; }
+
+  .lead-seg { display: flex; gap: 4px; padding: 4px; border-radius: 99px; background: color-mix(in srgb, var(--text) 5%, transparent); }
+  .lead-seg label { position: relative; flex: 1; min-width: 0; }
+  .lead-seg input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .lead-seg span {
+    display: block;
+    padding: 9px 6px;
+    border-radius: 99px;
+    text-align: center;
+    font-size: 0.8rem;
+    line-height: 1.25;
+    color: var(--text-2);
+    transition: background-color 0.3s var(--ease), color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .lead-seg input:checked + span { background: var(--bg); color: var(--text); box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 12px -6px rgb(0 0 0 / 0.2); }
+  .lead-seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .lead-seg--sm span { padding: 8px 4px; }
+
+  .lead select {
+    font: inherit;
+    font-weight: 400;
+    color: var(--text);
+    width: 100%;
+    padding: 14px 40px 14px 18px;
+    background: color-mix(in srgb, var(--text) 3%, transparent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23888' stroke-width='1.4'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 16px center / 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    appearance: none;
+  }
+  .lead select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent); }
+  .lead input[type='date'] { min-height: 52px; }
+  .lead-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  @media (max-width: 440px) { .lead-row { grid-template-columns: minmax(0, 1fr); } }
+
+  .lead-more { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .lead-more summary {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 14px 0;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .lead-more summary::-webkit-details-marker { display: none; }
+  .lead-more summary::after { content: '+'; margin-left: auto; font-size: 1.2rem; line-height: 1; color: var(--muted); transition: transform 0.4s var(--ease); }
+  .lead-more[open] summary::after { transform: rotate(45deg); }
+  .lead-more summary span { font-size: 0.75rem; color: var(--muted); }
+  .lead-more-in { display: grid; gap: 14px; padding-bottom: 18px; }
+
+  .lead-consent { position: relative; display: flex; align-items: flex-start; gap: 12px; font-size: 0.88rem; line-height: 1.45; color: var(--text-2); cursor: pointer; }
+  .lead-consent input { position: absolute; opacity: 0; width: 20px; height: 20px; margin: 0; cursor: pointer; }
+  .lead-consent i { flex: none; width: 20px; height: 20px; margin-top: 1px; border-radius: 6px; border: 1px solid var(--line-strong); transition: background-color 0.3s, border-color 0.3s; }
+  .lead-consent input:checked + i { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E") center / 14px no-repeat; border-color: var(--accent); }
+  .lead-consent input:focus-visible + i { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .lead-consent a { color: var(--accent); text-underline-offset: 3px; }
+
+  .lead-err { min-height: 0; color: #b3563f; font-size: 0.8rem; }
+  .lead-err:empty { display: none; }
+  .lead-form > .lead-err { margin-top: -10px; }
+  .lead-hint { color: var(--muted); font-size: 0.8rem; }
+  .lead-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .lead-status { margin: -4px 0 0; min-height: 1.4em; text-align: center; font-size: 0.88rem; color: var(--text-2); }
+  .lead-status:empty { display: none; }
+  .lead-alt { margin: -4px 0 0; text-align: center; font-size: 0.82rem; color: var(--muted); }
+  .lead-alt a, .lead-done a { color: var(--accent); text-underline-offset: 3px; }
+
+  .lead-done { display: grid; justify-items: center; gap: 14px; padding: 20px 0 6px; text-align: center; }
+  .lead-done h2 { padding: 0; }
+  .lead-done p { margin: 0 0 8px; color: var(--text-2); max-width: 32ch; }
+  .lead-done .btn { padding: 14px 34px; }
+  .lead-done-mark { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+  .lead-done-mark svg { width: 30px; height: 30px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lead, .lead[open] { transform: none; }
+  }
+</style>

@@ -27,9 +27,10 @@ export function startSession(cookie: SessionCookie, userId: number) {
 }
 
 export function endSession(cookie: SessionCookie) {
-  if (cookie.value)
+  if (typeof cookie.value === 'string')
     db.delete(sessions).where(eq(sessions.id, hashToken(cookie.value))).run()
-  cookie.remove()
+  // remove() выставил бы Path=/, а cookie живёт на /api — браузер её бы не удалил
+  writeCookie(cookie, '', new Date(0))
 }
 
 function findSession(token: string) {
@@ -46,7 +47,8 @@ export const auth = new Elysia({ name: 'auth' }).macro({
   auth: {
     resolve({ cookie, status }) {
       const sessionCookie = cookie.saywed_session as SessionCookie
-      const token = sessionCookie.value
+      // Elysia разбирает JSON в значении cookie: подделанное «{...}» придёт объектом, а не строкой
+      const token = typeof sessionCookie.value === 'string' ? sessionCookie.value : undefined
       const session = token ? findSession(token) : undefined
       if (!token || !session)
         return status(401, { ok: false as const, error: 'unauthorized' })

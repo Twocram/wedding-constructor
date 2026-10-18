@@ -21,7 +21,8 @@ export const authRoutes = new Elysia({ prefix: '/auth' })
     '/login',
     async ({ body: { login, password }, cookie, status }) => {
       const user = db.select().from(users).where(eq(users.login, login)).get()
-      const ok = await Bun.password.verify(password, user?.passwordHash ?? dummyHash)
+      // хеш неизвестного формата — отказ во входе, а не 500
+      const ok = await Bun.password.verify(password, user?.passwordHash ?? dummyHash).catch(() => false)
       if (!user || !ok)
         return status(401, { ok: false as const, error: 'Неверный логин или пароль' })
 

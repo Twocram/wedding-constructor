@@ -1,4 +1,5 @@
 import { Buffer } from 'node:buffer'
+import { rm } from 'node:fs/promises'
 import process from 'node:process'
 import { contactMethodLabels, leadStatusLabels, productLabels } from '@saywed/shared'
 // Служебные команды на сервере:
@@ -70,15 +71,18 @@ export async function runCli([command, arg, ...rest]: string[]) {
       fail('Использование: backup <файл>')
     }
     else {
-    // VACUUM INTO — целостная копия на ходу, API можно не останавливать
+      // VACUUM INTO — целостная копия на ходу, API можно не останавливать; в существующий файл писать отказывается
+      await rm(arg, { force: true })
       sqlite.run('VACUUM INTO ?', [arg])
       console.log(`Копия базы: ${arg}`)
     }
   }
   else if (command === 'purge-lost') {
-    const months = Number(arg) || 12
-    const before = new Date()
-    before.setMonth(before.getMonth() - months)
+    const months = arg === undefined ? 12 : Number(arg)
+    if (!Number.isInteger(months) || months < 1)
+      return fail('Использование: purge-lost [месяцев], целое число от 1')
+    // месяц считаем как 30 дней: точности до дня здесь не нужно, а setMonth переполняется в конце месяца
+    const before = new Date(Date.now() - months * 30 * 24 * 60 * 60 * 1000)
     const removed = db.delete(leads).where(and(eq(leads.status, 'lost'), lt(leads.updatedAt, before))).returning({ id: leads.id }).all()
     console.log(`Удалено отказных заявок старше ${months} мес.: ${removed.length}`)
   }

@@ -9,7 +9,7 @@
     "dev": "bun --watch src/main.ts",
     "cli": "bun src/main.ts",
     "db:generate": "drizzle-kit generate",
-    "build": "bun build src/main.ts --compile --minify --sourcemap --target=bun-linux-x64 --outfile dist/saywed-api",
+    "build": "bun build src/main.ts --compile --minify-whitespace --minify-syntax --sourcemap --target=bun-linux-x64 --outfile dist/saywed-api",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

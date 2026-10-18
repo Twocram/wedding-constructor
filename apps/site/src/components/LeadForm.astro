@@ -271,7 +271,8 @@ if (dialog) {
       }
       const body = await res.json().catch(() => ({}))
       if (res.status === 422 && body.errors) {
-        const rest = showErrors(body.errors.fieldErrors ?? {})
+        // новый формат { formErrors, fieldErrors } и старый плоский — сайт и API выкатываются независимо
+        const rest = showErrors(body.errors.fieldErrors ?? body.errors)
         status.textContent = rest.length ? `Проверьте поля формы: ${rest.join('; ')}` : 'Проверьте поля формы'
       }
       else if (res.status === 429) {

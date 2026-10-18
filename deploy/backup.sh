@@ -7,11 +7,12 @@ DIR=/var/lib/saywed/backups
 FILE="$DIR/saywed-$(date +%F).db"
 mkdir -p "$DIR"
 
+rm -f "$FILE"
 /opt/saywed-api/saywed-api backup "$FILE"
 # срок хранения из /privacy: отказные заявки старше 12 месяцев удаляем
 /opt/saywed-api/saywed-api purge-lost 12
 gzip -f "$FILE"
-find "$DIR" -name 'saywed-*.db.gz' -mtime +30 -delete
+find "$DIR" -name 'saywed-*.db*' -mtime +30 -delete
 
 if [[ -n "${RCLONE_REMOTE:-}" ]]; then
   rclone copy "$FILE.gz" "$RCLONE_REMOTE"

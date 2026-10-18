@@ -1,10 +1,10 @@
-import process from 'node:process'
 // один исполняемый файл: без аргументов — API, с командой — служебный CLI (saywed-api create-user …)
-import { runCli } from './cli'
-import { startServer } from './server'
+import process from 'node:process'
 
 const args = process.argv.slice(2)
 
+// CLI не тянет за собой сервер: лимитеры, хеш-заглушку для входа и прочее
 if (args.length)
-  await runCli(args)
-else startServer()
+  await (await import('./cli')).runCli(args)
+else
+  (await import('./server')).startServer()

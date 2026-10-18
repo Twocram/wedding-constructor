@@ -10,7 +10,9 @@ function toFieldErrors(error: Readonly<ValidationError>) {
   const formErrors: string[] = []
   for (const issue of error.all) {
     // путь приходит строкой: «contact», «amountBreakdown.base» или «/amountBreakdown/base» — берём поле верхнего уровня
-    const key = String('path' in issue ? issue.path : '').split(/[./]/).find(Boolean)
+    const field = String('path' in issue ? issue.path : '').split(/[./]/).find(Boolean)
+    // ошибка всего объекта (refine на верхнем уровне) приходит с путём root — это ошибка формы, не поля
+    const key = field === 'root' ? undefined : field
     const message = issue.message ?? 'Неверное значение'
     if (key)
       (fieldErrors[key] ??= []).push(message)

@@ -107,6 +107,17 @@ jobs:
       # один исполняемый файл с рантаймом Bun внутри — на сервере не нужны ни Bun, ни node_modules
       - run: bun run build:api
 
+      # тот же бинарник, что уедет на сервер: health мало — минификация уже ломала авторизацию при живом /health
+      - name: Smoke test binary
+        run: |
+          export DATABASE_PATH="$RUNNER_TEMP/smoke.db" MIGRATIONS_DIR=apps/api/drizzle PORT=3999
+          apps/api/dist/saywed-api & pid=$!
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3999/api/health && break; sleep 0.5; done
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3999/api/auth/me)" = 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3999/api/admin/stats)" = 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:3999/api/public/leads)" = 422
+          kill $pid
+
       - name: Assemble release
         run: |
           mkdir -p release
@@ -132,7 +143,7 @@ jobs:
     needs: [changes, lint, api]
     # включается после настройки admin.saywed.ru (deploy/README.md, раздел «Админка»)
     if: >-
-      always() && vars.ADMIN_DEPLOY_ENABLED == 'true' && needs.lint.result == 'success' &&
+      always() && vars.ADMIN_DEPLOY_ENABLED == 'true' && needs.changes.result == 'success' && needs.lint.result == 'success' &&
       (needs.api.result == 'success' || needs.api.result == 'skipped') &&
       (needs.changes.outputs.admin == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest

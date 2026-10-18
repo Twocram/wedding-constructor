@@ -1,7 +1,9 @@
 ---
+// порядок импортов = порядок CSS в сборке: базовые стили раньше компонентов и тем
+/* eslint-disable perfectionist/sort-imports */
+import Base from '../layouts/Base.astro'
 import { getCollection } from 'astro:content'
 import LeadForm from '../components/LeadForm.astro'
-import Base from '../layouts/Base.astro'
 import { leadFormEnabled, messageUrl, orderUrl, prices, rub, themes } from '../site'
 
 const order = Object.keys(themes)

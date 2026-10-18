@@ -71,6 +71,7 @@ function useInvalidateLead(id: MaybeRefOrGetter<number>) {
     Promise.all([
       client.invalidateQueries({ queryKey: ['lead', toValue(id)] }),
       client.invalidateQueries({ queryKey: ['leads'] }),
+      client.invalidateQueries({ queryKey: ['stats'] }),
     ])
 }
 

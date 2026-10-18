@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { useNewLeadsCount } from '@/composables/useLeads'
 import { useLogout, useSession } from '@/composables/useSession'
 
@@ -38,17 +38,12 @@ const logout = useLogout()
                 </span>
               </RouterLink>
             </Button>
-            <Tooltip>
-              <TooltipTrigger as-child>
-                <span>
-                  <Button variant="ghost" size="sm" disabled class="text-muted-foreground">
-                    <LayoutDashboardIcon />
-                    Дашборд
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Скоро: выручка и конверсия</TooltipContent>
-            </Tooltip>
+            <Button variant="ghost" size="sm" as-child>
+              <RouterLink :to="{ name: 'dashboard' }" active-class="bg-muted text-foreground" class="text-muted-foreground">
+                <LayoutDashboardIcon />
+                Дашборд
+              </RouterLink>
+            </Button>
           </nav>
 
           <DropdownMenu>

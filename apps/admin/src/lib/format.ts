@@ -13,6 +13,23 @@ export function formatDateTime(value: DateLike) {
   return (d.getFullYear() === new Date().getFullYear() ? dateTime : dateTimeYear).format(d)
 }
 
+const compact = new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 1 })
+const percent = new Intl.NumberFormat('ru-RU', { style: 'percent', maximumFractionDigits: 0 })
+const monthShort = new Intl.DateTimeFormat('ru-RU', { month: 'short', timeZone: 'UTC' })
+const monthLong = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+
+// подписи оси: «8 тыс.», «1,2 млн»
+export const formatCompact = (n: number) => compact.format(n)
+export const formatPercent = (n: number) => percent.format(n)
+
+// ключ месяца из API — «2026-10»
+function monthDate(key: string) {
+  const [year, month] = key.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, 1))
+}
+export const formatMonthShort = (key: string) => monthShort.format(monthDate(key)).replace('.', '')
+export const formatMonthLong = (key: string) => monthLong.format(monthDate(key)).replace(' г.', '')
+
 // дата события хранится как YYYY-MM-DD без времени
 export const formatEventDate = (ymd: string) => dateOnly.format(new Date(`${ymd}T12:00:00+03:00`))
 

@@ -12,6 +12,7 @@ export function createAppRouter(queryClient: QueryClient) {
         component: () => import('@/layouts/AppLayout.vue'),
         children: [
           { path: '', redirect: { name: 'leads' } },
+          { path: 'dashboard', name: 'dashboard', component: () => import('@/pages/DashboardPage.vue') },
           {
             path: 'leads',
             name: 'leads',

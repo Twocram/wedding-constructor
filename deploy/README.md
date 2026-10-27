@@ -4,7 +4,21 @@
 
 GitHub Actions (`.github/workflows/deploy.yml`) при пуше в main деплоит только изменившееся приложение. Задачи API и админки выключены, пока не выполнена первичная настройка ниже: их включают переменные репозитория `API_DEPLOY_ENABLED` и `ADMIN_DEPLOY_ENABLED`.
 
-## Первичная настройка сервера (один раз)
+## Сайт на новом сервере
+
+Сервер — Ubuntu 24.04, сейчас 94.154.11.166. Настройка под сайт одной командой (nginx, certbot, пользователь `deploy` с ключом CI, `/var/www/wedding`):
+
+```bash
+ssh root@<IP> "CI_PUBKEY='$(cat ~/.ssh/saywed_ci.pub)' bash -s" < deploy/setup-site.sh
+```
+
+Затем секреты репозитория `VPS_HOST`, `VPS_USER=deploy`, `VPS_SSH_KEY` (приватный `~/.ssh/saywed_ci`), A-записи `saywed.ru` и `www.saywed.ru` в reg.ru на IP сервера и, когда DNS обновится, сертификат:
+
+```bash
+certbot --nginx -d saywed.ru -d www.saywed.ru --non-interactive --agree-tos --register-unsafely-without-email --redirect
+```
+
+## Первичная настройка API и админки (один раз)
 
 Команды — от root. `deploy` ниже — пользователь из секрета `VPS_USER`, под которым CI заходит по SSH.
 
@@ -27,14 +41,10 @@ install -d -m 750 -g saywed /etc/saywed
 cp api.env.example /etc/saywed/api.env      # из deploy/systemd/
 chown root:saywed /etc/saywed/api.env && chmod 640 /etc/saywed/api.env
 openssl rand -hex 16                          # → IP_SALT
-nano /etc/saywed/api.env                      # TG_BOT_TOKEN, TG_CHAT_ID, IP_SALT
+nano /etc/saywed/api.env                      # IP_SALT
 ```
 
 `PORT` оставить 3000: на него смотрят nginx-сниппет и проверка здоровья в CI.
-
-`TG_NOTIFY_CONTACTS=true` отправляет имя и контакт клиента в Telegram — это передача персональных данных на зарубежные серверы. Включать только вместе с правкой раздела «Передача третьим лицам» в `/privacy`.
-
-Бот для уведомлений: создать в @BotFather, написать ему что-нибудь (или добавить в общий чат), chat id взять из `https://api.telegram.org/bot<TOKEN>/getUpdates`.
 
 ### 3. systemd и права на перезапуск для CI
 
@@ -101,7 +111,7 @@ nginx -t && systemctl reload nginx
 certbot --nginx -d admin.saywed.ru
 ```
 
-3. Переменная репозитория `ADMIN_DEPLOY_ENABLED = true` → Run workflow. Вход — логином и паролем из шага 6. Ссылка «Открыть в админке» в уведомлениях Telegram ведёт сразу в карточку заявки.
+3. Переменная репозитория `ADMIN_DEPLOY_ENABLED = true` → Run workflow. Вход — логином и паролем из шага 6. Новые заявки — во вкладке «Новые» и в бейдже в шапке, список обновляется сам раз в минуту.
 
 ## Бэкапы
 

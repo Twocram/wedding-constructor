@@ -18,8 +18,9 @@ defineOptions({
 const props = withDefaults(
   defineProps<SelectContentProps & { class?: HTMLAttributes['class'] }>(),
   {
-    position: 'item-aligned',
-    align: 'center',
+    // выпадающий список открывается под полем, а не поверх него
+    position: 'popper',
+    align: 'start',
   },
 )
 const emits = defineEmits<SelectContentEmits>()

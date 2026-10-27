@@ -4,7 +4,6 @@ import { db } from '../db'
 import { leadEvents, leads } from '../db/schema'
 import { ipHash, rateLimit } from '../lib/rateLimit'
 import { leadSearchText } from '../lib/search'
-import { notifyNewLead } from '../lib/telegram'
 
 // живой человек не заполнит форму быстрее
 const MIN_FILL_MS = 3000
@@ -33,7 +32,7 @@ export const publicRoutes = new Elysia({ prefix: '/public' }).post(
       return row
     })
 
-    notifyNewLead(lead).catch(err => console.error(`[telegram] заявка #${lead.id}:`, err))
+    console.log(`[leads] новая заявка #${lead.id}`)
     return status(201, { ok: true as const })
   },
   {

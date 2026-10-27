@@ -11,11 +11,6 @@ export const env = {
   port: Number(process.env.PORT ?? 3000),
   databasePath: process.env.DATABASE_PATH ?? 'data/saywed.db',
   migrationsDir: process.env.MIGRATIONS_DIR ?? 'drizzle',
-  tgBotToken: process.env.TG_BOT_TOKEN ?? '',
-  tgChatId: process.env.TG_CHAT_ID ?? '',
-  // имя и контакт в уведомлении = передача ПД на серверы Telegram за рубежом; по умолчанию только суть заявки
-  tgNotifyContacts: process.env.TG_NOTIFY_CONTACTS === 'true',
-  adminUrl: process.env.ADMIN_URL ?? 'https://admin.saywed.ru',
   allowedOrigins: list(process.env.ALLOWED_ORIGINS, 'https://saywed.ru,https://admin.saywed.ru'),
   // без постоянной соли хеши IP просто не сравнимы между перезапусками — для антиспама это не страшно
   ipSalt: process.env.IP_SALT || randomBytes(16).toString('hex'),

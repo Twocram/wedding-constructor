@@ -17,7 +17,7 @@ export function createAppRouter(queryClient: QueryClient) {
             path: 'leads',
             name: 'leads',
             component: () => import('@/pages/LeadsPage.vue'),
-            // карточка заявки — боковая панель поверх списка, у неё свой адрес для ссылки из Telegram
+            // карточка заявки — боковая панель поверх списка, у неё свой адрес, чтобы делиться ссылкой на заявку
             children: [{ path: ':id(\\d+)', name: 'lead', component: () => import('@/components/LeadSheet.vue'), props: true }],
           },
         ],

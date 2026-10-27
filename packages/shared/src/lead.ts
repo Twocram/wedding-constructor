@@ -119,7 +119,7 @@ export type LeadInput = z.input<typeof leadInput>
 export interface AmountBreakdown { base: number, namedLinks: number, extras: number, discount: number }
 export type Lead = z.output<typeof leadInput>
 
-// ссылка «написать» для карточки заявки и уведомления в Telegram
+// ссылка «написать» для карточки заявки
 export function contactUrl(method: ContactMethod, contact: string) {
   if (method === 'telegram' && telegramHandle.test(contact))
     return `https://t.me/${contact.replace(/^@/, '')}`

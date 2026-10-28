@@ -1,5 +1,5 @@
 import type { AmountBreakdown } from '@saywed/shared'
-import { contactMethods, eventTypes, leadSources, leadStatuses, products } from '@saywed/shared'
+import { attendingValues, contactMethods, eventTypes, leadSources, leadStatuses, products } from '@saywed/shared'
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 const timestamp = (name: string) => integer(name, { mode: 'timestamp_ms' })
@@ -82,5 +82,35 @@ export const leadEvents = sqliteTable(
   t => [index('lead_events_lead_idx').on(t.leadId)],
 )
 
+// приглашение клиента: к нему привязаны ответы гостей; token — секрет ссылки, по которой пара смотрит ответы
+export const invitations = sqliteTable('invitations', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  slug: text('slug').notNull().unique(),
+  title: text('title').notNull(),
+  token: text('token').notNull().unique(),
+  leadId: integer('lead_id').references(() => leads.id, { onDelete: 'set null' }),
+  createdAt: createdAt(),
+})
+
+export const rsvps = sqliteTable(
+  'rsvps',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    invitationId: integer('invitation_id').notNull().references(() => invitations.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    attending: text('attending', { enum: attendingValues }).notNull(),
+    drinks: text('drinks', { mode: 'json' }).$type<string[]>().notNull().default([]),
+    plusOne: integer('plus_one', { mode: 'boolean' }).notNull().default(false),
+    notes: text('notes'),
+    guest: text('guest'),
+    ipHash: text('ip_hash'),
+    userAgent: text('user_agent'),
+    createdAt: createdAt(),
+  },
+  t => [index('rsvps_invitation_idx').on(t.invitationId)],
+)
+
 export type LeadRow = typeof leads.$inferSelect
+export type InvitationRow = typeof invitations.$inferSelect
+export type RsvpRow = typeof rsvps.$inferSelect
 export type UserRow = typeof users.$inferSelect

@@ -131,17 +131,18 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     }
   }
 
-  // контент hero уплывает вверх и тает при скролле
+  // контент hero уплывает вверх и тает, только когда сам уходит за верх экрана:
+  // текст стоит внизу hero, и привязка к началу hero гасила его с первых пикселей прокрутки
   const heroContent = hero?.querySelector<HTMLElement>('.hero-content, .hero-ed-text, .hero-am-text, .hero-deco-content')
   if (hero && heroContent) {
     // ждём CSS-интро: fill-режим анимации перекрывает inline-стили GSAP
     gsap.delayedCall(2, () => {
       heroContent.style.animation = 'none'
       gsap.to(heroContent, {
-        y: -60,
+        y: -40,
         opacity: 0,
         ease: 'none',
-        scrollTrigger: { trigger: hero, start: 'top top', end: '70% top', scrub: true },
+        scrollTrigger: { trigger: heroContent, start: 'top 20%', end: 'bottom top', scrub: true },
       })
     })
   }

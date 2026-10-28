@@ -53,7 +53,7 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     color: #efe9da;
     isolation: isolate;
   }
-  .hero-deco-photo {
+  .hero-deco :global(.hero-deco-photo) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -157,6 +157,6 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     .hero-deco h1 { letter-spacing: 0.22em; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-deco-photo, .hero-deco-content > * { animation: none; }
+    .hero-deco :global(.hero-deco-photo), .hero-deco-content > * { animation: none; }
   }
 </style>

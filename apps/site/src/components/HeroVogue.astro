@@ -40,7 +40,7 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     color: #f1eee6;
     background: #111110;
   }
-  .vg-photo {
+  .hero-vg :global(.vg-photo) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -118,9 +118,9 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
   .hero-vg :global(.scroll-hint) { text-shadow: 0 1px 16px rgba(0, 0, 0, 0.7); opacity: 0.9; }
   @media (min-width: 900px) {
     /* на широком экране в кадр попадает больше светлых областей фото — приглушаем сильнее */
-    .vg-photo { filter: grayscale(1) contrast(1.08) brightness(0.72); }
+    .hero-vg :global(.vg-photo) { filter: grayscale(1) contrast(1.08) brightness(0.72); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .vg-photo, .vg-content > * { animation: none; }
+    .hero-vg :global(.vg-photo), .vg-content > * { animation: none; }
   }
 </style>

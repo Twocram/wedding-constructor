@@ -48,7 +48,7 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     color: #fbf8f2;
     isolation: isolate;
   }
-  .hero-photo {
+  .hero :global(.hero-photo) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -193,7 +193,7 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     .hero-amp { margin: 0; align-self: center; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-photo, .hero-content > *, .hero-monogram { animation: none; }
+    .hero :global(.hero-photo), .hero-content > *, .hero-monogram { animation: none; }
     .fireflies { display: none; }
   }
 </style>

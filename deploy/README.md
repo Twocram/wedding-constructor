@@ -51,7 +51,8 @@ nano /etc/saywed/api.env                      # IP_SALT
 ```bash
 cp saywed-api.service saywed-backup.service saywed-backup.timer /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable saywed-api saywed-backup.timer
+systemctl enable saywed-api
+systemctl enable --now saywed-backup.timer   # без --now таймер заработает только после перезагрузки
 
 cat > /etc/sudoers.d/saywed-deploy <<'EOF'
 deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart saywed-api, /usr/bin/journalctl -u saywed-api -n 50 --no-pager
@@ -96,7 +97,7 @@ sudo -u saywed --preserve-env bash -c 'set -a; . /etc/saywed/api.env; ./saywed-a
 
 ### 7. Включить форму на сайте
 
-Перед этим заполнить реквизиты оператора в `apps/site/src/site.ts` (`legal`) — они выводятся на `/privacy`. Затем переменная репозитория `LEAD_FORM_ENABLED = true` и Run workflow (или любой пуш в сайт). Без неё кнопки «Заказать» ведут в Telegram, как раньше.
+Реквизиты оператора (самозанятый: ФИО, ИНН, email) — в `apps/site/src/site.ts` (`legal`), выводятся на `/privacy`; до запуска продаж заменить заглушки. Затем переменная репозитория `LEAD_FORM_ENABLED = true` и Run workflow (или любой пуш в сайт). Без неё кнопки «Заказать» ведут в Telegram, как раньше.
 
 ### 8. Админка на admin.saywed.ru
 

@@ -6,11 +6,11 @@ export const orderTelegram = 'sad_arty'
 
 export const messageUrl = (text: string) => `https://t.me/${orderTelegram}?text=${encodeURIComponent(text)}`
 
-// оператор персональных данных для /privacy: без реальных реквизитов форму в проде не включаем
+// оператор персональных данных для /privacy — заполнить до запуска продаж
 export const legal = {
-  operator: '[ФИО индивидуального предпринимателя]',
+  // самозанятый: ФИО и ИНН, ОГРНИП у самозанятого нет
+  operator: '[ФИО]',
   inn: '[ИНН]',
-  ogrnip: '[ОГРНИП]',
   email: '[email для обращений]',
   updated: '17 октября 2026',
 }

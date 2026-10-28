@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDownIcon, InboxIcon, LayoutDashboardIcon, LogOutIcon } from '@lucide/vue'
+import { ChevronDownIcon, InboxIcon, LayoutDashboardIcon, LogOutIcon, MailIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -30,18 +30,24 @@ const logout = useLogout()
 
           <nav class="flex items-center gap-1">
             <Button variant="ghost" size="sm" as-child>
-              <RouterLink :to="{ name: 'leads' }" active-class="bg-muted text-foreground" class="text-muted-foreground">
+              <RouterLink :to="{ name: 'leads' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Заявки">
                 <InboxIcon />
-                Заявки
+                <span class="hidden sm:inline">Заявки</span>
                 <span v-if="newCount" class="grid h-5 min-w-5 place-items-center rounded-full bg-sky-500 px-1.5 text-[11px] font-semibold text-white tabular-nums">
                   {{ newCount }}
                 </span>
               </RouterLink>
             </Button>
             <Button variant="ghost" size="sm" as-child>
-              <RouterLink :to="{ name: 'dashboard' }" active-class="bg-muted text-foreground" class="text-muted-foreground">
+              <RouterLink :to="{ name: 'invitations' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Приглашения">
+                <MailIcon />
+                <span class="hidden sm:inline">Приглашения</span>
+              </RouterLink>
+            </Button>
+            <Button variant="ghost" size="sm" as-child>
+              <RouterLink :to="{ name: 'dashboard' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Дашборд">
                 <LayoutDashboardIcon />
-                Дашборд
+                <span class="hidden sm:inline">Дашборд</span>
               </RouterLink>
             </Button>
           </nav>

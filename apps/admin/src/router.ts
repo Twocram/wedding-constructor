@@ -20,6 +20,12 @@ export function createAppRouter(queryClient: QueryClient) {
             // карточка заявки — боковая панель поверх списка, у неё свой адрес, чтобы делиться ссылкой на заявку
             children: [{ path: ':id(\\d+)', name: 'lead', component: () => import('@/components/LeadSheet.vue'), props: true }],
           },
+          {
+            path: 'invitations',
+            name: 'invitations',
+            component: () => import('@/pages/InvitationsPage.vue'),
+            children: [{ path: ':id(\\d+)', name: 'invitation', component: () => import('@/components/InvitationSheet.vue'), props: true }],
+          },
         ],
       },
       { path: '/:pathMatch(.*)*', redirect: { name: 'leads' } },

@@ -58,8 +58,12 @@ jobs:
       - run: bun run typecheck
 
   site:
-    needs: [changes, lint]
-    if: needs.changes.outputs.site == 'true' || github.event_name == 'workflow_dispatch'
+    # после API: анкета в приглашениях и форма заявки отправляют данные в него
+    needs: [changes, lint, api]
+    if: >-
+      always() && needs.changes.result == 'success' && needs.lint.result == 'success' &&
+      (needs.api.result == 'success' || needs.api.result == 'skipped') &&
+      (needs.changes.outputs.site == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -116,6 +120,9 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3999/api/auth/me)" = 401
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3999/api/admin/stats)" = 401
           test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:3999/api/public/leads)" = 422
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:3999/api/public/rsvp)" = 422
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'x-rsvp-token: aaaaaaaaaaaaaaaaaaaaaaaa' http://127.0.0.1:3999/api/public/rsvp)" = 404
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3999/api/admin/invitations)" = 401
           kill $pid
 
       - name: Assemble release

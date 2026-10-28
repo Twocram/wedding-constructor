@@ -29,19 +29,131 @@ const initials = `${groom[0]}${bride[0]}`;
 
 <script>
 const envelope = document.getElementById('envelope')
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
+const out = 'cubic-bezier(0.16, 1, 0.3, 1)'
+
+function spark(layer: HTMLElement, x: number, y: number) {
+  const s = document.createElement('i')
+  s.className = 'env-spark'
+  s.style.left = `${x}px`
+  s.style.top = `${y}px`
+  layer.append(s)
+  const angle = Math.random() * Math.PI * 2
+  const dist = 140 + Math.random() * 260
+  s.animate([
+    { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+    { transform: `translate(calc(-50% + ${Math.cos(angle) * dist}px), calc(-50% + ${Math.sin(angle) * dist}px)) scale(0)`, opacity: 0 },
+  ], { duration: 900 + Math.random() * 600, easing: out, fill: 'forwards' })
+}
+
+// печать трескается, из неё вспышка и искры, конверт расходится на две створки по линии печати
+function open(el: HTMLElement) {
+  const seal = el.querySelector<HTMLElement>('.envelope-seal')!
+  const body = seal.querySelector<HTMLElement>('.seal-body')!
+  const r = body.getBoundingClientRect()
+  const cx = r.left + r.width / 2
+  const cy = r.top + r.height / 2
+  const h = innerHeight
+
+  // створки — копии фона конверта, разрезанные по высоте печати; оригинал остаётся только с текстом
+  const doors = (['top', 'bottom'] as const).map((side) => {
+    const d = document.createElement('div')
+    d.className = 'env-door'
+    el.querySelectorAll(':scope > img, :scope > .envelope-veil, :scope > .envelope-frame').forEach(n => d.append(n.cloneNode(true)))
+    d.style.clipPath = side === 'top' ? `inset(0 0 ${h - cy}px 0)` : `inset(${cy}px 0 0 0)`
+    el.append(d)
+    return { d, side }
+  })
+  el.classList.add('opening')
+
+  const fx = document.createElement('div')
+  fx.className = 'env-fx'
+  el.append(fx)
+
+  body.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.88)' }, { transform: 'scale(0.94)' }], { duration: 160, easing: 'ease-out', fill: 'forwards' })
+  setTimeout(() => {
+    body.style.visibility = 'hidden'
+    seal.querySelector<HTMLElement>('.seal-ring')?.remove()
+    // две половинки сургуча по неровной трещине
+    const halves = [
+      ['polygon(0 0, 56% 0, 44% 32%, 60% 58%, 42% 100%, 0 100%)', -1],
+      ['polygon(56% 0, 100% 0, 100% 100%, 42% 100%, 60% 58%, 44% 32%)', 1],
+    ] as const
+    halves.forEach(([clip, dir]) => {
+      const half = body.cloneNode(true) as HTMLElement
+      half.classList.add('seal-half')
+      half.style.visibility = 'visible'
+      half.style.clipPath = clip
+      half.style.left = `${r.left}px`
+      half.style.top = `${r.top}px`
+      fx.append(half)
+      half.animate([
+        { transform: 'translate(0, 0) rotate(0)', opacity: 1 },
+        { transform: `translate(${dir * 70}px, ${90 + Math.random() * 40}px) rotate(${dir * 38}deg)`, opacity: 0 },
+      ], { duration: 750, easing: 'cubic-bezier(0.3, 0, 0.6, 1)', fill: 'forwards' })
+    })
+
+    const glow = document.createElement('i')
+    glow.className = 'env-glow'
+    glow.style.left = `${cx}px`
+    glow.style.top = `${cy}px`
+    fx.append(glow)
+    glow.animate([
+      { transform: 'translate(-50%, -50%) scale(0.2)', opacity: 1 },
+      { transform: 'translate(-50%, -50%) scale(5)', opacity: 0 },
+    ], { duration: 900, easing: out, fill: 'forwards' })
+    for (let i = 0; i < 30; i++) spark(fx, cx, cy)
+
+    const seam = document.createElement('i')
+    seam.className = 'env-seam'
+    seam.style.top = `${cy}px`
+    fx.append(seam)
+    seam.animate([
+      { transform: 'translateY(-50%) scaleX(0)', opacity: 1 },
+      { transform: 'translateY(-50%) scaleX(1)', opacity: 1, offset: 0.35 },
+      { transform: 'translateY(-50%) scaleX(1)', opacity: 0 },
+    ], { duration: 900, easing: 'ease-out', fill: 'forwards' })
+
+    el.querySelectorAll<HTMLElement>('.envelope-label, .envelope-names, .envelope-hint').forEach((n, i) => {
+      n.animate([
+        { transform: 'translateY(0)', opacity: 1, filter: 'blur(0)' },
+        { transform: 'translateY(-24px)', opacity: 0, filter: 'blur(6px)' },
+      ], { duration: 420, delay: i * 40, easing: out, fill: 'forwards' })
+    })
+  }, 150)
+
+  setTimeout(() => {
+    doors.forEach(({ d, side }) => {
+      d.animate([
+        { transform: 'translateY(0)' },
+        { transform: `translateY(${side === 'top' ? -cy - 40 : h - cy + 40}px)` },
+      ], { duration: 1100, easing: 'cubic-bezier(0.7, 0, 0.2, 1)', fill: 'forwards' })
+    })
+  }, 380)
+
+  setTimeout(() => el.remove(), 1550)
+}
+
 if (envelope) {
   document.body.style.overflow = 'hidden'
   envelope.querySelector('button')?.addEventListener('click', () => {
-    envelope.classList.add('opened')
     document.body.style.overflow = ''
+    envelope.style.pointerEvents = 'none'
     // тап = жест пользователя, можно включать музыку
     const audio = document.getElementById('music') as HTMLAudioElement | null
     audio?.play().catch(() => {})
     const btn = document.getElementById('music-btn')
     if (btn && audio && !audio.paused)
       btn.classList.add('playing')
-    envelope.addEventListener('transitionend', () => envelope.remove(), { once: true })
-  })
+    navigator.vibrate?.(25)
+    if (reduceMotion) {
+      envelope.classList.add('opened')
+      envelope.addEventListener('transitionend', () => envelope.remove(), { once: true })
+    }
+    else {
+      open(envelope)
+    }
+  }, { once: true })
 }
 </script>
 
@@ -55,10 +167,7 @@ if (envelope) {
     background: var(--bg);
     color: var(--text);
     isolation: isolate;
-    clip-path: circle(160% at 50% 78%);
-    transition: clip-path 1.2s cubic-bezier(0.7, 0, 0.3, 1);
   }
-  .envelope.opened { clip-path: circle(0% at 50% 78%); pointer-events: none; }
   .envelope-photo { color: #fbf8f2; }
   .envelope img {
     position: absolute;
@@ -67,9 +176,48 @@ if (envelope) {
     height: 100%;
     object-fit: cover;
     z-index: -2;
-    transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1);
   }
-  .envelope.opened img { transform: scale(1.08); }
+
+  /* открытие: фон уходит в створки, в самом конверте остаются текст и эффекты */
+  .envelope.opening { background: transparent; }
+  .envelope.opening > img,
+  .envelope.opening > .envelope-veil,
+  .envelope.opening > .envelope-frame { visibility: hidden; }
+  /* створки и эффекты создаются из скрипта, у них нет scoped-атрибута — отсюда :global */
+  .envelope :global(.env-door) {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--bg);
+    isolation: isolate;
+    will-change: transform;
+  }
+  .envelope :global(.env-fx) { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+  .envelope :global(.env-fx .seal-half) { position: fixed; margin: 0; will-change: transform, opacity; }
+  .envelope :global(.env-glow) {
+    position: fixed;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 244, 214, 0.95), rgba(255, 220, 150, 0.45) 35%, transparent 70%);
+    mix-blend-mode: screen;
+  }
+  .envelope :global(.env-spark) {
+    position: fixed;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fff4d6;
+    box-shadow: 0 0 14px 4px rgba(255, 220, 150, 0.8);
+  }
+  .envelope :global(.env-seam) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffe7b0 20%, #fff8e6 50%, #ffe7b0 80%, transparent);
+    box-shadow: 0 0 18px 4px rgba(255, 220, 150, 0.6);
+  }
   .envelope-veil {
     position: absolute;
     inset: 0;
@@ -186,6 +334,6 @@ if (envelope) {
   @media (prefers-reduced-motion: reduce) {
     .seal-ring, .envelope-content > * { animation: none; }
     .envelope { transition: opacity 0.5s; }
-    .envelope.opened { clip-path: none; opacity: 0; }
+    .envelope.opened { opacity: 0; }
   }
 </style>

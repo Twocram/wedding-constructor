@@ -1,0 +1,173 @@
+---
+import Base from '../layouts/Base.astro'
+---
+
+<Base title="Ответы гостей — saywed" description="Ответы гостей на анкету в приглашении." noindex>
+  <main class="section">
+    <article class="wrap answers" data-state="loading">
+      <header class="section-head">
+        <p class="eyebrow">Ответы гостей</p>
+        <h1 class="answers-title">Загружаем…</h1>
+        <p class="answers-sub"></p>
+      </header>
+
+      <p class="answers-message" role="status"></p>
+
+      <div class="answers-body">
+        <div class="answers-stats">
+          <div class="stat"><strong data-stat="people">0</strong><span>придут, с парами</span></div>
+          <div class="stat"><strong data-stat="yes">0</strong><span>ответили «да»</span></div>
+          <div class="stat"><strong data-stat="no">0</strong><span>не смогут</span></div>
+        </div>
+
+        <section class="answers-drinks" hidden>
+          <h2>Напитки</h2>
+          <ul></ul>
+        </section>
+
+        <section class="answers-list">
+          <div class="answers-list-head">
+            <h2>Все ответы</h2>
+            <button type="button" class="btn btn--ghost answers-csv">Скачать для Excel</button>
+          </div>
+          <ul class="answers-items"></ul>
+        </section>
+      </div>
+    </article>
+  </main>
+</Base>
+
+<script>
+import type { RsvpAnswer } from '@saywed/shared/rsvp-report'
+import { answeredForOther, attendingLabels, latestAnswers, rsvpCsv, rsvpSummary } from '@saywed/shared/rsvp-report'
+
+interface Payload { ok: true, invitation: { title: string, slug: string }, items: RsvpAnswer[] }
+
+const root = document.querySelector<HTMLElement>('.answers')!
+const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!
+const message = $('.answers-message')
+
+function fail(text: string) {
+  root.dataset.state = 'error'
+  $('.answers-title').textContent = 'Ответы гостей'
+  message.textContent = text
+}
+
+function el(tag: string, cls: string, text?: string) {
+  const node = document.createElement(tag)
+  node.className = cls
+  if (text)
+    node.textContent = text
+  return node
+}
+
+const dateFormat = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' })
+
+function render({ invitation, items: all }: Payload) {
+  // гость ответил повторно — показываем только последний ответ
+  const items = latestAnswers(all)
+  root.dataset.state = 'ready'
+  $('.answers-title').textContent = invitation.title
+  $('.answers-sub').textContent = `saywed.ru/${invitation.slug}`
+  document.title = `Ответы гостей — ${invitation.title}`
+
+  const summary = rsvpSummary(items)
+  $('[data-stat="people"]').textContent = String(summary.people)
+  $('[data-stat="yes"]').textContent = String(summary.yes)
+  $('[data-stat="no"]').textContent = String(summary.no)
+
+  const drinks = $('.answers-drinks')
+  drinks.hidden = summary.drinks.length === 0
+  drinks.querySelector('ul')!.replaceChildren(...summary.drinks.map(([name, n]) => el('li', 'drink', `${name} — ${n}`)))
+
+  const list = $('.answers-items')
+  if (!items.length) {
+    list.replaceChildren(el('li', 'answers-empty', 'Пока никто не ответил. Ответы появятся здесь, как только гости заполнят анкету в приглашении.'))
+    $('.answers-csv').hidden = true
+    return
+  }
+  list.replaceChildren(...items.map((item) => {
+    const li = el('li', `answer answer--${item.attending}`)
+    const head = el('div', 'answer-head')
+    head.append(el('strong', 'answer-name', item.name), el('span', 'answer-badge', attendingLabels[item.attending]))
+    li.append(head)
+    const details = [
+      item.plusOne ? 'с парой' : '',
+      item.drinks.length ? item.drinks.join(', ') : '',
+      // гость мог написать имя иначе, чем в именной ссылке
+      answeredForOther(item) ? `по ссылке для «${item.guest}»` : '',
+    ].filter(Boolean)
+    if (details.length)
+      li.append(el('p', 'answer-details', details.join(' · ')))
+    if (item.notes)
+      li.append(el('p', 'answer-notes', item.notes))
+    li.append(el('time', 'answer-date', dateFormat.format(new Date(item.createdAt))))
+    return li
+  }))
+
+  $('.answers-csv').onclick = () => {
+    const url = URL.createObjectURL(new Blob([rsvpCsv(items)], { type: 'text/csv;charset=utf-8' }))
+    const a = Object.assign(document.createElement('a'), { href: url, download: `${invitation.slug}-otvety.csv` })
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+}
+
+// токен в #: не уходит на сервер с запросом страницы и в Referer; в API — заголовком, чтобы не попасть в логи nginx
+const token = location.hash.slice(1)
+// вставили другую ссылку в ту же вкладку — меняется только #, страницу надо перечитать
+addEventListener('hashchange', () => location.reload())
+if (!/^[\w-]{20,64}$/.test(token)) {
+  fail('Ссылка неполная. Откройте её целиком из сообщения, которое мы вам прислали.')
+}
+else {
+  fetch('/api/public/rsvp', { headers: { 'x-rsvp-token': token } })
+    .then(async (res) => {
+      if (res.status === 404)
+        return fail('Ссылка устарела или неверна. Напишите нам — пришлём новую.')
+      if (!res.ok)
+        throw new Error(String(res.status))
+      render(await res.json() as Payload)
+    })
+    .catch(() => fail('Не получилось загрузить ответы. Обновите страницу через минуту.'))
+}
+</script>
+
+<style>
+  /* карточки ответов создаёт скрипт — у них нет scoped-атрибута, поэтому :global под .answers */
+  .answers { display: grid; gap: 28px; text-align: left; max-width: 760px; }
+  .answers .section-head { justify-items: start; margin-bottom: 0; }
+  .answers-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(2rem, 7vw, 2.8rem); line-height: 1.1; margin: 0; }
+  .answers-sub { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  .answers-sub:empty { display: none; }
+  .answers-message { margin: 0; color: var(--text-2); }
+  .answers-message:empty { display: none; }
+  .answers:not([data-state='ready']) .answers-body { display: none; }
+
+  .answers-body { display: grid; gap: 32px; }
+  .answers-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .stat { display: grid; gap: 4px; padding: 18px 16px; border-radius: var(--r-md); background: var(--surface); }
+  .stat strong { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.8rem, 6vw, 2.4rem); line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--text-2); font-size: 0.82rem; line-height: 1.3; }
+
+  .answers h2 { font-size: 1.2rem; margin: 0 0 12px; }
+  .answers-drinks ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .answers :global(.drink) { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; font-size: 0.9rem; }
+
+  .answers-list-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .answers-list-head h2 { margin: 0; }
+  .answers-items { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .answers :global(.answer) { display: grid; gap: 6px; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-md); }
+  .answers :global(.answer-head) { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .answers :global(.answer-name) { font-size: 1.05rem; font-weight: 500; overflow-wrap: anywhere; }
+  .answers :global(.answer-badge) { padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--text); }
+  .answers :global(.answer--no .answer-badge) { background: var(--surface-2); color: var(--text-2); }
+  .answers :global(.answer-details), .answers :global(.answer-notes) { margin: 0; color: var(--text-2); font-size: 0.92rem; line-height: 1.5; overflow-wrap: anywhere; }
+  .answers :global(.answer-notes) { font-style: italic; }
+  .answers :global(.answer-date) { color: var(--muted); font-size: 0.78rem; }
+  .answers :global(.answers-empty) { padding: 24px; border: 1px dashed var(--line-strong); border-radius: var(--r-md); color: var(--text-2); }
+
+  @media (max-width: 480px) {
+    .stat { padding: 14px 12px; }
+  }
+</style>

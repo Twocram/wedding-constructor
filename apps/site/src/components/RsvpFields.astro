@@ -1,26 +1,28 @@
 ---
-// поля анкеты + отправка в Telegram; обёртку (секция, диалог) даёт вызывающий
+// поля анкеты + отправка ответа в наш API; обёртку (секция, диалог) даёт вызывающий
+import { getEntry } from 'astro:content'
+
 interface Props {
   drinks?: string[] // чекбоксы напитков
   plusOne?: boolean // чекбокс «приду с парой»
 }
 const { drinks, plusOne } = Astro.props
-const botToken = import.meta.env.PUBLIC_TG_BOT_TOKEN ?? ''
-const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
+const slug = Astro.params.slug ?? ''
+const isDemo = Boolean((await getEntry('invitations', slug))?.data.demo);
 ---
 
 <div class="plate rsvp-plate">
-  <form id="rsvp-form" class="plate-inner" novalidate>
+  <form id="rsvp-form" class="plate-inner" novalidate data-slug={slug} data-demo={String(isDemo)}>
     <fieldset class="field">
       <span>Сможете ли вы присутствовать?</span>
       <div class="choice-group">
         <label class="choice">
-          <input type="radio" name="attending" value="Приду" required />
+          <input type="radio" name="attending" value="yes" required />
           <strong>Да, я буду</strong>
           <small>Ждём вас в этот день</small>
         </label>
         <label class="choice">
-          <input type="radio" name="attending" value="Не смогу" />
+          <input type="radio" name="attending" value="no" />
           <strong>К сожалению, не смогу</strong>
           <small>Мы всё равно вас любим</small>
         </label>
@@ -28,7 +30,7 @@ const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
     </fieldset>
     <label class="field">
       <span>Имя и фамилия</span>
-      <input name="name" type="text" required autocomplete="name" placeholder="Как к вам обращаться" data-guest-value />
+      <input name="name" type="text" required minlength="2" maxlength="80" autocomplete="name" placeholder="Как к вам обращаться" data-guest-value />
     </label>
     {drinks && drinks.length > 0 && (
       <fieldset class="field">
@@ -53,8 +55,9 @@ const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
     )}
     <label class="field">
       <span>Пожелания, аллергии</span>
-      <textarea name="notes" rows="3" placeholder="Предпочтения по еде, музыке — всё, что нам стоит знать"></textarea>
+      <textarea name="notes" rows="3" maxlength="1000" placeholder="Предпочтения по еде, музыке — всё, что нам стоит знать"></textarea>
     </label>
+    <input class="rsvp-hp" type="text" name="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
     <button type="submit" class="btn btn--block">
       Отправить ответ
       <span class="btn-icon" aria-hidden="true">
@@ -65,42 +68,60 @@ const chatId = import.meta.env.PUBLIC_TG_CHAT_ID ?? '';
   </form>
 </div>
 
-<script define:vars={{ botToken, chatId }}>
-// ponytail: токен бота виден в клиенте, для MVP-демо ок; на этапе 3 — отправка через свой server endpoint
-const form = document.getElementById('rsvp-form')
+<script>
+const form = document.querySelector<HTMLFormElement>('#rsvp-form')
 form?.addEventListener('submit', async (e) => {
   e.preventDefault()
-  const status = form.querySelector('.form-status')
+  const status = form.querySelector<HTMLElement>('.form-status')!
   if (!form.reportValidity()) {
     status.textContent = 'Заполните имя и выберите ответ.'
     return
   }
-  const button = form.querySelector('button[type="submit"]')
+  // в демо ответ никуда не уходит: показываем, как анкета работает в настоящем приглашении
+  if (form.dataset.demo === 'true') {
+    status.textContent = 'Это демо. В вашем приглашении ответ гостя сразу появится в списке ответов.'
+    form.reset()
+    return
+  }
+  const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!
   const data = new FormData(form)
-  const lines = [
-    'RSVP',
-    `Имя: ${data.get('name')}`,
-    `Ответ: ${data.get('attending')}`,
-  ]
-  const picked = data.getAll('drinks')
-  if (picked.length)
-    lines.push(`Напитки: ${picked.join(', ')}`)
-  if (data.get('plusOne'))
-    lines.push('С парой: да')
-  lines.push(`Пожелания: ${data.get('notes') || '—'}`)
-  const text = lines.join('\n')
+  const text = (key: string) => String(data.get(key) ?? '').trim() || undefined
   button.disabled = true
   status.textContent = 'Отправляем…'
   try {
-    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const res = await fetch('/api/public/rsvp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text }),
+      body: JSON.stringify({
+        slug: form.dataset.slug,
+        name: text('name'),
+        attending: text('attending'),
+        drinks: data.getAll('drinks').map(String),
+        plusOne: data.has('plusOne'),
+        notes: text('notes'),
+        // имя из именной ссылки: паре видно, по чьей ссылке ответили
+        guest: new URLSearchParams(location.search).get('g') || undefined,
+        hp: text('hp'),
+      }),
     })
-    if (!res.ok)
-      throw new Error(`Telegram ${res.status}`)
-    status.textContent = 'Спасибо. Ваш ответ получен.'
-    form.reset()
+    if (res.ok) {
+      status.textContent = 'Спасибо! Ваш ответ получен.'
+      form.reset()
+    }
+    else if (res.status === 422) {
+      const body = await res.json().catch(() => ({})) as { errors?: { fieldErrors?: Record<string, string[]> } }
+      const messages = Object.values(body.errors?.fieldErrors ?? {}).flat()
+      status.textContent = messages.length ? messages.join('. ') : 'Проверьте ответы в анкете.'
+    }
+    else if (res.status === 404) {
+      status.textContent = 'Анкета пока не принимает ответы. Пожалуйста, напишите паре напрямую.'
+    }
+    else if (res.status === 429) {
+      status.textContent = 'Слишком много попыток. Попробуйте чуть позже.'
+    }
+    else {
+      throw new Error(String(res.status))
+    }
   }
   catch {
     status.textContent = 'Не удалось отправить. Попробуйте ещё раз.'
@@ -117,6 +138,7 @@ form?.addEventListener('submit', async (e) => {
   .rsvp-plate fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
   .rsvp-plate .btn { margin-top: 6px; }
   .rsvp-plate .form-status { margin-top: -10px; }
+  .rsvp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
   /* чекбоксы-пилюли в стиле плиток выбора */
   .checks { display: flex; flex-wrap: wrap; gap: 8px; }

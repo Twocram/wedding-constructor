@@ -103,8 +103,9 @@ if (guest) {
       el.textContent = el.dataset.guest.replace('{g}', guest)
   })
   document.querySelectorAll<HTMLInputElement>('input[data-guest-value]').forEach((el) => {
+    // defaultValue, а не value: после отправки анкеты form.reset() возвращает имя, а не очищает поле
     if (!el.value)
-      el.value = guest
+      el.defaultValue = guest
   })
 }
 </script>

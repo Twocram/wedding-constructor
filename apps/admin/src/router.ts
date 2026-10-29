@@ -26,6 +26,7 @@ export function createAppRouter(queryClient: QueryClient) {
             component: () => import('@/pages/InvitationsPage.vue'),
             children: [{ path: ':id(\\d+)', name: 'invitation', component: () => import('@/components/InvitationSheet.vue'), props: true }],
           },
+          { path: 'notifications', name: 'notifications', component: () => import('@/pages/NotificationsPage.vue') },
         ],
       },
       { path: '/:pathMatch(.*)*', redirect: { name: 'leads' } },

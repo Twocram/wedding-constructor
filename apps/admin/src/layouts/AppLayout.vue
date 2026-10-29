@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ChevronDownIcon, InboxIcon, LayoutDashboardIcon, LogOutIcon, MailIcon } from '@lucide/vue'
+import { BellIcon, ChevronDownIcon, InboxIcon, LayoutDashboardIcon, LogOutIcon, MailIcon } from '@lucide/vue'
+import { computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -12,10 +13,13 @@ import {
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useNewLeadsCount } from '@/composables/useLeads'
 import { useLogout, useSession } from '@/composables/useSession'
+import { useTgSubscribers } from '@/composables/useTelegram'
 
 const { data: user } = useSession()
 const { data: newCount } = useNewLeadsCount()
 const logout = useLogout()
+const { data: subscribers } = useTgSubscribers()
+const pendingSubscribers = computed(() => subscribers.value?.items.filter(s => s.status === 'pending').length ?? 0)
 </script>
 
 <template>
@@ -48,6 +52,15 @@ const logout = useLogout()
               <RouterLink :to="{ name: 'dashboard' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Дашборд">
                 <LayoutDashboardIcon />
                 <span class="hidden sm:inline">Дашборд</span>
+              </RouterLink>
+            </Button>
+            <Button variant="ghost" size="sm" as-child>
+              <RouterLink :to="{ name: 'notifications' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Уведомления">
+                <BellIcon />
+                <span class="hidden sm:inline">Уведомления</span>
+                <span v-if="pendingSubscribers" class="grid h-5 min-w-5 place-items-center rounded-full bg-amber-500 px-1.5 text-[11px] font-semibold text-white tabular-nums">
+                  {{ pendingSubscribers }}
+                </span>
               </RouterLink>
             </Button>
           </nav>

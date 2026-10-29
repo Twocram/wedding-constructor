@@ -1,0 +1,7 @@
+// деплой: bunx wrangler deploy; ключ: bunx wrangler secret put RELAY_KEY (тот же, что TG_RELAY_KEY у API)
+{
+  "name": "saywed-tg-relay",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true
+}

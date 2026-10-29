@@ -114,6 +114,24 @@ certbot --nginx -d admin.saywed.ru
 
 3. Переменная репозитория `ADMIN_DEPLOY_ENABLED = true` → Run workflow. Вход — логином и паролем из шага 6. Новые заявки — во вкладке «Новые» и в бейдже в шапке, список обновляется сам раз в минуту.
 
+## Уведомления в Telegram
+
+API пишет в бота о новых заявках и ответах гостей. С российского сервера `api.telegram.org` недоступен, поэтому запросы идут через воркер Cloudflare из `deploy/tg-relay`: он пропускает только `sendMessage` и только с ключом.
+
+1. Бот: @BotFather → `/newbot` → токен. Написать боту любое сообщение; chat id — из `getUpdates`.
+2. Воркер (один раз, с локальной машины):
+
+```bash
+cd deploy/tg-relay
+bunx wrangler login
+bunx wrangler deploy                    # выведет https://saywed-tg-relay.<аккаунт>.workers.dev
+KEY=$(openssl rand -hex 32); printf %s "$KEY" | bunx wrangler secret put RELAY_KEY; echo "TG_RELAY_KEY=$KEY"
+```
+
+3. В `/etc/saywed/api.env`: `TG_BOT_TOKEN`, `TG_CHAT_ID`, `TG_API_URL` (адрес воркера), `TG_RELAY_KEY` (тот же ключ) → `systemctl restart saywed-api`.
+
+Имена и контакты в уведомление не попадают: это была бы передача ПД за рубеж. В сообщении только суть и ссылка в админку; `TG_NOTIFY_CONTACTS=true` включает подробности.
+
 ## Бэкапы
 
 `saywed-backup.timer` каждую ночь в 03:30 делает копию базы в `/var/lib/saywed/backups` (хранится 30 дней) и удаляет отказные заявки старше 12 месяцев — этот срок обещан в `/privacy`. Чтобы копия уходила с сервера, настроить `rclone` (Yandex Object Storage / Selectel S3) и добавить в `/etc/saywed/api.env`:

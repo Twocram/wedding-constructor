@@ -1,4 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises'
+import { invitationHost } from '@saywed/shared'
 import { and, count, eq } from 'drizzle-orm'
 import { db } from '../db'
 import { invitationChats, invitations, tgSubscribers } from '../db/schema'
@@ -51,7 +52,7 @@ async function linkInvitation(chat: TgChat, token: string) {
     : undefined
   if (!invitation)
     return reply(chat.id, 'Ссылка устарела. Попросите новую у saywed.')
-  const site = `saywed.ru/${invitation.slug}`
+  const site = invitationHost(invitation.slug)
   const linked = db
     .select({ id: invitationChats.id })
     .from(invitationChats)

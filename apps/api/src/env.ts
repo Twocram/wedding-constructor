@@ -21,6 +21,8 @@ export const env = {
   tgNotifyContacts: process.env.TG_NOTIFY_CONTACTS === 'true',
   adminUrl: process.env.ADMIN_URL ?? 'https://admin.saywed.ru',
   allowedOrigins: list(process.env.ALLOWED_ORIGINS, 'https://saywed.ru,https://admin.saywed.ru'),
+  // приглашения клиентов на поддоменах: <адрес>.saywed.ru — их не перечислить в ALLOWED_ORIGINS
+  invitationDomain: process.env.INVITATION_DOMAIN ?? 'saywed.ru',
   // без постоянной соли хеши IP просто не сравнимы между перезапусками — для антиспама это не страшно
   ipSalt: process.env.IP_SALT || randomBytes(16).toString('hex'),
 }

@@ -47,6 +47,7 @@ export const errorHandler = new Elysia({ name: 'errors' }).onError({ as: 'global
 })
 
 const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+const invitationOrigin = new RegExp(`^https://[a-z0-9-]+\\.${env.invitationDomain.replace(/\./g, '\\.')}$`)
 
 // запросы, меняющие данные, — только со своих страниц; без Origin (curl, сервер-сервер) пропускаем:
 // браузер его всегда ставит, а cookie админки SameSite=Strict
@@ -54,7 +55,7 @@ export const originGuard = new Elysia({ name: 'origin-guard' }).onRequest(({ req
   if (!MUTATING.has(request.method))
     return
   const origin = request.headers.get('origin')
-  if (origin && !env.allowedOrigins.includes(origin)) {
+  if (origin && !env.allowedOrigins.includes(origin) && !invitationOrigin.test(origin)) {
     set.status = 403
     return { ok: false as const, error: 'forbidden' }
   }

@@ -53,7 +53,7 @@ export function icsFile(ev: NonNullable<ReturnType<typeof calendarEvent>>, uid: 
   return `${[
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Wedding Constructor//RU',
+    'PRODID:-//saywed//RU',
     'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
     `UID:${uid}`,

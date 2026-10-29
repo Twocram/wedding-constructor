@@ -21,7 +21,9 @@ import HeroVogue from '../components/HeroVogue.astro'
 import HeroWatercolor from '../components/HeroWatercolor.astro'
 import LeadForm from '../components/LeadForm.astro'
 import Stories from '../components/Stories.astro'
+import ToSubdomain from '../components/ToSubdomain.astro'
 import { calendarEvent } from '../lib/calendar'
+import { invitationPageUrl } from '../lib/invitationUrl'
 import { leadFormEnabled, themes } from '../site'
 import AmalfiBody from '../themes/amalfi/Body.astro'
 import BotanicalBody from '../themes/botanical/Body.astro'
@@ -45,7 +47,7 @@ export async function getStaticPaths() {
 const { inv } = Astro.props
 const title = `${inv.groom} & ${inv.bride}`
 const slug = Astro.params.slug!
-const cal = calendarEvent(inv, new URL(`/${slug}`, Astro.site).href)
+const cal = calendarEvent(inv, invitationPageUrl(slug, inv.demo, Astro.site))
 const heroes = { cover: HeroCover, botanical: HeroBotanical, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile }
 // cinema и stories — отдельные одноэкранные форматы, у них нет hero и ленты секций
 const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme]
@@ -60,6 +62,7 @@ const heroDate = weekday ? `${weekday}, ${inv.date}` : inv.date;
 ---
 
 <Base title={title} theme={inv.theme} image={`/og/${slug}.jpg`} description={`${title} — приглашение на свадьбу, ${inv.date}`} noindex={!inv.demo}>
+  {!inv.demo && <ToSubdomain slug={slug} />}
   {inv.envelope && <Envelope groom={inv.groom} bride={inv.bride} photo={inv.envelopePhoto} />}
   {/* без JS конверт бы навсегда закрыл страницу */}
   {inv.envelope && <noscript><style is:inline>.envelope{display:none!important}</style></noscript>}

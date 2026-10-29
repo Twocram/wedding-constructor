@@ -1,8 +1,10 @@
 ---
 import { getCollection } from 'astro:content'
+import ToSubdomain from '../../components/ToSubdomain.astro'
 import Base from '../../layouts/Base.astro'
+import { invitationPageUrl } from '../../lib/invitationUrl'
 
-// служебная страница пары: список гостей → личные ссылки вида /slug?g=Имя
+// служебная страница пары: список гостей → личные ссылки вида <адрес>.saywed.ru?g=Имя
 export async function getStaticPaths() {
   const invitations = await getCollection('invitations')
   return invitations.map(inv => ({ params: { slug: inv.id }, props: { inv: inv.data } }))
@@ -10,10 +12,11 @@ export async function getStaticPaths() {
 
 const { inv } = Astro.props
 const { slug } = Astro.params
-const base = new URL(`/${slug}`, Astro.site).href;
+const base = invitationPageUrl(slug!, inv.demo, Astro.site);
 ---
 
 <Base title={`Ссылки для гостей — ${inv.groom} & ${inv.bride}`} theme={inv.theme} noindex>
+  {!inv.demo && <ToSubdomain slug={slug!} />}
   <main class="section">
     <div class="wrap wrap--narrow guests" data-base={base} data-slug={slug}>
       <header class="section-head">

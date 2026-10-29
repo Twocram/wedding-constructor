@@ -1,0 +1,14 @@
+---
+import { invitationUrl } from '@saywed/shared'
+
+// приглашение клиента на основном домене (старая ссылка saywed.ru/<адрес>) уводим на его поддомен
+interface Props { slug: string }
+const { slug } = Astro.props
+const target = invitationUrl(slug)
+const mainHost = new URL(Astro.site ?? 'https://saywed.ru').hostname
+---
+
+<script is:inline define:vars={{ target, mainHost }}>
+  if (location.hostname === mainHost || location.hostname === `www.${mainHost}`)
+    location.replace(target + location.pathname.replace(/^\/[^/]+/, '') + location.search + location.hash)
+</script>

@@ -13,6 +13,7 @@ const fetchRsvps = (id: number) => unwrap(api.admin.invitations({ id }).rsvps.ge
 
 export type InvitationItem = Awaited<ReturnType<typeof fetchInvitations>>['items'][number]
 export type RsvpItem = Awaited<ReturnType<typeof fetchRsvps>>['items'][number]
+export type InvitationChatItem = Awaited<ReturnType<typeof fetchRsvps>>['chats'][number]
 
 export function useInvitations() {
   return useQuery({
@@ -79,6 +80,14 @@ export function useDeleteRsvp(invitationId: MaybeRefOrGetter<number>) {
   const invalidate = useInvalidate()
   return useMutation({
     mutationFn: (id: number) => unwrap(api.admin.rsvps({ id }).delete()),
+    onSuccess: () => invalidate(toValue(invitationId)),
+  })
+}
+
+export function useDeleteInvitationChat(invitationId: MaybeRefOrGetter<number>) {
+  const invalidate = useInvalidate()
+  return useMutation({
+    mutationFn: (id: number) => unwrap(api.admin['invitation-chats']({ id }).delete()),
     onSuccess: () => invalidate(toValue(invitationId)),
   })
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { InvitationPatch } from '@saywed/shared'
-import { CheckIcon, CopyIcon, DownloadIcon, ExternalLinkIcon, PencilIcon, RefreshCwIcon, Trash2Icon } from '@lucide/vue'
+import { CheckIcon, CopyIcon, DownloadIcon, ExternalLinkIcon, PencilIcon, RefreshCwIcon, SendIcon, Trash2Icon } from '@lucide/vue'
 import { answeredForOther, attendingLabels, latestAnswers, rsvpCsv, rsvpSummary } from '@saywed/shared'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -16,6 +16,7 @@ import {
   coupleUrl,
   invitationUrl,
   useDeleteInvitation,
+  useDeleteInvitationChat,
   useDeleteRsvp,
   useRegenerateToken,
   useRsvps,
@@ -39,6 +40,7 @@ const update = useUpdateInvitation(invitationId)
 const regenerate = useRegenerateToken(invitationId)
 const removeInvitation = useDeleteInvitation(invitationId)
 const removeRsvp = useDeleteRsvp(invitationId)
+const removeChat = useDeleteInvitationChat(invitationId)
 
 const open = ref(true)
 watch(open, (value) => {
@@ -57,26 +59,41 @@ const stats = computed(() => [
   { label: 'Всего ответов', value: summary.value.total, hint: 'анкет' },
 ])
 
-// ── ссылка для пары ──
+// ── ссылки для пары ──
 const coupleLink = computed(() => (invitation.value ? coupleUrl(invitation.value.token) : ''))
-const copied = ref(false)
-async function copyLink() {
+const notifyLink = computed(() => data.value?.notifyLink ?? null)
+const chats = computed(() => data.value?.chats ?? [])
+const copied = ref<'answers' | 'bot' | null>(null)
+async function copyLink(kind: 'answers' | 'bot') {
   try {
-    await navigator.clipboard.writeText(coupleLink.value)
+    await navigator.clipboard.writeText(kind === 'answers' ? coupleLink.value : notifyLink.value ?? '')
   }
   catch {
     toast.error('Не удалось скопировать — выделите ссылку вручную')
     return
   }
-  copied.value = true
-  toast.success('Ссылка для пары скопирована')
-  setTimeout(() => (copied.value = false), 1500)
+  copied.value = kind
+  toast.success(kind === 'answers' ? 'Ссылка для пары скопирована' : 'Ссылка на бота скопирована')
+  setTimeout(() => (copied.value = null), 1500)
+}
+
+const confirmChatId = ref<number | null>(null)
+function deleteChat(id: number) {
+  if (confirmChatId.value !== id) {
+    confirmChatId.value = id
+    return
+  }
+  removeChat.mutate(id, {
+    onSuccess: () => toast.success('Чат отключён'),
+    onError: (error: Error) => toast.error(error.message),
+    onSettled: () => (confirmChatId.value = null),
+  })
 }
 
 const confirmRegenerate = ref(false)
 function regenerateToken() {
   regenerate.mutate(undefined, {
-    onSuccess: () => toast.success('Новая ссылка создана, старая больше не работает'),
+    onSuccess: () => toast.success('Новые ссылки созданы, старые больше не работают'),
     onError: (error: Error) => toast.error(error.message),
     onSettled: () => (confirmRegenerate.value = false),
   })
@@ -221,34 +238,72 @@ function deleteInvitation() {
 
           <section class="space-y-3">
             <h3 class="text-sm font-medium">
-              Ссылка для пары
+              Ссылки для пары
             </h3>
-            <div class="flex min-w-0 items-center gap-2 rounded-lg border bg-muted/40 py-1 pr-1 pl-3 text-sm">
-              <span class="truncate font-medium">{{ coupleLink }}</span>
-              <Button variant="ghost" size="icon-xs" class="ml-auto" :aria-label="copied ? 'Скопировано' : 'Скопировать ссылку'" @click="copyLink">
-                <CheckIcon v-if="copied" class="text-emerald-600" />
-                <CopyIcon v-else />
-              </Button>
+            <div class="space-y-1.5">
+              <div class="flex min-w-0 items-center gap-2 rounded-lg border bg-muted/40 py-1 pr-1 pl-3 text-sm">
+                <span class="truncate font-medium">{{ coupleLink }}</span>
+                <Button variant="ghost" size="icon-xs" class="ml-auto" :aria-label="copied === 'answers' ? 'Скопировано' : 'Скопировать ссылку'" @click="copyLink('answers')">
+                  <CheckIcon v-if="copied === 'answers'" class="text-emerald-600" />
+                  <CopyIcon v-else />
+                </Button>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                Ответы гостей. Никому, кроме пары, её не отправляйте.
+              </p>
             </div>
-            <p class="text-xs text-muted-foreground">
-              По этой ссылке пара видит ответы гостей. Никому больше её не отправляйте.
-            </p>
+            <div class="space-y-1.5">
+              <div v-if="notifyLink" class="flex min-w-0 items-center gap-2 rounded-lg border bg-muted/40 py-1 pr-1 pl-3 text-sm">
+                <SendIcon class="size-3.5 shrink-0 text-muted-foreground" />
+                <span class="truncate font-medium">{{ notifyLink }}</span>
+                <Button variant="ghost" size="icon-xs" class="ml-auto" :aria-label="copied === 'bot' ? 'Скопировано' : 'Скопировать ссылку на бота'" @click="copyLink('bot')">
+                  <CheckIcon v-if="copied === 'bot'" class="text-emerald-600" />
+                  <CopyIcon v-else />
+                </Button>
+              </div>
+              <p v-else class="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+                Ссылка на бота появится, когда сервер свяжется с Telegram.
+              </p>
+              <p class="text-xs text-muted-foreground">
+                Уведомления в Telegram: пара открывает ссылку и жмёт Start. Приходят ответ и сводка, без имён гостей. Можно подключить обоих.
+              </p>
+            </div>
+            <ul v-if="chats.length" class="divide-y rounded-lg border">
+              <li v-for="chat in chats" :key="chat.id" class="flex min-w-0 items-center gap-2 py-1.5 pr-1.5 pl-3 text-sm">
+                <div class="min-w-0 flex-1">
+                  <span class="font-medium break-words">{{ chat.name }}</span>
+                  <span v-if="chat.username" class="ml-1.5 break-all text-muted-foreground">@{{ chat.username }}</span>
+                  <div class="text-xs text-muted-foreground" :title="formatDateTime(chat.createdAt)">
+                    подключён {{ formatAgo(chat.createdAt) }}
+                  </div>
+                </div>
+                <Button
+                  :variant="confirmChatId === chat.id ? 'destructive' : 'ghost'"
+                  size="sm"
+                  :disabled="removeChat.isPending.value"
+                  @click="deleteChat(chat.id)"
+                  @blur="confirmChatId = null"
+                >
+                  {{ confirmChatId === chat.id ? 'Отключить?' : 'Отключить' }}
+                </Button>
+              </li>
+            </ul>
             <div v-if="confirmRegenerate" class="space-y-2 rounded-lg border border-dashed p-3">
               <p class="text-sm">
-                Старая ссылка перестанет работать. Пришлите паре новую.
+                Обе ссылки перестанут работать — пришлите паре новые. Уже подключённые чаты останутся, лишние отключите выше.
               </p>
               <div class="flex justify-end gap-2">
                 <Button variant="ghost" size="sm" @click="confirmRegenerate = false">
                   Отмена
                 </Button>
                 <Button variant="destructive" size="sm" :disabled="regenerate.isPending.value" @click="regenerateToken">
-                  Создать новую
+                  Создать новые
                 </Button>
               </div>
             </div>
             <Button v-else variant="outline" size="sm" @click="confirmRegenerate = true">
               <RefreshCwIcon />
-              Новая ссылка
+              Новые ссылки
             </Button>
           </section>
 

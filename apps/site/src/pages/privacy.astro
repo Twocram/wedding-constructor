@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro'
-import { leadFormEnabled, legal, orderTelegram } from '../site'
+import { leadFormEnabled, legal, orderContactTo, orderTelegram } from '../site'
 
 if (!leadFormEnabled)
 return Astro.redirect('/')
@@ -47,7 +47,7 @@ const sections = [
   {
     title: 'Ваши права',
     body: [
-      `Вы можете узнать, какие данные о вас у нас есть, попросить их уточнить или удалить, а также отозвать согласие. Пишите на ${legal.email} или в Telegram @${orderTelegram} — ответим в течение 10 рабочих дней.`,
+      `Вы можете узнать, какие данные о вас у нас есть, попросить их уточнить или удалить, а также отозвать согласие. Пишите в Telegram ${orderContactTo} (@${orderTelegram}) — ответим в течение 10 рабочих дней.`,
     ],
   },
 ];

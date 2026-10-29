@@ -1,8 +1,9 @@
 // Витрина: контакты для заказа; цены и темы — в @saywed/shared.
 export { prices, rub, type ThemeInfo, themes } from '@saywed/shared'
 
-// Telegram для заказов (без @)
-export const orderTelegram = 'sad_arty'
+// Telegram для заказов (без @); на сайте показываем имя, а не логин
+export const orderTelegram = 'Pie_lie_die96'
+export const orderContactTo = 'Сергею'
 
 export const messageUrl = (text: string) => `https://t.me/${orderTelegram}?text=${encodeURIComponent(text)}`
 
@@ -11,7 +12,6 @@ export const legal = {
   // самозанятый: ФИО и ИНН, ОГРНИП у самозанятого нет
   operator: '[ФИО]',
   inn: '[ИНН]',
-  email: '[email для обращений]',
   updated: '17 октября 2026',
 }
 

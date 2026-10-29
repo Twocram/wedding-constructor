@@ -1,6 +1,6 @@
 ---
 import { contactMethodLabels, contactMethods, eventTypeLabels, eventTypes, prices, productLabels, products, themes } from '@saywed/shared'
-import { orderTelegram } from '../site';
+import { orderContactTo, orderTelegram } from '../site';
 
 // диалог заявки: открывается любой кнопкой с data-lead, контекст кнопки (тема, продукт, источник) подставляется в поля
 ---
@@ -94,7 +94,7 @@ import { orderTelegram } from '../site';
           <span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 8h10M9 4l4 4-4 4" /></svg></span>
         </button>
         <p class="lead-status" role="status"></p>
-        <p class="lead-alt">Или напишите в Telegram — <a href={`https://t.me/${orderTelegram}`} target="_blank" rel="noopener">@{orderTelegram}</a></p>
+        <p class="lead-alt">Или напишите в Telegram — <a href={`https://t.me/${orderTelegram}`} target="_blank" rel="noopener">{orderContactTo}</a></p>
       </form>
 
       <div class="lead-done" hidden>
@@ -102,7 +102,7 @@ import { orderTelegram } from '../site';
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
         </span>
         <h2>Заявка отправлена</h2>
-        <p>Свяжемся с вами в течение дня. Если не терпится — пишите в Telegram <a href={`https://t.me/${orderTelegram}`} target="_blank" rel="noopener">@{orderTelegram}</a>.</p>
+        <p>Свяжемся с вами в течение дня. Если не терпится — пишите <a href={`https://t.me/${orderTelegram}`} target="_blank" rel="noopener">{orderContactTo} в Telegram</a>.</p>
         <button type="button" class="btn" data-close-lead>Хорошо</button>
       </div>
     </div>

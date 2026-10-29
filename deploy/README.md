@@ -97,7 +97,7 @@ sudo -u saywed --preserve-env bash -c 'set -a; . /etc/saywed/api.env; ./saywed-a
 
 ### 7. Включить форму на сайте
 
-Реквизиты оператора (самозанятый: ФИО, ИНН, email) — в `apps/site/src/site.ts` (`legal`), выводятся на `/privacy`; до запуска продаж заменить заглушки. Затем переменная репозитория `LEAD_FORM_ENABLED = true` и Run workflow (или любой пуш в сайт). Без неё кнопки «Заказать» ведут в Telegram, как раньше.
+Реквизиты оператора (самозанятый: ФИО и ИНН) — в `apps/site/src/site.ts` (`legal`), выводятся на `/privacy`; до запуска продаж заменить заглушки. Затем переменная репозитория `LEAD_FORM_ENABLED = true` и Run workflow (или любой пуш в сайт). Без неё кнопки «Заказать» ведут в Telegram, как раньше.
 
 ### 8. Админка на admin.saywed.ru
 

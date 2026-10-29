@@ -6,6 +6,7 @@ import { db } from '../db'
 import { invitations, leadEvents, leads, rsvps } from '../db/schema'
 import { ipHash, rateLimit } from '../lib/rateLimit'
 import { leadSearchText } from '../lib/search'
+import { errorMessage, notifyNewLead, notifyNewRsvp } from '../lib/telegram'
 
 // живой человек не заполнит форму быстрее
 const MIN_FILL_MS = 3000
@@ -40,6 +41,7 @@ export const publicRoutes = new Elysia({ prefix: '/public' })
       })
 
       console.log(`[leads] новая заявка #${lead.id}`)
+      notifyNewLead(lead).catch(err => console.error(`[telegram] заявка #${lead.id}: ${errorMessage(err)}`))
       return status(201, { ok: true as const })
     },
     {
@@ -58,7 +60,7 @@ export const publicRoutes = new Elysia({ prefix: '/public' })
       }
 
       // ответы принимаем только для приглашений, заведённых в админке: иначе любой мог бы засыпать базу по выдуманным адресам
-      const invitation = db.select({ id: invitations.id }).from(invitations).where(eq(invitations.slug, slug.toLowerCase())).get()
+      const invitation = db.select().from(invitations).where(eq(invitations.slug, slug.toLowerCase())).get()
       if (!invitation) {
         // реальное приглашение забыли завести в админке — гости не могут ответить, это должно быть видно в логах
         console.warn(`[rsvp] приглашение не заведено: ${slug.slice(0, 80)}`)
@@ -67,7 +69,8 @@ export const publicRoutes = new Elysia({ prefix: '/public' })
 
       // «не смогу» с парой и напитками бессмысленно: в сводке и выгрузке это только путает
       const declined = answer.attending === 'no'
-      db.insert(rsvps)
+      const rsvp = db
+        .insert(rsvps)
         .values({
           ...answer,
           plusOne: declined ? false : answer.plusOne,
@@ -78,8 +81,10 @@ export const publicRoutes = new Elysia({ prefix: '/public' })
           ipHash: ipHash(request, server),
           userAgent: request.headers.get('user-agent')?.slice(0, 300),
         })
-        .run()
+        .returning()
+        .get()
       console.log(`[rsvp] ответ гостя для ${slug}`)
+      notifyNewRsvp(invitation, rsvp).catch(err => console.error(`[telegram] ответ гостя #${rsvp.id}: ${errorMessage(err)}`))
       return status(201, { ok: true as const })
     },
     {

@@ -114,6 +114,29 @@ certbot --nginx -d admin.saywed.ru
 
 3. Переменная репозитория `ADMIN_DEPLOY_ENABLED = true` → Run workflow. Вход — логином и паролем из шага 6. Новые заявки — во вкладке «Новые» и в бейдже в шапке, список обновляется сам раз в минуту.
 
+## Приглашения на поддоменах
+
+Приглашение клиента открывается на `<адрес>.saywed.ru`: nginx берёт страницу `/<адрес>/` из той же сборки сайта, старые ссылки `saywed.ru/<адрес>` уводят на поддомен. Демо каталога остаются по пути.
+
+Сертификат один на `*.saywed.ru`: Let's Encrypt выдаёт его только через проверку DNS. Отдельные сертификаты на каждый поддомен попадают в публичные журналы — по ним нашлись бы адреса всех пар.
+
+1. reg.ru → зона saywed.ru → A-запись `*` → IP сервера.
+2. reg.ru → Настройки → «Настройки API»: альтернативный пароль и IP сервера в списке разрешённых.
+3. На сервере (acme.sh сам продлевает сертификат и перезагружает nginx):
+
+```sh
+git clone --depth 1 https://github.com/acmesh-official/acme.sh.git /tmp/acme.sh && (cd /tmp/acme.sh && ./acme.sh --install --no-profile)
+REGRU_API_Username=<логин reg.ru> REGRU_API_Password=<пароль API> \
+  ~/.acme.sh/acme.sh --issue --server letsencrypt --dns dns_regru --dnssleep 300 -d '*.saywed.ru'
+install -d /etc/letsencrypt/wildcard
+~/.acme.sh/acme.sh --install-cert -d '*.saywed.ru' \
+  --fullchain-file /etc/letsencrypt/wildcard/fullchain.pem --key-file /etc/letsencrypt/wildcard/privkey.pem \
+  --reloadcmd 'systemctl reload nginx'
+cp invitations.saywed.ru.conf /etc/nginx/sites-available/invitations.saywed.ru
+ln -s /etc/nginx/sites-available/invitations.saywed.ru /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+```
+
 ## Уведомления в Telegram
 
 API пишет в бота о новых заявках и ответах гостей. С российского сервера `api.telegram.org` недоступен, поэтому запросы идут через воркер Cloudflare из `deploy/tg-relay`: он пропускает только отправку и приём сообщений и только с ключом.

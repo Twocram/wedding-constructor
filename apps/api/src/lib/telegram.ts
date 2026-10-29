@@ -11,29 +11,62 @@ import {
   rub,
   themes,
 } from '@saywed/shared'
+import { and, eq } from 'drizzle-orm'
+import { db } from '../db'
+import { tgSubscribers } from '../db/schema'
 import { env } from '../env'
 
 // в ошибке сетевого сбоя Bun лежит адрес запроса с токеном бота — в лог только текст
 export const errorMessage = (err: unknown) => (err instanceof Error ? err.message : String(err))
 
-const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+export const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
-export async function sendTelegram(html: string) {
-  if (!env.tgBotToken || !env.tgChatId)
-    return
-  const res = await fetch(`${env.tgApiUrl}/bot${env.tgBotToken}/sendMessage`, {
+export class TelegramError extends Error {
+  // fromTelegram — ответ самого Bot API, а не отказ воркера или Cloudflare с тем же HTTP-кодом
+  constructor(readonly status: number, readonly description: string, readonly fromTelegram: boolean) {
+    super(`Telegram ${status}: ${description}`)
+  }
+}
+
+const chatGone = /bot was blocked|bot was kicked|user is deactivated|not a member/i
+export const isChatGone = (err: unknown) => err instanceof TelegramError && err.fromTelegram && err.status === 403 && chatGone.test(err.description)
+
+export async function callBot<T>(method: string, payload: object, timeoutMs = 10_000): Promise<T> {
+  const res = await fetch(`${env.tgApiUrl}/bot${env.tgBotToken}/${method}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(env.tgRelayKey && { 'X-Relay-Key': env.tgRelayKey }) },
-    body: JSON.stringify({
-      chat_id: env.tgChatId,
-      text: html,
-      parse_mode: 'HTML',
-      link_preview_options: { is_disabled: true },
-    }),
-    signal: AbortSignal.timeout(10_000),
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(timeoutMs),
   })
-  if (!res.ok)
-    throw new Error(`Telegram ${res.status}: ${await res.text()}`)
+  const data = await res.json().catch(() => null) as { ok: boolean, result: T, description?: string } | null
+  if (!res.ok || !data?.ok)
+    throw new TelegramError(res.status, data?.description ?? res.statusText, data !== null)
+  return data.result
+}
+
+export function sendMessage(chatId: number | string, html: string) {
+  return callBot('sendMessage', { chat_id: chatId, text: html, parse_mode: 'HTML', link_preview_options: { is_disabled: true } })
+}
+
+// основной чат из настроек получает всё всегда, подписчики бота — после одобрения в админке
+function recipients() {
+  const active = db.select({ chatId: tgSubscribers.chatId }).from(tgSubscribers).where(eq(tgSubscribers.status, 'active')).all()
+  return [...new Set([env.tgChatId, ...active.map(s => String(s.chatId))].filter(Boolean))]
+}
+
+export async function sendTelegram(html: string) {
+  if (!env.tgBotToken)
+    return
+  const errors: string[] = []
+  await Promise.all(recipients().map(chatId => sendMessage(chatId, html).catch((err) => {
+    // подписчик заблокировал бота или удалил его из группы — больше ему не пишем
+    if (chatId !== env.tgChatId && isChatGone(err))
+      db.delete(tgSubscribers).where(and(eq(tgSubscribers.chatId, Number(chatId)), eq(tgSubscribers.status, 'active'))).run()
+    else
+      errors.push(`чат ${chatId}: ${errorMessage(err)}`)
+  })))
+  if (errors.length)
+    throw new Error(errors.join('; '))
 }
 
 export async function notifyNewLead(lead: LeadRow) {

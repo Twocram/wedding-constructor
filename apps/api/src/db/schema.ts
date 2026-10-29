@@ -1,5 +1,5 @@
 import type { AmountBreakdown } from '@saywed/shared'
-import { attendingValues, contactMethods, eventTypes, leadSources, leadStatuses, products } from '@saywed/shared'
+import { attendingValues, contactMethods, eventTypes, leadSources, leadStatuses, products, tgSubscriberStatuses } from '@saywed/shared'
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 const timestamp = (name: string) => integer(name, { mode: 'timestamp_ms' })
@@ -110,7 +110,19 @@ export const rsvps = sqliteTable(
   t => [index('rsvps_invitation_idx').on(t.invitationId)],
 )
 
+// кто получает уведомления бота; blocked — отклонённые, их повторный Start не попадает в админку
+export const tgSubscribers = sqliteTable('tg_subscribers', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  chatId: integer('chat_id').notNull().unique(),
+  name: text('name').notNull(),
+  username: text('username'),
+  status: text('status', { enum: tgSubscriberStatuses }).notNull().default('pending'),
+  approvedAt: timestamp('approved_at'),
+  createdAt: createdAt(),
+})
+
 export type LeadRow = typeof leads.$inferSelect
 export type InvitationRow = typeof invitations.$inferSelect
 export type RsvpRow = typeof rsvps.$inferSelect
 export type UserRow = typeof users.$inferSelect
+export type TgSubscriberRow = typeof tgSubscribers.$inferSelect

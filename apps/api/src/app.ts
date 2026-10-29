@@ -5,6 +5,7 @@ import { authRoutes } from './routes/auth'
 import { invitationRoutes } from './routes/invitations'
 import { publicRoutes } from './routes/public'
 import { statsRoutes } from './routes/stats'
+import { telegramRoutes } from './routes/telegram'
 
 export const app = new Elysia({ prefix: '/api' })
   .use(errorHandler)
@@ -15,6 +16,7 @@ export const app = new Elysia({ prefix: '/api' })
   .use(adminRoutes)
   .use(invitationRoutes)
   .use(statsRoutes)
+  .use(telegramRoutes)
 
 // типы маршрутов для Eden Treaty в админке: treaty<App>()
 export type App = typeof app

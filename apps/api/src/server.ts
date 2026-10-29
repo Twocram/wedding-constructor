@@ -2,9 +2,12 @@ import process from 'node:process'
 import { app } from './app'
 import { runMigrations, sqlite } from './db'
 import { env } from './env'
+import { startBotPolling } from './lib/telegramBot'
 
 export function startServer() {
   runMigrations()
+
+  startBotPolling()
 
   app.listen({ hostname: env.host, port: env.port }, ({ hostname, port }) => console.log(`[api] слушаю http://${hostname}:${port}`))
 

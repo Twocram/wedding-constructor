@@ -4,8 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, toValue } from 'vue'
 import { api, unwrap } from '@/lib/api'
 
+export { invitationHost, invitationUrl } from '@saywed/shared'
+
 export const siteOrigin = 'https://saywed.ru'
-export const invitationUrl = (slug: string) => `${siteOrigin}/${slug}`
 export const coupleUrl = (token: string) => `${siteOrigin}/answers#${token}`
 
 const fetchInvitations = () => unwrap(api.admin.invitations.get())

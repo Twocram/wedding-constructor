@@ -9,7 +9,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { coupleUrl, useCreateInvitation, useInvitations } from '@/composables/useInvitations'
+import { coupleUrl, invitationHost, useCreateInvitation, useInvitations } from '@/composables/useInvitations'
 import { ApiError } from '@/lib/api'
 import { formatAgo, formatDateTime } from '@/lib/format'
 
@@ -92,14 +92,14 @@ async function submit() {
         <div class="min-w-0 space-y-1.5">
           <label for="new-slug" class="text-xs font-medium text-muted-foreground">Адрес</label>
           <div class="flex min-w-0 items-center gap-2">
-            <span class="text-sm text-muted-foreground">saywed.ru/</span>
             <Input id="new-slug" v-model="form.slug" placeholder="anna-dmitry" autocomplete="off" autofocus :aria-invalid="Boolean(errors.slug)" />
+            <span class="text-sm text-muted-foreground">.saywed.ru</span>
           </div>
           <p v-if="errors.slug" class="text-sm text-destructive">
             {{ errors.slug[0] }}
           </p>
           <p v-else class="text-xs text-muted-foreground">
-            Как в ссылке saywed.ru/…: латиница, цифры и дефис
+            Поддомен приглашения: латиница, цифры и дефис — как имя yaml-файла приглашения
           </p>
         </div>
         <div class="min-w-0 space-y-1.5">
@@ -165,7 +165,7 @@ async function submit() {
           <li v-for="item in data.items" :key="item.id" class="flex items-center gap-1 pr-2">
             <button type="button" class="flex min-w-0 flex-1 flex-col gap-1 p-4 text-left active:bg-muted/60" @click="open(item)">
               <span class="truncate font-medium">{{ item.title }}</span>
-              <span class="truncate text-sm text-muted-foreground">saywed.ru/{{ item.slug }}</span>
+              <span class="truncate text-sm text-muted-foreground">{{ invitationHost(item.slug) }}</span>
               <span class="text-xs text-muted-foreground">
                 Придут: {{ item.counts.people }} · не смогут: {{ item.counts.no }} · ответов: {{ item.counts.total }}
                 <template v-if="item.lastAnswerAt"> · {{ formatAgo(item.lastAnswerAt) }}</template>
@@ -198,7 +198,7 @@ async function submit() {
                   {{ item.title }}
                 </div>
                 <div class="text-xs text-muted-foreground">
-                  saywed.ru/{{ item.slug }}
+                  {{ invitationHost(item.slug) }}
                 </div>
               </TableCell>
               <TableCell class="tabular-nums">

@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   coupleUrl,
+  invitationHost,
   invitationUrl,
   useDeleteInvitation,
   useDeleteInvitationChat,
@@ -196,7 +197,7 @@ function deleteInvitation() {
           </SheetTitle>
           <SheetDescription class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <a :href="invitationUrl(invitation.slug)" target="_blank" rel="noopener" class="inline-flex min-w-0 items-center gap-1 underline-offset-4 hover:underline">
-              <span class="truncate">saywed.ru/{{ invitation.slug }}</span>
+              <span class="truncate">{{ invitationHost(invitation.slug) }}</span>
               <ExternalLinkIcon class="size-3.5 shrink-0" />
             </a>
             <RouterLink v-if="invitation.leadId" :to="{ name: 'lead', params: { id: invitation.leadId } }" class="underline-offset-4 hover:underline">
@@ -410,8 +411,8 @@ function deleteInvitation() {
               <div class="min-w-0 space-y-1.5">
                 <label for="edit-slug" class="text-xs font-medium text-muted-foreground">Адрес</label>
                 <div class="flex min-w-0 items-center gap-2">
-                  <span class="text-sm text-muted-foreground">saywed.ru/</span>
                   <Input id="edit-slug" v-model="form.slug" autocomplete="off" :aria-invalid="Boolean(errors.slug)" />
+                  <span class="text-sm text-muted-foreground">.saywed.ru</span>
                 </div>
                 <p v-if="errors.slug" class="text-sm text-destructive">
                   {{ errors.slug[0] }}
@@ -444,7 +445,7 @@ function deleteInvitation() {
                 Адрес
               </dt>
               <dd class="min-w-0 break-words">
-                saywed.ru/{{ invitation.slug }}
+                {{ invitationHost(invitation.slug) }}
               </dd>
               <dt class="text-muted-foreground">
                 Заявка

@@ -1,0 +1,40 @@
+# тестовое приглашение по заявке №4
+theme: cinema
+groom: Артём
+bride: Вика
+date: 12 июня 2027
+city: Москва
+countdown: '2027-06-12T16:00:00'
+heroPhoto: /photos/story/story-9.jpg
+gallery:
+  - /photos/story/story-10.jpg
+  - /photos/story/story-11.jpg
+  - /photos/story/story-12.jpg
+welcome: Мы долго писали этот сценарий. Осталась главная сцена — и мы хотим, чтобы вы были в кадре.
+venue:
+  name: Особняк «Тестовый»
+  address: Москва, ул. Пример, 1
+timeline:
+  - time: '16:00'
+    title: Сбор гостей
+    text: Шампанское и музыка.
+  - time: '16:30'
+    title: Церемония
+  - time: '17:30'
+    title: Банкет
+    text: Ужин, тосты и танцы.
+dressCode:
+  text: Чёрно-белое кино — чёрный, белый и оттенки серого.
+  colors: ['#0b0a09', '#3a3632', '#8a847b', '#f2ece1']
+rsvp:
+  deadline: 15.05.2027
+  plusOne: true
+  drinks:
+    - Игристое
+    - Вино
+    - Крепкое
+    - Безалкогольное
+organizer:
+  name: Сергей
+  phone: '+7 999 000-00-00'
+music: /music/song.mp3

@@ -1,6 +1,7 @@
 import type { AmountBreakdown } from '@saywed/shared'
 import { attendingValues, contactMethods, eventTypes, leadSources, leadStatuses, products, tgSubscriberStatuses } from '@saywed/shared'
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { newToken } from '../lib/token'
 
 const timestamp = (name: string) => integer(name, { mode: 'timestamp_ms' })
 const createdAt = () => timestamp('created_at').notNull().$defaultFn(() => new Date())
@@ -82,12 +83,14 @@ export const leadEvents = sqliteTable(
   t => [index('lead_events_lead_idx').on(t.leadId)],
 )
 
-// приглашение клиента: к нему привязаны ответы гостей; token — секрет ссылки, по которой пара смотрит ответы
+// приглашение клиента: к нему привязаны ответы гостей; token — секрет ссылки, по которой пара смотрит ответы,
+// notifyToken — отдельный секрет ссылки на бота: он проходит через Telegram и не должен открывать ответы
 export const invitations = sqliteTable('invitations', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   slug: text('slug').notNull().unique(),
   title: text('title').notNull(),
   token: text('token').notNull().unique(),
+  notifyToken: text('notify_token').notNull().unique().$defaultFn(newToken),
   leadId: integer('lead_id').references(() => leads.id, { onDelete: 'set null' }),
   createdAt: createdAt(),
 })
@@ -121,8 +124,23 @@ export const tgSubscribers = sqliteTable('tg_subscribers', {
   createdAt: createdAt(),
 })
 
+// чаты пары, подключённые к боту по ссылке из карточки приглашения
+export const invitationChats = sqliteTable(
+  'invitation_chats',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    invitationId: integer('invitation_id').notNull().references(() => invitations.id, { onDelete: 'cascade' }),
+    chatId: integer('chat_id').notNull(),
+    name: text('name').notNull(),
+    username: text('username'),
+    createdAt: createdAt(),
+  },
+  t => [uniqueIndex('invitation_chats_unique').on(t.invitationId, t.chatId), index('invitation_chats_chat_idx').on(t.chatId)],
+)
+
 export type LeadRow = typeof leads.$inferSelect
 export type InvitationRow = typeof invitations.$inferSelect
 export type RsvpRow = typeof rsvps.$inferSelect
 export type UserRow = typeof users.$inferSelect
 export type TgSubscriberRow = typeof tgSubscribers.$inferSelect
+export type InvitationChatRow = typeof invitationChats.$inferSelect

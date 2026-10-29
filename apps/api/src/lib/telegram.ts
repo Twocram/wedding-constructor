@@ -8,12 +8,13 @@ import {
   eventTypeLabels,
   leadSourceLabels,
   productLabels,
+  rsvpSummary,
   rub,
   themes,
 } from '@saywed/shared'
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 import { db } from '../db'
-import { tgSubscribers } from '../db/schema'
+import { invitationChats, rsvps, tgSubscribers } from '../db/schema'
 import { env } from '../env'
 
 // в ошибке сетевого сбоя Bun лежит адрес запроса с токеном бота — в лог только текст
@@ -54,19 +55,27 @@ function recipients() {
   return [...new Set([env.tgChatId, ...active.map(s => String(s.chatId))].filter(Boolean))]
 }
 
-export async function sendTelegram(html: string) {
-  if (!env.tgBotToken)
-    return
+// чат заблокировал бота или удалил его из группы — больше ему не пишем
+function forgetChat(chatId: string) {
+  db.delete(tgSubscribers).where(and(eq(tgSubscribers.chatId, Number(chatId)), eq(tgSubscribers.status, 'active'))).run()
+  db.delete(invitationChats).where(eq(invitationChats.chatId, Number(chatId))).run()
+}
+
+async function deliver(chatIds: string[], html: string) {
   const errors: string[] = []
-  await Promise.all(recipients().map(chatId => sendMessage(chatId, html).catch((err) => {
-    // подписчик заблокировал бота или удалил его из группы — больше ему не пишем
+  await Promise.all(chatIds.map(chatId => sendMessage(chatId, html).catch((err) => {
     if (chatId !== env.tgChatId && isChatGone(err))
-      db.delete(tgSubscribers).where(and(eq(tgSubscribers.chatId, Number(chatId)), eq(tgSubscribers.status, 'active'))).run()
+      forgetChat(chatId)
     else
       errors.push(`чат ${chatId}: ${errorMessage(err)}`)
   })))
   if (errors.length)
     throw new Error(errors.join('; '))
+}
+
+export async function sendTelegram(html: string) {
+  if (env.tgBotToken)
+    await deliver(recipients(), html)
 }
 
 export async function notifyNewLead(lead: LeadRow) {
@@ -98,14 +107,51 @@ export async function notifyNewLead(lead: LeadRow) {
   return sendTelegram(lines.filter((l, i, all) => l !== '' || all[i - 1] !== '').join('\n'))
 }
 
+// паре — без имён гостей: имя в Telegram было бы передачей персональных данных за границу;
+// напитки тоже не шлём — сервер принимает в них любой текст, а пара не должна получать от нашего бота чужие ссылки
+function coupleMessage(invitationId: number, rsvp: RsvpRow) {
+  const all = db
+    .select()
+    .from(rsvps)
+    .where(eq(rsvps.invitationId, invitationId))
+    .orderBy(desc(rsvps.createdAt), desc(rsvps.id))
+    .all()
+    .map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))
+  const { people, no } = rsvpSummary(all)
+  return [
+    `💌 <b>Новый ответ гостя</b>`,
+    `${attendingLabels[rsvp.attending]}${rsvp.attending === 'yes' && rsvp.plusOne ? ' · с парой' : ''}`,
+    '',
+    `Всего: придут ${people} чел., не смогут ${no}`,
+    'Имена и пожелания — на вашей странице с ответами.',
+  ].join('\n')
+}
+
 export async function notifyNewRsvp(invitation: InvitationRow, rsvp: RsvpRow) {
+  if (!env.tgBotToken)
+    return
   const details = rsvp.attending === 'yes'
     ? [rsvp.plusOne ? 'с парой' : '', rsvp.drinks.join(', ')].filter(Boolean).join(' · ')
     : ''
+  const answer = `${attendingLabels[rsvp.attending]}${details ? ` · ${escape(details)}` : ''}`
   const lines = [
     `💌 <b>Ответ гостя</b> · ${env.tgNotifyContacts ? escape(invitation.title) : `приглашение #${invitation.id}`}`,
-    `${env.tgNotifyContacts ? `${escape(rsvp.name)}: ` : ''}${attendingLabels[rsvp.attending]}${details ? ` · ${escape(details)}` : ''}`,
+    `${env.tgNotifyContacts ? `${escape(rsvp.name)}: ` : ''}${answer}`,
     `<a href="${env.adminUrl}/invitations/${invitation.id}">Открыть в админке</a>`,
   ]
-  return sendTelegram(lines.join('\n'))
+  const team = recipients()
+  const couple = db
+    .select({ chatId: invitationChats.chatId })
+    .from(invitationChats)
+    .where(eq(invitationChats.invitationId, invitation.id))
+    .all()
+    .map(c => String(c.chatId))
+    .filter(chatId => !team.includes(chatId))
+  const results = await Promise.allSettled([
+    deliver(team, lines.join('\n')),
+    couple.length ? deliver(couple, coupleMessage(invitation.id, rsvp)) : undefined,
+  ])
+  const failed = results.flatMap(r => (r.status === 'rejected' ? [errorMessage(r.reason)] : []))
+  if (failed.length)
+    throw new Error(failed.join('; '))
 }

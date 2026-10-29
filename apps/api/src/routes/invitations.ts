@@ -1,16 +1,16 @@
 import type { InvitationRow } from '../db/schema'
-import { Buffer } from 'node:buffer'
 import { invitationInput, invitationPatch, rsvpSummary } from '@saywed/shared'
 import { and, desc, eq, ne } from 'drizzle-orm'
 import { Elysia } from 'elysia'
 import * as z from 'zod'
 import { db } from '../db'
-import { invitations, leads, rsvps } from '../db/schema'
+import { invitationChats, invitations, leads, rsvps } from '../db/schema'
 import { fieldError } from '../lib/http'
 import { auth } from '../lib/session'
+import { getBotUsername } from '../lib/telegramBot'
+import { newToken } from '../lib/token'
 
 const iso = (d: Date) => d.toISOString()
-const newToken = () => Buffer.from(crypto.getRandomValues(new Uint8Array(24))).toString('base64url')
 
 const idParam = z.object({ id: z.coerce.number().int().positive() })
 const notFound = { ok: false as const, error: 'Приглашение не найдено' }
@@ -110,13 +110,13 @@ export const invitationRoutes = new Elysia({ prefix: '/admin' }).use(auth).guard
       },
       { params: idParam, body: invitationPatch },
     )
-    // новая ссылка для пары: старая перестаёт работать, если её переслали не тем людям
+    // новые ссылки для пары: старые перестают работать, если их переслали не тем людям; подключённые чаты остаются
     .post(
       '/invitations/:id/token',
       ({ params: { id }, status }) => {
         if (!findInvitation(id))
           return status(404, notFound)
-        const row = db.update(invitations).set({ token: newToken() }).where(eq(invitations.id, id)).returning().get()
+        const row = db.update(invitations).set({ token: newToken(), notifyToken: newToken() }).where(eq(invitations.id, id)).returning().get()
         return { ok: true as const, invitation: publicInvitation(row) }
       },
       { params: idParam },
@@ -144,7 +144,26 @@ export const invitationRoutes = new Elysia({ prefix: '/admin' }).use(auth).guard
           .orderBy(desc(rsvps.createdAt))
           .all()
           .map(({ ipHash: _ip, userAgent: _ua, ...row }) => ({ ...row, createdAt: iso(row.createdAt) }))
-        return { ok: true as const, invitation: publicInvitation(invitation), items }
+        const chats = db
+          .select()
+          .from(invitationChats)
+          .where(eq(invitationChats.invitationId, id))
+          .orderBy(desc(invitationChats.createdAt))
+          .all()
+          .map(c => ({ ...c, createdAt: iso(c.createdAt) }))
+        const bot = getBotUsername()
+        const notifyLink = bot ? `https://t.me/${bot}?start=${invitation.notifyToken}` : null
+        return { ok: true as const, invitation: publicInvitation(invitation), items, chats, notifyLink }
+      },
+      { params: idParam },
+    )
+    .delete(
+      '/invitation-chats/:id',
+      ({ params: { id }, status }) => {
+        const deleted = db.delete(invitationChats).where(eq(invitationChats.id, id)).returning({ id: invitationChats.id }).get()
+        if (!deleted)
+          return status(404, { ok: false as const, error: 'Чат не найден' })
+        return { ok: true as const }
       },
       { params: idParam },
     )

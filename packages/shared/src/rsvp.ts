@@ -1,14 +1,15 @@
 import * as z from 'zod'
 import { attendingValues } from './rsvpReport'
 
-const reservedSlugs = new Set(['answers', 'privacy', 'api', 'og', 'ics', 'admin', 'previews', 'photos', 'music'])
+// пути страниц сайта и поддомены сервисов
+const reservedSlugs = new Set(['answers', 'privacy', 'api', 'og', 'ics', 'admin', 'previews', 'photos', 'music', 'www', 'mail', 'static'])
 
-// адрес приглашения на сайте: saywed.ru/<slug>
+// адрес приглашения: поддомен <slug>.saywed.ru, поэтому не длиннее 63 символов
 export const invitationSlugSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(/^[a-z0-9][a-z0-9-]{1,79}$/, 'Латиница, цифры и дефис, от 2 символов')
+  .regex(/^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/, 'Латиница, цифры и дефис, от 2 до 63 символов, без дефиса по краям')
   // эти адреса заняты страницами сайта и API
   .refine(s => !reservedSlugs.has(s), 'Этот адрес занят служебной страницей')
 

@@ -1,5 +1,6 @@
 export * from './admin'
 export * from './catalog'
+export * from './domain'
 export * from './lead'
 export * from './rsvp'
 export * from './rsvpReport'

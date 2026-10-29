@@ -466,8 +466,8 @@ if (root) {
     transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
     transition-delay: calc(0.45s + var(--d, 0) * 0.09s);
   }
-  /* заголовки выезжают из-под маски построчно */
-  .ln { display: block; overflow: hidden; padding-bottom: 0.06em; }
+  /* заголовки выезжают из-под маски построчно; сверху запас под точки Ё и кратку Й — маска их иначе срезает */
+  .ln { display: block; overflow: hidden; padding: 0.14em 0 0.06em; margin-top: -0.14em; }
   .ln > span { display: block; transform: translateY(110%); }
   .scene.is-active .ln > span {
     transform: none;

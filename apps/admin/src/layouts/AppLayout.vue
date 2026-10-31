@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { BellIcon, ChevronDownIcon, InboxIcon, LayoutDashboardIcon, LogOutIcon, MailIcon } from '@lucide/vue'
+import { ChevronDownIcon, LogOutIcon } from '@lucide/vue'
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -20,6 +21,23 @@ const { data: newCount } = useNewLeadsCount()
 const logout = useLogout()
 const { data: subscribers } = useTgSubscribers()
 const pendingSubscribers = computed(() => subscribers.value?.items.filter(s => s.status === 'pending').length ?? 0)
+
+const route = useRoute()
+const sections = computed(() => [
+  {
+    label: 'Заявки',
+    badge: newCount.value,
+    badgeClass: 'bg-sky-500',
+    pages: [{ name: 'leads', label: 'Список' }, { name: 'dashboard', label: 'Дашборд' }],
+  },
+  {
+    label: 'Коммуникации',
+    badge: pendingSubscribers.value,
+    badgeClass: 'bg-amber-500',
+    pages: [{ name: 'invitations', label: 'Приглашения' }, { name: 'notifications', label: 'Уведомления' }],
+  },
+])
+const currentSection = computed(() => sections.value.find(s => s.pages.some(page => route.matched.some(r => r.name === page.name))) ?? sections.value[0]!)
 </script>
 
 <template>
@@ -27,42 +45,24 @@ const pendingSubscribers = computed(() => subscribers.value?.items.filter(s => s
     <div class="min-h-svh bg-muted/30">
       <header class="sticky top-0 z-30 border-b bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
         <div class="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-6">
-          <RouterLink :to="{ name: 'leads' }" class="flex items-center gap-2.5 font-medium">
+          <RouterLink :to="{ name: 'leads' }" class="hidden items-center gap-2.5 font-medium sm:flex">
             <span class="grid size-7 place-items-center rounded-full bg-[#78865a] font-serif text-base text-[#f6f2ea] italic">&amp;</span>
-            <span class="hidden sm:inline">saywed</span>
+            saywed
           </RouterLink>
 
-          <nav class="flex items-center gap-1">
-            <Button variant="ghost" size="sm" as-child>
-              <RouterLink :to="{ name: 'leads' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Заявки">
-                <InboxIcon />
-                <span class="hidden sm:inline">Заявки</span>
-                <span v-if="newCount" class="grid h-5 min-w-5 place-items-center rounded-full bg-sky-500 px-1.5 text-[11px] font-semibold text-white tabular-nums">
-                  {{ newCount }}
-                </span>
-              </RouterLink>
-            </Button>
-            <Button variant="ghost" size="sm" as-child>
-              <RouterLink :to="{ name: 'invitations' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Приглашения">
-                <MailIcon />
-                <span class="hidden sm:inline">Приглашения</span>
-              </RouterLink>
-            </Button>
-            <Button variant="ghost" size="sm" as-child>
-              <RouterLink :to="{ name: 'dashboard' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Дашборд">
-                <LayoutDashboardIcon />
-                <span class="hidden sm:inline">Дашборд</span>
-              </RouterLink>
-            </Button>
-            <Button variant="ghost" size="sm" as-child>
-              <RouterLink :to="{ name: 'notifications' }" active-class="bg-muted text-foreground" class="text-muted-foreground" aria-label="Уведомления">
-                <BellIcon />
-                <span class="hidden sm:inline">Уведомления</span>
-                <span v-if="pendingSubscribers" class="grid h-5 min-w-5 place-items-center rounded-full bg-amber-500 px-1.5 text-[11px] font-semibold text-white tabular-nums">
-                  {{ pendingSubscribers }}
-                </span>
-              </RouterLink>
-            </Button>
+          <nav class="inline-flex min-w-0 gap-1 rounded-lg bg-muted p-1" aria-label="Разделы">
+            <RouterLink
+              v-for="section in sections"
+              :key="section.label"
+              :to="{ name: section.pages[0]!.name }"
+              class="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:shadow-sm sm:px-3"
+              :data-active="section === currentSection"
+            >
+              {{ section.label }}
+              <span v-if="section.badge" class="grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[11px] font-semibold text-white tabular-nums" :class="section.badgeClass">
+                {{ section.badge }}
+              </span>
+            </RouterLink>
           </nav>
 
           <DropdownMenu>
@@ -70,7 +70,7 @@ const pendingSubscribers = computed(() => subscribers.value?.items.filter(s => s
               <Button variant="ghost" size="sm" class="ml-auto gap-2">
                 <span class="grid size-6 place-items-center rounded-full bg-muted text-xs font-semibold uppercase">{{ user?.name?.[0] }}</span>
                 <span class="hidden sm:inline">{{ user?.name }}</span>
-                <ChevronDownIcon class="text-muted-foreground" />
+                <ChevronDownIcon class="hidden text-muted-foreground sm:block" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="w-48">
@@ -92,7 +92,22 @@ const pendingSubscribers = computed(() => subscribers.value?.items.filter(s => s
         </div>
       </header>
 
-      <main class="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+      <main class="mx-auto max-w-6xl px-4 pt-3 pb-6 sm:pt-4 sm:pb-8">
+        <nav class="mb-5 flex gap-5 border-b" aria-label="Страницы раздела">
+          <RouterLink
+            v-for="page in currentSection.pages"
+            :key="page.name"
+            :to="{ name: page.name }"
+            class="-mb-px inline-flex h-10 items-center gap-1.5 border-b-2 border-transparent text-sm text-muted-foreground transition-colors hover:text-foreground"
+            active-class="border-foreground! text-foreground!"
+          >
+            {{ page.label }}
+            <span v-if="page.name === 'notifications' && pendingSubscribers" class="grid h-5 min-w-5 place-items-center rounded-full bg-amber-500 px-1.5 text-[11px] font-semibold text-white tabular-nums">
+              {{ pendingSubscribers }}
+            </span>
+          </RouterLink>
+        </nav>
+
         <RouterView />
       </main>
     </div>

@@ -106,21 +106,9 @@ function orderLine(lead: LeadItem) {
 
 <template>
   <div class="space-y-5">
-    <div class="flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">
-          Заявки
-        </h1>
-        <p class="text-sm text-muted-foreground">
-          <template v-if="data">
-            Найдено: {{ data.total }}
-          </template>
-          <template v-else>
-&nbsp;
-          </template>
-        </p>
-      </div>
-    </div>
+    <h1 class="sr-only">
+      Заявки
+    </h1>
 
     <!-- вкладки статусов: горизонтальный скролл на телефоне -->
     <div class="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]">
@@ -170,15 +158,18 @@ function orderLine(lead: LeadItem) {
           </SelectItem>
         </SelectContent>
       </Select>
-      <div class="flex items-center gap-1.5">
-        <Input type="date" class="w-36" :model-value="filters.from ?? ''" aria-label="С даты" @change="(e: Event) => setFilters({ from: (e.target as HTMLInputElement).value })" />
-        <span class="text-muted-foreground">—</span>
-        <Input type="date" class="w-36" :model-value="filters.to ?? ''" aria-label="По дату" @change="(e: Event) => setFilters({ to: (e.target as HTMLInputElement).value })" />
+      <div class="flex w-full items-center gap-1.5 sm:w-auto">
+        <Input type="date" class="min-w-0 flex-1 sm:w-36 sm:flex-none" :model-value="filters.from ?? ''" aria-label="С даты" @change="(e: Event) => setFilters({ from: (e.target as HTMLInputElement).value })" />
+        <span class="hidden text-muted-foreground sm:inline">—</span>
+        <Input type="date" class="min-w-0 flex-1 sm:w-36 sm:flex-none" :model-value="filters.to ?? ''" aria-label="По дату" @change="(e: Event) => setFilters({ to: (e.target as HTMLInputElement).value })" />
       </div>
       <Button v-if="hasFilters" variant="ghost" size="sm" @click="resetFilters">
         <XIcon />
         Сбросить
       </Button>
+      <p v-if="data" class="ml-auto text-sm text-muted-foreground">
+        Найдено: {{ data.total }}
+      </p>
     </div>
 
     <div class="overflow-hidden rounded-xl border bg-background" :class="{ 'opacity-70 transition-opacity': isFetching && !isPending }">

@@ -68,7 +68,7 @@ const lostRows = computed<BarRow[]>(() =>
   <div class="space-y-6">
     <div class="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">
+        <h1 class="sr-only">
           Дашборд
         </h1>
         <p class="text-sm text-muted-foreground">

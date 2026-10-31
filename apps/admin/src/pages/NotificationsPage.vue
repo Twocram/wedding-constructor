@@ -34,7 +34,7 @@ async function run(action: typeof approve, item: TgSubscriberItem, done: string)
 <template>
   <div class="space-y-5">
     <div>
-      <h1 class="text-2xl font-semibold tracking-tight">
+      <h1 class="sr-only">
         Уведомления
       </h1>
       <p class="text-sm text-muted-foreground">

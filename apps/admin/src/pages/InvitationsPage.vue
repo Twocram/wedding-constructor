@@ -55,7 +55,7 @@ async function submit() {
     const { invitation } = await create.mutateAsync({ slug: form.slug, title: form.title, leadId: leadIdNumber.value })
     creating.value = false
     toast.success('Приглашение создано')
-    void router.push({ name: 'invitation', params: { id: invitation.id } })
+    void router.push({ name: 'invitation', params: { id: invitation.id }, query: { tab: 'couple' } })
   }
   catch (error) {
     if (error instanceof ApiError && Object.keys(error.fieldErrors).length)
@@ -69,7 +69,7 @@ async function submit() {
   <div class="space-y-5">
     <div class="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">
+        <h1 class="sr-only">
           Приглашения
         </h1>
         <p class="text-sm text-muted-foreground">

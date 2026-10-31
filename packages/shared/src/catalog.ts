@@ -17,7 +17,7 @@ export const themes: Record<string, ThemeInfo> = {
   watercolor: { name: 'Watercolor', tagline: 'Акварель и пастель — как открытка ручной работы', tags: ['Светлая', 'Нежная'] },
   ticket: { name: 'Ticket', tagline: 'Посадочный талон для свадьбы-путешествия', tags: ['Светлая', 'Необычная'], isNew: true },
   luxe: { name: 'Luxe', tagline: 'Мрамор, золото и тонкая рамка — дорогая классика', tags: ['Светлая', 'Премиум'] },
-  botanical: { name: 'Botanical', tagline: 'Эвкалипт, крафт и садовая нежность', tags: ['Светлая', 'Ботаника'] },
+  fairytale: { name: 'Fairytale', tagline: 'Сказка о любви: замок, фейерверк и «долго и счастливо»', tags: ['Тёмная', 'Сказочная'], isNew: true },
   toile: { name: 'Toile de Jouy', tagline: 'Синий фарфор: чернильный принт и кремовая бумага', tags: ['Светлая', 'Классика'], isNew: true },
   editorial: { name: 'Editorial', tagline: 'Журнальная вёрстка, воздух и тонкая типографика', tags: ['Светлая', 'Минимализм'] },
 }

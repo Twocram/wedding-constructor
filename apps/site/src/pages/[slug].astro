@@ -9,10 +9,10 @@ import DemoInfo from '../components/DemoInfo.astro'
 import Envelope from '../components/Envelope.astro'
 import Footer from '../components/Footer.astro'
 import HeroAmalfi from '../components/HeroAmalfi.astro'
-import HeroBotanical from '../components/HeroBotanical.astro'
 import HeroCoquette from '../components/HeroCoquette.astro'
 import HeroCover from '../components/HeroCover.astro'
 import HeroDeco from '../components/HeroDeco.astro'
+import HeroFairytale from '../components/HeroFairytale.astro'
 import HeroEditorial from '../components/HeroEditorial.astro'
 import HeroLuxe from '../components/HeroLuxe.astro'
 import HeroTicket from '../components/HeroTicket.astro'
@@ -26,9 +26,9 @@ import { calendarEvent } from '../lib/calendar'
 import { invitationPageUrl } from '../lib/invitationUrl'
 import { leadFormEnabled, themes } from '../site'
 import AmalfiBody from '../themes/amalfi/Body.astro'
-import BotanicalBody from '../themes/botanical/Body.astro'
 import CoquetteBody from '../themes/coquette/Body.astro'
 import DecoBody from '../themes/deco/Body.astro'
+import FairytaleBody from '../themes/fairytale/Body.astro'
 import EditorialBody from '../themes/editorial/Body.astro'
 import LuxeBody from '../themes/luxe/Body.astro'
 import TicketBody from '../themes/ticket/Body.astro'
@@ -48,11 +48,11 @@ const { inv } = Astro.props
 const title = `${inv.groom} & ${inv.bride}`
 const slug = Astro.params.slug!
 const cal = calendarEvent(inv, invitationPageUrl(slug, inv.demo, Astro.site))
-const heroes = { cover: HeroCover, botanical: HeroBotanical, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile }
+const heroes = { cover: HeroCover, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile, fairytale: HeroFairytale }
 // cinema и stories — отдельные одноэкранные форматы, у них нет hero и ленты секций
 const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme]
 // у каждой темы своё тело страницы; cover — базовая классика на общих секциях
-const bodies = { cover: ClassicBody, botanical: BotanicalBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody }
+const bodies = { cover: ClassicBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody, fairytale: FairytaleBody }
 const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null
 // день недели к дате на первом экране: «суббота, 3 октября 2026» — из ISO-даты таймера
 const weekday = inv.countdown

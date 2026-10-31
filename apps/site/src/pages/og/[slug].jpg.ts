@@ -20,7 +20,6 @@ interface Look { bg: string, text: string, muted: string, accent: string, font: 
 // цвета — те же токены, что в Base.astro; у Marcellus нет кириллицы, для deco берём Prata
 const looks: Record<Theme, Look> = {
   cover: { bg: '#f6f2ea', text: '#2a2823', muted: '#6f6a5f', accent: '#78865a', font: 'Playfair Display', italic: true },
-  botanical: { bg: '#f3f1e8', text: '#2f3327', muted: '#757a64', accent: '#6e7f57', font: 'Cormorant Garamond', italic: true },
   editorial: { bg: '#f4efe6', text: '#1f1c18', muted: '#6e675c', accent: '#7a6a57', font: 'Cormorant Garamond', italic: true },
   watercolor: { bg: '#f8f2f0', text: '#3c2e2e', muted: '#857069', accent: '#b07d7d', font: 'Cormorant Garamond', italic: true },
   luxe: { bg: '#faf7f1', text: '#2c2619', muted: '#7d7358', accent: '#a9853e', font: 'Playfair Display', italic: true },
@@ -31,6 +30,7 @@ const looks: Record<Theme, Look> = {
   stories: { bg: '#1b1a1d', text: '#ffffff', muted: '#a9a5ae', accent: '#f19a7e', font: 'Playfair Display', italic: true },
   cinema: { bg: '#0b0a09', text: '#f2ece1', muted: '#91887b', accent: '#e0b36a', font: 'Oswald', upper: true },
   coquette: { bg: '#faeef1', text: '#432a31', muted: '#8f6d76', accent: '#b25a70', font: 'Playfair Display', italic: true },
+  fairytale: { bg: '#141838', text: '#f5f0e6', muted: '#9a95b6', accent: '#f0c76e', font: 'Cormorant Garamond', italic: true },
   toile: { bg: '#f3f0e7', text: '#24344e', muted: '#6d7a90', accent: '#3a5a80', font: 'Cormorant Garamond' },
 }
 

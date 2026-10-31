@@ -5,7 +5,7 @@ import { defineCollection, z } from 'astro:content'
 const invitations = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/invitations' }),
   schema: z.object({
-    theme: z.enum(['cover', 'botanical', 'editorial', 'watercolor', 'luxe', 'amalfi', 'deco', 'vogue', 'ticket', 'cinema', 'stories', 'coquette', 'toile']).default('cover'),
+    theme: z.enum(['cover', 'editorial', 'watercolor', 'luxe', 'amalfi', 'deco', 'vogue', 'ticket', 'cinema', 'stories', 'coquette', 'toile', 'fairytale']).default('cover'),
     groom: z.string(),
     bride: z.string(),
     date: z.string(), // "3 октября 2026"

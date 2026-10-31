@@ -71,7 +71,7 @@ async function linkInvitation(chat: TgChat, token: string) {
   if (env.tgChatId) {
     await sendMessage(
       env.tgChatId,
-      `🔗 <b>Пара подключила уведомления</b> · приглашение #${invitation.id}\n${escape(name)}${chat.username ? ` (@${escape(chat.username)})` : ''}\n<a href="${env.adminUrl}/invitations/${invitation.id}">Открыть в админке</a>`,
+      `🔗 <b>Пара подключила уведомления</b> · приглашение #${invitation.id}\n${escape(name)}${chat.username ? ` (@${escape(chat.username)})` : ''}\n<a href="${env.adminUrl}/invitations/${invitation.id}?tab=couple">Открыть в админке</a>`,
     ).catch(err => console.error(`[telegram] подключение пары: ${errorMessage(err)}`))
   }
 }

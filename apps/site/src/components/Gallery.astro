@@ -51,6 +51,10 @@ else {
     margin-inline: -24px;
     padding: 8px 24px 24px;
   }
+  /* iOS 15: clip там нет; два объявления подряд сборщик схлопывает до последнего */
+  @supports not (overflow: clip) {
+    .stack { overflow-x: hidden; }
+  }
   :global(body[data-theme='deco']) .stack,
   :global(body[data-theme='amalfi']) .stack {
     --card-bg: var(--surface-2);

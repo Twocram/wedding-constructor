@@ -38,7 +38,7 @@ async function run(action: typeof approve, item: TgSubscriberItem, done: string)
         Уведомления
       </h1>
       <p class="text-sm text-muted-foreground">
-        Бот команды присылает новые заявки и ответы гостей.
+        Бот команды присылает новые заявки.
         <template v-if="botUrl">
           Чтобы подключиться, откройте <a :href="botUrl" target="_blank" rel="noopener" class="text-foreground underline underline-offset-4">@{{ data?.botUsername }}</a> и нажмите Start — запрос появится здесь.
         </template>

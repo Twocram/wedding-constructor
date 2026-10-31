@@ -138,29 +138,16 @@ function coupleMessage(invitation: InvitationRow, rsvp: RsvpRow) {
   ].join('\n')
 }
 
+// только паре: команде каждый ответ гостя был бы спамом, он и так виден в админке
 export async function notifyNewRsvp(invitation: InvitationRow, rsvp: RsvpRow) {
-  const details = rsvp.attending === 'yes'
-    ? [rsvp.plusOne ? 'с парой' : '', rsvp.drinks.join(', ')].filter(Boolean).join(' · ')
-    : ''
-  const answer = `${attendingLabels[rsvp.attending]}${details ? ` · ${escape(details)}` : ''}`
-  const lines = [
-    `💌 <b>Ответ гостя</b> · ${env.tgNotifyContacts ? escape(invitation.title) : `приглашение #${invitation.id}`}`,
-    `${env.tgNotifyContacts ? `${escape(rsvp.name)}: ` : ''}${answer}`,
-    `<a href="${env.adminUrl}/invitations/${invitation.id}">Открыть в админке</a>`,
-  ]
-  const couple = env.tgCoupleBotToken
-    ? db
-        .select({ chatId: invitationChats.chatId })
-        .from(invitationChats)
-        .where(eq(invitationChats.invitationId, invitation.id))
-        .all()
-        .map(c => String(c.chatId))
-    : []
-  const results = await Promise.allSettled([
-    sendTelegram(lines.join('\n')),
-    couple.length ? deliver('couple', couple, coupleMessage(invitation, rsvp)) : undefined,
-  ])
-  const failed = results.flatMap(r => (r.status === 'rejected' ? [errorMessage(r.reason)] : []))
-  if (failed.length)
-    throw new Error(failed.join('; '))
+  if (!env.tgCoupleBotToken)
+    return
+  const couple = db
+    .select({ chatId: invitationChats.chatId })
+    .from(invitationChats)
+    .where(eq(invitationChats.invitationId, invitation.id))
+    .all()
+    .map(c => String(c.chatId))
+  if (couple.length)
+    await deliver('couple', couple, coupleMessage(invitation, rsvp))
 }

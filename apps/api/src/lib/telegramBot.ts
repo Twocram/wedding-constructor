@@ -129,7 +129,7 @@ async function handleTeam(chat: TgChat, text: string) {
   const name = chatName(chat).slice(0, 100)
   db.insert(tgSubscribers).values({ chatId: chat.id, name, username: chat.username ?? null }).onConflictDoNothing().run()
   console.log(`[telegram] запрос на подписку от чата ${chat.id}`)
-  await reply('team', chat.id, 'Запрос отправлен. Как только его одобрят в админке saywed, сюда начнут приходить новые заявки и ответы гостей.')
+  await reply('team', chat.id, 'Запрос отправлен. Как только его одобрят в админке saywed, сюда начнут приходить новые заявки.')
   // только в основной чат: чужие Start не должны рассылаться всем подписчикам
   if (env.tgChatId) {
     await sendMessage(

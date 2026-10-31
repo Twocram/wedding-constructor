@@ -22,7 +22,7 @@ export const telegramRoutes = new Elysia({ prefix: '/admin/telegram' }).use(auth
   app
     .get('/subscribers', () => {
       const items = db.select().from(tgSubscribers).orderBy(desc(tgSubscribers.createdAt)).all().map(publicSubscriber)
-      return { ok: true as const, enabled: Boolean(env.tgBotToken), botUsername: getBotUsername() ?? null, items }
+      return { ok: true as const, enabled: Boolean(env.tgBotToken), botUsername: getBotUsername('team') ?? null, items }
     })
     .post(
       '/subscribers/:id/approve',
@@ -33,7 +33,7 @@ export const telegramRoutes = new Elysia({ prefix: '/admin/telegram' }).use(auth
         if (current.status !== 'pending')
           return status(409, { ok: false as const, error: 'Запрос уже обработан' })
         const row = db.update(tgSubscribers).set({ status: 'active', approvedAt: new Date() }).where(eq(tgSubscribers.id, id)).returning().get()
-        await sendMessage(row.chatId, 'Готово: сюда будут приходить новые заявки и ответы гостей. Отключить — /stop.')
+        await sendMessage('team', row.chatId, `Готово: сюда будут приходить новые заявки и ответы гостей. Отключить — /stop.\n<a href="${env.adminUrl}">Открыть админку</a>`)
           .catch(err => console.error(`[telegram] одобрение чата ${row.chatId}: ${errorMessage(err)}`))
         return { ok: true as const, subscriber: publicSubscriber(row) }
       },

@@ -1,5 +1,6 @@
 import type { InvitationRow, LeadRow, RsvpRow } from '../db/schema'
 import {
+  answersUrl,
   attendingLabels,
   breakdownTotal,
   contactMethodLabels,
@@ -34,8 +35,12 @@ export class TelegramError extends Error {
 const chatGone = /bot was blocked|bot was kicked|user is deactivated|not a member/i
 export const isChatGone = (err: unknown) => err instanceof TelegramError && err.fromTelegram && err.status === 403 && chatGone.test(err.description)
 
-export async function callBot<T>(method: string, payload: object, timeoutMs = 10_000): Promise<T> {
-  const res = await fetch(`${env.tgApiUrl}/bot${env.tgBotToken}/${method}`, {
+// team — бот команды: заявки и ответы со ссылками в админку; couple — бот пар: сводка и ссылка на их страницу
+export type Bot = 'team' | 'couple'
+const tokens: Record<Bot, string> = { team: env.tgBotToken, couple: env.tgCoupleBotToken }
+
+export async function callBot<T>(bot: Bot, method: string, payload: object, timeoutMs = 10_000): Promise<T> {
+  const res = await fetch(`${env.tgApiUrl}/bot${tokens[bot]}/${method}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(env.tgRelayKey && { 'X-Relay-Key': env.tgRelayKey }) },
     body: JSON.stringify(payload),
@@ -47,8 +52,8 @@ export async function callBot<T>(method: string, payload: object, timeoutMs = 10
   return data.result
 }
 
-export function sendMessage(chatId: number | string, html: string) {
-  return callBot('sendMessage', { chat_id: chatId, text: html, parse_mode: 'HTML', link_preview_options: { is_disabled: true } })
+export function sendMessage(bot: Bot, chatId: number | string, html: string) {
+  return callBot(bot, 'sendMessage', { chat_id: chatId, text: html, parse_mode: 'HTML', link_preview_options: { is_disabled: true } })
 }
 
 // основной чат из настроек получает всё всегда, подписчики бота — после одобрения в админке
@@ -58,16 +63,18 @@ function recipients() {
 }
 
 // чат заблокировал бота или удалил его из группы — больше ему не пишем
-function forgetChat(chatId: string) {
-  db.delete(tgSubscribers).where(and(eq(tgSubscribers.chatId, Number(chatId)), eq(tgSubscribers.status, 'active'))).run()
-  db.delete(invitationChats).where(eq(invitationChats.chatId, Number(chatId))).run()
+function forgetChat(bot: Bot, chatId: string) {
+  if (bot === 'team')
+    db.delete(tgSubscribers).where(and(eq(tgSubscribers.chatId, Number(chatId)), eq(tgSubscribers.status, 'active'))).run()
+  else
+    db.delete(invitationChats).where(eq(invitationChats.chatId, Number(chatId))).run()
 }
 
-async function deliver(chatIds: string[], html: string) {
+async function deliver(bot: Bot, chatIds: string[], html: string) {
   const errors: string[] = []
-  await Promise.all(chatIds.map(chatId => sendMessage(chatId, html).catch((err) => {
-    if (chatId !== env.tgChatId && isChatGone(err))
-      forgetChat(chatId)
+  await Promise.all(chatIds.map(chatId => sendMessage(bot, chatId, html).catch((err) => {
+    if (!(bot === 'team' && chatId === env.tgChatId) && isChatGone(err))
+      forgetChat(bot, chatId)
     else
       errors.push(`чат ${chatId}: ${errorMessage(err)}`)
   })))
@@ -77,7 +84,7 @@ async function deliver(chatIds: string[], html: string) {
 
 export async function sendTelegram(html: string) {
   if (env.tgBotToken)
-    await deliver(recipients(), html)
+    await deliver('team', recipients(), html)
 }
 
 export async function notifyNewLead(lead: LeadRow) {
@@ -111,11 +118,11 @@ export async function notifyNewLead(lead: LeadRow) {
 
 // паре — без имён гостей: имя в Telegram было бы передачей персональных данных за границу;
 // напитки тоже не шлём — сервер принимает в них любой текст, а пара не должна получать от нашего бота чужие ссылки
-function coupleMessage(invitationId: number, rsvp: RsvpRow) {
+function coupleMessage(invitation: InvitationRow, rsvp: RsvpRow) {
   const all = db
     .select()
     .from(rsvps)
-    .where(eq(rsvps.invitationId, invitationId))
+    .where(eq(rsvps.invitationId, invitation.id))
     .orderBy(desc(rsvps.createdAt), desc(rsvps.id))
     .all()
     .map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))
@@ -127,13 +134,11 @@ function coupleMessage(invitationId: number, rsvp: RsvpRow) {
     `${attendingLabels[rsvp.attending]}${rsvp.attending === 'yes' && rsvp.plusOne ? ' · с парой' : ''}`,
     '',
     `Всего: ${people} ${peopleLabel(people)}${note ? ` (${note})` : ''}, не смогут ${no}`,
-    'Имена и пожелания — на вашей странице с ответами.',
+    `<a href="${answersUrl(invitation.token)}">Имена и пожелания — на вашей странице с ответами</a>`,
   ].join('\n')
 }
 
 export async function notifyNewRsvp(invitation: InvitationRow, rsvp: RsvpRow) {
-  if (!env.tgBotToken)
-    return
   const details = rsvp.attending === 'yes'
     ? [rsvp.plusOne ? 'с парой' : '', rsvp.drinks.join(', ')].filter(Boolean).join(' · ')
     : ''
@@ -143,17 +148,17 @@ export async function notifyNewRsvp(invitation: InvitationRow, rsvp: RsvpRow) {
     `${env.tgNotifyContacts ? `${escape(rsvp.name)}: ` : ''}${answer}`,
     `<a href="${env.adminUrl}/invitations/${invitation.id}">Открыть в админке</a>`,
   ]
-  const team = recipients()
-  const couple = db
-    .select({ chatId: invitationChats.chatId })
-    .from(invitationChats)
-    .where(eq(invitationChats.invitationId, invitation.id))
-    .all()
-    .map(c => String(c.chatId))
-    .filter(chatId => !team.includes(chatId))
+  const couple = env.tgCoupleBotToken
+    ? db
+        .select({ chatId: invitationChats.chatId })
+        .from(invitationChats)
+        .where(eq(invitationChats.invitationId, invitation.id))
+        .all()
+        .map(c => String(c.chatId))
+    : []
   const results = await Promise.allSettled([
-    deliver(team, lines.join('\n')),
-    couple.length ? deliver(couple, coupleMessage(invitation.id, rsvp)) : undefined,
+    sendTelegram(lines.join('\n')),
+    couple.length ? deliver('couple', couple, coupleMessage(invitation, rsvp)) : undefined,
   ])
   const failed = results.flatMap(r => (r.status === 'rejected' ? [errorMessage(r.reason)] : []))
   if (failed.length)

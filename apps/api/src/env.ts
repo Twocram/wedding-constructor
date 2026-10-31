@@ -12,6 +12,8 @@ export const env = {
   databasePath: process.env.DATABASE_PATH ?? 'data/saywed.db',
   migrationsDir: process.env.MIGRATIONS_DIR ?? 'drizzle',
   tgBotToken: process.env.TG_BOT_TOKEN ?? '',
+  // отдельный бот для пар: подключение по ссылке из карточки приглашения, команда в него не заходит
+  tgCoupleBotToken: process.env.TG_COUPLE_BOT_TOKEN ?? '',
   tgChatId: process.env.TG_CHAT_ID ?? '',
   // из российского дата-центра api.telegram.org недоступен — ходим через воркер Cloudflare (deploy/tg-relay)
   tgApiUrl: (process.env.TG_API_URL || 'https://api.telegram.org').replace(/\/+$/, ''),

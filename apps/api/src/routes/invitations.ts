@@ -151,7 +151,7 @@ export const invitationRoutes = new Elysia({ prefix: '/admin' }).use(auth).guard
           .orderBy(desc(invitationChats.createdAt))
           .all()
           .map(c => ({ ...c, createdAt: iso(c.createdAt) }))
-        const bot = getBotUsername()
+        const bot = getBotUsername('couple')
         const notifyLink = bot ? `https://t.me/${bot}?start=${invitation.notifyToken}` : null
         return { ok: true as const, invitation: publicInvitation(invitation), items, chats, notifyLink }
       },

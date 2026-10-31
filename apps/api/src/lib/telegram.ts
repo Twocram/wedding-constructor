@@ -7,6 +7,8 @@ import {
   estimateAmount,
   eventTypeLabels,
   leadSourceLabels,
+  peopleLabel,
+  peopleNote,
   productLabels,
   rsvpSummary,
   rub,
@@ -117,12 +119,14 @@ function coupleMessage(invitationId: number, rsvp: RsvpRow) {
     .orderBy(desc(rsvps.createdAt), desc(rsvps.id))
     .all()
     .map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))
-  const { people, no } = rsvpSummary(all)
+  const summary = rsvpSummary(all)
+  const { people, no } = summary
+  const note = peopleNote(summary)
   return [
     `💌 <b>Новый ответ гостя</b>`,
     `${attendingLabels[rsvp.attending]}${rsvp.attending === 'yes' && rsvp.plusOne ? ' · с парой' : ''}`,
     '',
-    `Всего: придут ${people} чел., не смогут ${no}`,
+    `Всего: ${people} ${peopleLabel(people)}${note ? ` (${note})` : ''}, не смогут ${no}`,
     'Имена и пожелания — на вашей странице с ответами.',
   ].join('\n')
 }

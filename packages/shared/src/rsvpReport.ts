@@ -1,5 +1,6 @@
 // сводка и выгрузка ответов гостей — без zod: модуль грузится в браузер на странице для пары
 import { strToU8, zipSync } from 'fflate'
+import { pluralRu } from './plural'
 
 export const attendingValues = ['yes', 'no'] as const
 export type Attending = (typeof attendingValues)[number]
@@ -50,8 +51,15 @@ export function rsvpSummary(all: RsvpAnswer[]) {
     yes: yes.length,
     no: items.length - yes.length,
     people: yes.reduce((sum, i) => sum + (i.plusOne ? 2 : 1), 0),
+    plusOnes: yes.filter(i => i.plusOne).length,
     drinks: Object.entries(drinks).sort((a, b) => b[1] - a[1]),
   }
+}
+
+// «3 человека придут» и из кого складывается число: иначе пара гостя выглядит как ошибка подсчёта
+export const peopleLabel = (n: number) => `${pluralRu(n, ['человек', 'человека', 'человек'])} ${pluralRu(n, ['придёт', 'придут', 'придут'])}`
+export function peopleNote({ yes, plusOnes }: { yes: number, plusOnes: number }) {
+  return plusOnes ? `${yes} ${pluralRu(yes, ['гость', 'гостя', 'гостей'])} и ${plusOnes} ${pluralRu(plusOnes, ['спутник', 'спутника', 'спутников'])}` : ''
 }
 
 type Cell = string | number | Date | null
@@ -119,11 +127,12 @@ export function rsvpXlsx(all: RsvpAnswer[]) {
       i.guest ?? '',
     ]),
   ]
-  const { people, yes, no, drinks } = rsvpSummary(all)
+  const { people, yes, plusOnes, no, drinks } = rsvpSummary(all)
   const summary: Row[] = [
     ['Показатель', 'Количество'],
-    ['Придут, человек (с парами)', people],
-    ['Ответили «придут»', yes],
+    ['Придут, человек', people],
+    ['Из них гостей', yes],
+    ['Из них спутников', plusOnes],
     ['Не смогут', no],
     ...drinks.map(([drink, n]): Row => [`Напиток: ${drink}`, n]),
   ]

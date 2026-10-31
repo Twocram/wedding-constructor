@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { InvitationPatch } from '@saywed/shared'
 import { CheckIcon, CopyIcon, DownloadIcon, ExternalLinkIcon, PencilIcon, RefreshCwIcon, SendIcon, Trash2Icon } from '@lucide/vue'
-import { answeredForOther, attendingLabels, latestAnswers, rsvpSummary, rsvpXlsx, xlsxType } from '@saywed/shared'
+import { answeredForOther, attendingLabels, latestAnswers, peopleNote, rsvpSummary, rsvpXlsx, xlsxType } from '@saywed/shared'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -55,7 +55,7 @@ watch(open, (value) => {
 })
 
 const stats = computed(() => [
-  { label: 'Придут', value: summary.value.people, hint: 'с парами' },
+  { label: 'Придут', value: summary.value.people, hint: peopleNote(summary.value) || 'человек' },
   { label: 'Не смогут', value: summary.value.no, hint: 'ответов' },
   { label: 'Всего ответов', value: summary.value.total, hint: 'анкет' },
 ])

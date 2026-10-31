@@ -104,7 +104,7 @@ const glints = Array.from({ length: 16 }, (_, i) => {
 </section>
 
 <script>
-import { pluralRu } from '../../lib/plural'
+import { pluralRu } from '@saywed/shared/plural'
 
 document.querySelectorAll<HTMLElement>('.am-night').forEach((el) => {
   const target = new Date(el.dataset.target ?? '').getTime()

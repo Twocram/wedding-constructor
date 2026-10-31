@@ -19,7 +19,7 @@ const { target } = Astro.props;
 </section>
 
 <script>
-import { pluralRu } from '../lib/plural'
+import { pluralRu } from '@saywed/shared/plural'
 
 document.querySelectorAll<HTMLElement>('.countdown').forEach((el) => {
   const target = new Date(el.dataset.target ?? '').getTime()

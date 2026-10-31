@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./domain": "./src/domain.ts",
+    "./plural": "./src/plural.ts",
     "./rsvp-report": "./src/rsvpReport.ts"
   },
   "scripts": {

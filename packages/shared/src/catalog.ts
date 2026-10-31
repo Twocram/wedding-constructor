@@ -18,6 +18,10 @@ export const themes: Record<string, ThemeInfo> = {
   ticket: { name: 'Ticket', tagline: 'Посадочный талон для свадьбы-путешествия', tags: ['Светлая', 'Необычная'], isNew: true },
   luxe: { name: 'Luxe', tagline: 'Мрамор, золото и тонкая рамка — дорогая классика', tags: ['Светлая', 'Премиум'] },
   fairytale: { name: 'Fairytale', tagline: 'Сказка о любви: замок, фейерверк и «долго и счастливо»', tags: ['Тёмная', 'Сказочная'], isNew: true },
+  sketch: { name: 'Sketch', tagline: 'Рисунок от руки: усадьба и карта тонким пером', tags: ['Светлая', 'Иллюстрация'], isNew: true },
+  frost: { name: 'Frost', tagline: 'Зимняя свадьба: иней, снег и серебристый лес', tags: ['Светлая', 'Зимняя'], isNew: true },
+  scrapbook: { name: 'Scrapbook', tagline: 'Альбом пары: полароиды, скотч и записки от руки', tags: ['Светлая', 'Необычная'], isNew: true },
+  terracotta: { name: 'Terracotta', tagline: 'Солнце на стене, лён, олива и тени листьев', tags: ['Светлая', 'Тёплая'], isNew: true },
   toile: { name: 'Toile de Jouy', tagline: 'Синий фарфор: чернильный принт и кремовая бумага', tags: ['Светлая', 'Классика'], isNew: true },
   editorial: { name: 'Editorial', tagline: 'Журнальная вёрстка, воздух и тонкая типографика', tags: ['Светлая', 'Минимализм'] },
 }

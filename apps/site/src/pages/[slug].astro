@@ -14,7 +14,11 @@ import HeroCover from '../components/HeroCover.astro'
 import HeroDeco from '../components/HeroDeco.astro'
 import HeroFairytale from '../components/HeroFairytale.astro'
 import HeroEditorial from '../components/HeroEditorial.astro'
+import HeroFrost from '../components/HeroFrost.astro'
 import HeroLuxe from '../components/HeroLuxe.astro'
+import HeroScrapbook from '../components/HeroScrapbook.astro'
+import HeroSketch from '../components/HeroSketch.astro'
+import HeroTerracotta from '../components/HeroTerracotta.astro'
 import HeroTicket from '../components/HeroTicket.astro'
 import HeroToile from '../components/HeroToile.astro'
 import HeroVogue from '../components/HeroVogue.astro'
@@ -30,7 +34,11 @@ import CoquetteBody from '../themes/coquette/Body.astro'
 import DecoBody from '../themes/deco/Body.astro'
 import FairytaleBody from '../themes/fairytale/Body.astro'
 import EditorialBody from '../themes/editorial/Body.astro'
+import FrostBody from '../themes/frost/Body.astro'
 import LuxeBody from '../themes/luxe/Body.astro'
+import ScrapbookBody from '../themes/scrapbook/Body.astro'
+import SketchBody from '../themes/sketch/Body.astro'
+import TerracottaBody from '../themes/terracotta/Body.astro'
 import TicketBody from '../themes/ticket/Body.astro'
 import ToileBody from '../themes/toile/Body.astro'
 import VogueBody from '../themes/vogue/Body.astro'
@@ -48,11 +56,11 @@ const { inv } = Astro.props
 const title = `${inv.groom} & ${inv.bride}`
 const slug = Astro.params.slug!
 const cal = calendarEvent(inv, invitationPageUrl(slug, inv.demo, Astro.site))
-const heroes = { cover: HeroCover, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile, fairytale: HeroFairytale }
+const heroes = { cover: HeroCover, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile, fairytale: HeroFairytale, sketch: HeroSketch, frost: HeroFrost, scrapbook: HeroScrapbook, terracotta: HeroTerracotta }
 // cinema и stories — отдельные одноэкранные форматы, у них нет hero и ленты секций
 const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme]
 // у каждой темы своё тело страницы; cover — базовая классика на общих секциях
-const bodies = { cover: ClassicBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody, fairytale: FairytaleBody }
+const bodies = { cover: ClassicBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody, fairytale: FairytaleBody, sketch: SketchBody, frost: FrostBody, scrapbook: ScrapbookBody, terracotta: TerracottaBody }
 const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null
 // день недели к дате на первом экране: «суббота, 3 октября 2026» — из ISO-даты таймера
 const weekday = inv.countdown

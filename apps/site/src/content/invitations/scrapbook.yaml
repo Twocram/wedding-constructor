@@ -1,0 +1,56 @@
+theme: scrapbook
+groom: Даня
+bride: Соня
+date: 28 августа 2027
+city: Санкт-Петербург
+countdown: '2027-08-28T16:00:00'
+heroPhoto: /photos/story/story-7.jpg
+gallery:
+  - /photos/story/story-7.jpg
+  - /photos/story/story-9.jpg
+  - /photos/story/story-6.jpg
+  - /photos/story/story-3.jpg
+welcome: Семь лет, три города, один кот и бесконечно много фото в телефоне. Следующую страницу этого альбома хотим заполнить вместе с вами.
+venue:
+  name: Лофт «Чердак»
+  address: Санкт-Петербург, Набережная Обводного канала, 118
+timeline:
+  - time: '16:00'
+    title: Встречаемся
+    text: Обнимаемся, знакомимся и фотографируемся на плёнку.
+    icon: camera
+  - time: '17:00'
+    title: Говорим «да»
+    text: Коротко, по-настоящему и, скорее всего, со слезами.
+    icon: rings
+  - time: '18:00'
+    title: Ужин
+    text: Едим то, что любим сами.
+    icon: dinner
+  - time: '20:30'
+    title: Танцы
+    text: Заявки на песни принимаются заранее.
+    icon: music
+dressCode:
+  text: Никаких правил — приходите в том, в чём вам хорошо и в чём хочется танцевать.
+  colors: ['#fbe58a', '#c7472d', '#2e6f73', '#efe6d3', '#2f2a24']
+wishes:
+  - title: Подарки
+    text: Вместо вещей — ваш вклад в наше свадебное путешествие.
+  - title: Фото
+    text: Принесите своё любимое фото с нами — вклеим его в свадебный альбом.
+  - title: Записка
+    text: 'На входе ждут листочки: напишите пару слов, откроем их через год.'
+rsvp:
+  deadline: 15.07.2027
+  plusOne: true
+  drinks:
+    - Игристое
+    - Вино
+    - Крепкое
+    - Безалкогольное
+organizer:
+  name: Катя
+  phone: '+7 (900) 000-00-00'
+music: /music/song.mp3
+demo: true

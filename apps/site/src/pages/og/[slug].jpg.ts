@@ -31,6 +31,10 @@ const looks: Record<Theme, Look> = {
   cinema: { bg: '#0b0a09', text: '#f2ece1', muted: '#91887b', accent: '#e0b36a', font: 'Oswald', upper: true },
   coquette: { bg: '#faeef1', text: '#432a31', muted: '#8f6d76', accent: '#b25a70', font: 'Playfair Display', italic: true },
   fairytale: { bg: '#141838', text: '#f5f0e6', muted: '#9a95b6', accent: '#f0c76e', font: 'Cormorant Garamond', italic: true },
+  sketch: { bg: '#f8f4ea', text: '#23211d', muted: '#6d675a', accent: '#23211d', font: 'Cormorant Garamond', italic: true },
+  frost: { bg: '#eef4f9', text: '#1e3348', muted: '#587289', accent: '#3f6f96', font: 'Prata' },
+  scrapbook: { bg: '#f6f0e3', text: '#2f2a24', muted: '#70675a', accent: '#c7472d', font: 'Playfair Display', italic: true },
+  terracotta: { bg: '#f5ece0', text: '#3d2a20', muted: '#7c6655', accent: '#a84a2c', font: 'Playfair Display', italic: true },
   toile: { bg: '#f3f0e7', text: '#24344e', muted: '#6d7a90', accent: '#3a5a80', font: 'Cormorant Garamond' },
 }
 

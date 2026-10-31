@@ -2,7 +2,7 @@
 interface Props {
   title: string
   description?: string
-  theme?: 'cover' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories' | 'coquette' | 'toile' | 'fairytale'
+  theme?: 'cover' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories' | 'coquette' | 'toile' | 'fairytale' | 'sketch' | 'frost' | 'scrapbook' | 'terracotta'
   image?: string
   noindex?: boolean
 }
@@ -35,6 +35,14 @@ const fontSets: Record<string, string> = {
     'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap',
   fairytale:
     'https://fonts.googleapis.com/css2?family=Alice&family=Marck+Script&family=Jost:wght@300;400;500&display=swap',
+  sketch:
+    'https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=Bad+Script&family=Jost:wght@300;400;500&display=swap',
+  frost:
+    'https://fonts.googleapis.com/css2?family=Oranienbaum&family=Tenor+Sans&family=Jost:wght@300;400;500&display=swap',
+  scrapbook:
+    'https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=PT+Mono&family=Jost:wght@300;400;500&display=swap',
+  terracotta:
+    'https://fonts.googleapis.com/css2?family=Yeseva+One&family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Jost:wght@300;400;500&display=swap',
   cinema:
     'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@300;400;500&display=swap',
 }
@@ -53,9 +61,13 @@ const accents: Record<string, [string, string]> = {
   coquette: ['%23faeef1', '%23b25a70'],
   toile: ['%23f3f0e7', '%233a5a80'],
   fairytale: ['%23141838', '%23f0c76e'],
+  sketch: ['%23f8f4ea', '%2323211d'],
+  frost: ['%23eef4f9', '%233f6f96'],
+  scrapbook: ['%23fbe58a', '%23c7472d'],
+  terracotta: ['%23f5ece0', '%23a84a2c'],
 }
 const [favBg, favFg] = accents[theme]
-const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000', coquette: '#faeef1', toile: '#f3f0e7', fairytale: '#0e1130' }
+const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000', coquette: '#faeef1', toile: '#f3f0e7', fairytale: '#0e1130', sketch: '#f8f4ea', frost: '#dfeaf3', scrapbook: '#f6f0e3', terracotta: '#f5ece0' }
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -313,6 +325,84 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     --img-outline: rgba(255, 255, 255, 0.12);
     --grain-opacity: 0.05;
     color-scheme: dark;
+  }
+
+  body[data-theme='sketch'] {
+    --bg: #f8f4ea;
+    --surface: #f1ebdc;
+    --surface-2: #e8e0cd;
+    --text: #23211d;
+    --text-2: #4d483e;
+    --muted: #6d675a;
+    --accent: #23211d;
+    --accent-2: #8a7f6a;
+    --accent-ink: #f8f4ea;
+    --line: rgba(35, 33, 29, 0.16);
+    --line-strong: rgba(35, 33, 29, 0.5);
+    --font-display: 'Spectral', Georgia, serif;
+    --font-accent: 'Bad Script', cursive;
+    --r-lg: 14px;
+    --r-md: 10px;
+    --r-swatch: 50%;
+  }
+
+  body[data-theme='frost'] {
+    --bg: #eef4f9;
+    --surface: #e3edf5;
+    --surface-2: #d6e4ef;
+    --text: #1e3348;
+    --text-2: #3f566c;
+    --muted: #587289;
+    --accent: #3f6f96;
+    --accent-2: #8fb2cd;
+    --accent-ink: #ffffff;
+    --line: rgba(30, 51, 72, 0.13);
+    --line-strong: rgba(63, 111, 150, 0.4);
+    --font-display: 'Oranienbaum', Georgia, serif;
+    --font-label: 'Tenor Sans', var(--font-body);
+    --font-accent: 'Oranienbaum', var(--font-display);
+    --r-lg: 22px;
+    --r-md: 14px;
+    --r-swatch: 50%;
+  }
+
+  body[data-theme='scrapbook'] {
+    --bg: #f6f0e3;
+    --surface: #efe6d3;
+    --surface-2: #e6dbc4;
+    --text: #2f2a24;
+    --text-2: #54493d;
+    --muted: #70675a;
+    --accent: #c7472d;
+    --accent-2: #2e6f73;
+    --accent-ink: #fff9ee;
+    --line: rgba(47, 42, 36, 0.14);
+    --line-strong: rgba(47, 42, 36, 0.38);
+    --font-display: 'Caveat', cursive;
+    --font-label: 'PT Mono', monospace;
+    --font-accent: 'Caveat', cursive;
+    --r-lg: 4px;
+    --r-md: 3px;
+    --r-swatch: 4px;
+  }
+
+  body[data-theme='terracotta'] {
+    --bg: #f5ece0;
+    --surface: #eedfcc;
+    --surface-2: #e5d2ba;
+    --text: #3d2a20;
+    --text-2: #5e4638;
+    --muted: #7c6655;
+    --accent: #a84a2c;
+    --accent-2: #6a7245;
+    --accent-ink: #fff7ec;
+    --line: rgba(61, 42, 32, 0.14);
+    --line-strong: rgba(168, 74, 44, 0.42);
+    --font-display: 'Yeseva One', Georgia, serif;
+    --font-accent: 'Cormorant Garamond', var(--font-display);
+    --r-lg: 20px;
+    --r-md: 12px;
+    --r-swatch: 50%;
   }
 
   body[data-theme='luxe'] {

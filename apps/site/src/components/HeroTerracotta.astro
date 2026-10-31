@@ -1,0 +1,219 @@
+---
+import HeroMedia from './HeroMedia.astro'
+
+interface Props {
+  groom: string
+  bride: string
+  date: string
+  city?: string
+  heroPhoto?: string
+  heroVideo?: string
+}
+const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props
+
+// ветка оливы: листья вдоль изгиба, зерно фиксировано — одинаково при каждой сборке
+let seed = 31
+const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+function branch(count: number, length: number) {
+  return Array.from({ length: count }, (_, i) => {
+    const t = i / count
+    const x = t * length
+    const y = Math.sin(t * 2.4) * 34
+    const side = i % 2 ? 1 : -1
+    const angle = side * (38 + rand() * 26) + t * 14
+    const size = 32 - t * 12 + rand() * 7
+    return `<ellipse cx="${(size * 0.9).toFixed(1)}" rx="${size.toFixed(1)}" ry="${(size * 0.3).toFixed(1)}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${angle.toFixed(0)})"/>`
+  }).join('')
+}
+const shade = [
+  { leaves: branch(16, 420), at: 'translate(-30 60) rotate(14)' },
+  { leaves: branch(14, 360), at: 'translate(190 250) rotate(-8)' },
+  { leaves: branch(14, 380), at: 'translate(60 470) rotate(10)' },
+]
+---
+
+<header class="hero-tc">
+  {/* тень листьев на стене: главное движение темы, как от дерева за окном */}
+  <svg class="tc-shade" viewBox="0 0 600 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    {shade.map(s => <g transform={s.at} set:html={s.leaves} />)}
+  </svg>
+
+  <div class="tc-title">
+    <p class="tc-kicker">Приглашение на свадьбу</p>
+    <h1>
+      <span>{groom}</span>
+      <i>и</i>
+      <span>{bride}</span>
+    </h1>
+    <p class="tc-date">{date}{city && ` · ${city}`}</p>
+  </div>
+
+  <div class="tc-arch">
+    <div class="tc-sun" aria-hidden="true"></div>
+    <div class="tc-window">
+      {heroPhoto || heroVideo
+        ? <HeroMedia photo={heroPhoto} video={heroVideo} />
+        : <span class="tc-empty"></span>}
+    </div>
+  </div>
+
+  <div class="tc-tiles" aria-hidden="true"></div>
+</header>
+
+<style>
+  .hero-tc {
+    --tile-h: clamp(38px, 7svh, 56px);
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    justify-items: center;
+    gap: clamp(14px, 3svh, 26px);
+    overflow: hidden;
+    isolation: isolate;
+    padding: clamp(56px, 9svh, 88px) 24px var(--tile-h);
+    text-align: center;
+    color: var(--text);
+    /* неравномерно выгоревшая штукатурка */
+    background:
+      radial-gradient(60% 40% at 80% 18%, rgba(255, 233, 196, 0.9), transparent 70%),
+      radial-gradient(50% 36% at 14% 58%, rgba(214, 170, 130, 0.28), transparent 72%),
+      linear-gradient(to bottom, #f6e8d5, #efdcc4);
+  }
+
+  /* солнце садится за проём: держим его у арки, иначе оно заходит под подпись с датой */
+  .tc-sun {
+    position: absolute;
+    top: 8%;
+    right: -30%;
+    z-index: -1;
+    width: 62%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #e9936a, #cf6a42);
+    opacity: 0.85;
+    animation: tc-sun 1.6s var(--ease-out) both;
+  }
+  @keyframes tc-sun {
+    from { opacity: 0; transform: translateY(40px) scale(0.92); }
+    to { opacity: 0.85; transform: none; }
+  }
+
+  .tc-shade {
+    position: absolute;
+    inset: -8%;
+    z-index: -1;
+    width: 116%;
+    height: 116%;
+    fill: #5b3a22;
+    opacity: 0.17;
+    filter: blur(7px);
+    transform-origin: 30% 0;
+    will-change: transform;
+    animation: tc-sway 11s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes tc-sway {
+    from { transform: rotate(-1.4deg) translate3d(-10px, 0, 0); }
+    to { transform: rotate(1.6deg) translate3d(14px, 8px, 0); }
+  }
+
+  .tc-title { display: grid; justify-items: center; gap: 6px; max-width: 100%; animation: tc-rise 1.1s var(--ease-out) 0.2s both; }
+  @keyframes tc-rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
+  }
+  .tc-kicker,
+  .tc-date {
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .tc-date { color: var(--accent); }
+  h1 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    column-gap: 0.24em;
+    max-width: 100%;
+    font-weight: 400;
+    font-size: min(clamp(2.5rem, 11.5vw, 4.6rem), 8.5svh);
+    line-height: 1.06;
+    overflow-wrap: anywhere;
+  }
+  h1 i { font-family: var(--font-accent); font-weight: 500; font-size: 0.82em; color: var(--accent); }
+
+  /* арка стоит на плитке, как дверной проём: заполняет всё, что осталось от экрана */
+  .tc-arch {
+    position: relative;
+    isolation: isolate;
+    align-self: stretch;
+    width: min(74vw, 400px);
+    min-height: 200px;
+    padding: 7px 7px 0;
+    border: 1px solid var(--line-strong);
+    border-bottom: none;
+    border-radius: 999px 999px 0 0;
+    animation: tc-rise 1.3s var(--ease-out) 0.45s both;
+  }
+  .tc-window {
+    height: 100%;
+    overflow: hidden;
+    border-radius: 999px 999px 0 0;
+    background: var(--surface-2);
+  }
+  .tc-window :global(img),
+  .tc-window :global(video) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: sepia(0.14) saturate(1.05);
+  }
+  .tc-empty { display: block; height: 100%; background: linear-gradient(to bottom, #e9936a, #edd2ae); }
+
+  .tc-tiles {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    height: var(--tile-h);
+    background: #a84a2c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'%3E%3Crect width='56' height='56' fill='%23f5ece0'/%3E%3Cpath d='M28 4 52 28 28 52 4 28Z' fill='%23a84a2c'/%3E%3Cpath d='M28 15 41 28 28 41 15 28Z' fill='%23f5ece0'/%3E%3Ccircle cx='28' cy='28' r='5' fill='%236a7245'/%3E%3Cpath d='M0 0h10L0 10ZM56 0v10L46 0ZM0 56V46l10 10ZM56 56H46l10-10Z' fill='%236a7245'/%3E%3C/svg%3E") left center / var(--tile-h) var(--tile-h) repeat-x;
+    box-shadow: 0 -2px 0 #8e3c22;
+  }
+
+  /* компьютер: текст слева, арка справа */
+  @media (min-width: 900px) {
+    .hero-tc {
+      grid-template-rows: minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: clamp(40px, 6vw, 96px);
+      padding-inline: clamp(48px, 9vw, 140px);
+      padding-top: 56px;
+    }
+    .tc-title { justify-items: start; text-align: left; }
+    h1 { display: grid; font-size: min(clamp(3rem, 6.4vw, 5.4rem), 13svh); }
+    .tc-arch { align-self: end; width: min(38vw, 66svh, 520px); height: calc(100svh - 56px - var(--tile-h)); }
+  }
+  /* телефон лёжа: то же, только компактнее */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-tc {
+      grid-template-rows: minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 32px;
+      padding: 16px max(36px, env(safe-area-inset-left)) var(--tile-h);
+    }
+    .tc-title { justify-items: start; text-align: left; }
+    h1 { justify-content: flex-start; font-size: clamp(2rem, 13svh, 3rem); }
+    .tc-arch { align-self: end; width: 44svh; min-height: 0; height: calc(100svh - 16px - var(--tile-h)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tc-sun, .tc-shade, .tc-title, .tc-arch { animation: none; }
+  }
+</style>

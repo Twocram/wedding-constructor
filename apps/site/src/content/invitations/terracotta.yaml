@@ -1,0 +1,56 @@
+theme: terracotta
+groom: Марк
+bride: Ева
+date: 4 сентября 2027
+city: Геленджик
+countdown: '2027-09-04T17:00:00'
+heroPhoto: /photos/story/story-9.jpg
+gallery:
+  - /photos/story/story-9.jpg
+  - /photos/story/story-12.jpg
+  - /photos/story/story-10.jpg
+  - /photos/story/story-11.jpg
+welcome: Мы хотим, чтобы этот день был похож на долгий тёплый вечер на юге — с вином, разговорами и теми, кого мы любим.
+venue:
+  name: Винодельня «Солнечный склон»
+  address: Краснодарский край, Геленджик, Виноградная улица, 7
+timeline:
+  - time: '17:00'
+    title: Сбор гостей
+    text: Холодное вино и закуски под оливами.
+    icon: glass
+  - time: '17:30'
+    title: Церемония
+    text: На террасе, когда солнце станет мягким.
+    icon: rings
+  - time: '18:30'
+    title: Ужин
+    text: Общий стол, домашняя кухня и тосты на закате.
+    icon: dinner
+  - time: '21:00'
+    title: Танцы
+    text: Под открытым небом, пока не устанут ноги.
+    icon: music
+dressCode:
+  text: Натуральные ткани и тёплые оттенки земли. Каблуки оставьте дома — вокруг камень и трава.
+  colors: ['#f5ece0', '#d9a77f', '#a84a2c', '#6a7245', '#3d2a20']
+wishes:
+  - title: Подарки
+    text: Вклад в наше путешествие будет лучшим подарком.
+  - title: Цветы
+    text: Вместо букетов — бутылка вина для нашего семейного погреба.
+  - title: Солнце
+    text: Днём будет жарко. Шляпы, очки и веера очень пригодятся.
+rsvp:
+  deadline: 01.08.2027
+  plusOne: true
+  drinks:
+    - Игристое
+    - Вино
+    - Крепкое
+    - Безалкогольное
+organizer:
+  name: Лидия
+  phone: '+7 (900) 000-00-00'
+music: /music/song.mp3
+demo: true

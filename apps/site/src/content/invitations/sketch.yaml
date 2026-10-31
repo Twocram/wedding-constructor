@@ -1,0 +1,56 @@
+theme: sketch
+groom: Михаил
+bride: Полина
+date: 12 июня 2027
+city: Подмосковье
+countdown: '2027-06-12T15:00:00'
+heroPhoto: /photos/story/story-6.jpg
+gallery:
+  - /photos/story/story-6.jpg
+  - /photos/story/story-3.jpg
+  - /photos/story/story-12.jpg
+  - /photos/story/story-10.jpg
+welcome: Мы долго выбирали слова, а потом решили просто нарисовать этот день. Осталось добавить в него главное — вас.
+venue:
+  name: Усадьба «Липки»
+  address: Московская область, Истринский округ, деревня Липки, 12
+timeline:
+  - time: '15:00'
+    title: Сбор гостей
+    text: Лимонад, игристое и прогулка по парку.
+    icon: glass
+  - time: '16:00'
+    title: Церемония
+    text: На лужайке перед домом, под старыми липами.
+    icon: rings
+  - time: '17:30'
+    title: Ужин
+    text: Длинный стол в саду и тосты без регламента.
+    icon: dinner
+  - time: '21:00'
+    title: Танцы
+    text: Живая музыка до самой темноты.
+    icon: music
+dressCode:
+  text: Светлые льняные тона и удобная обувь — часть вечера пройдёт на траве.
+  colors: ['#f8f4ea', '#d9cfba', '#a59a83', '#6d675a', '#23211d']
+wishes:
+  - title: Подарки
+    text: Лучший подарок — вклад в наш первый общий дом. Конверт подойдёт идеально.
+  - title: Цветы
+    text: Вместо букетов возьмите книгу с подписью — соберём домашнюю библиотеку.
+  - title: Фото
+    text: Сделаем снимки на память сами, поэтому на церемонии отложите телефоны.
+rsvp:
+  deadline: 01.05.2027
+  plusOne: true
+  drinks:
+    - Игристое
+    - Вино
+    - Крепкое
+    - Безалкогольное
+organizer:
+  name: Анастасия
+  phone: '+7 (900) 000-00-00'
+music: /music/song.mp3
+demo: true

@@ -1,0 +1,125 @@
+---
+// тема scrapbook — альбом пары: общие секции (ClassicBody) вклеены на лист в клетку скотчем, пожелания — стикеры
+import type { Props } from '../../components/ClassicBody.astro'
+import ClassicBody from '../../components/ClassicBody.astro'
+
+const { inv, slug, cal } = Astro.props as Props
+---
+
+<ClassicBody inv={inv} slug={slug} cal={cal} />
+
+<section class="sb-end fade-up">
+  <figure class="sb-blank">
+    <div><span>здесь будет фото с вами</span></div>
+    <figcaption>скоро допишем</figcaption>
+  </figure>
+  <p class="sb-end-text">Продолжение следует…</p>
+</section>
+
+<style is:global>
+  body[data-theme='scrapbook'] {
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(rgba(46, 111, 115, 0.11) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(46, 111, 115, 0.11) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  /* поверхность — крафтовый лист, вклеенный поверх клетки */
+  body[data-theme='scrapbook'] .section--surface { background: var(--surface); }
+
+  /* заголовок выделен маркером, как пометка в тетради */
+  body[data-theme='scrapbook'] .section h2 {
+    display: inline;
+    font-weight: 700;
+    font-size: clamp(2.6rem, 9vw, 3.6rem);
+    line-height: 1.1;
+    background: linear-gradient(to top, transparent 10%, #fbe58a 10%, #fbe58a 42%, transparent 42%);
+    padding-inline: 0.12em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  body[data-theme='scrapbook'] .eyebrow { font-size: 0.68rem; letter-spacing: 0.08em; }
+  body[data-theme='scrapbook'] .eyebrow::before,
+  body[data-theme='scrapbook'] .eyebrow::after { display: none; }
+  body[data-theme='scrapbook'] .ornament { display: none; }
+
+  /* плашка — листок, приклеенный скотчем с лёгким наклоном */
+  body[data-theme='scrapbook'] .plate {
+    position: relative;
+    padding: 0;
+    background: #fffdf8;
+    border: none;
+    border-radius: 2px;
+    box-shadow: 0 14px 24px -16px rgba(47, 42, 36, 0.5), 0 1px 3px rgba(47, 42, 36, 0.12);
+    rotate: -0.7deg;
+  }
+  body[data-theme='scrapbook'] .section:nth-of-type(even) .plate { rotate: 0.8deg; }
+  body[data-theme='scrapbook'] .plate::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    z-index: 1;
+    width: 92px;
+    height: 24px;
+    translate: -50% 0;
+    rotate: -2deg;
+    background: rgba(230, 205, 130, 0.72);
+    clip-path: polygon(0 0, 3% 25%, 0 50%, 3% 75%, 0 100%, 100% 100%, 97% 75%, 100% 50%, 97% 25%, 100% 0);
+    pointer-events: none;
+  }
+  body[data-theme='scrapbook'] .plate > .plate-inner { background: transparent; border: none; box-shadow: none; border-radius: 2px; }
+  body[data-theme='scrapbook'] .map-plate { rotate: none; }
+
+  /* пожелания — стикеры вперемешку */
+  body[data-theme='scrapbook'] .wishes li {
+    padding: 16px 18px;
+    background: #fbe58a;
+    box-shadow: 0 10px 16px -12px rgba(47, 42, 36, 0.55);
+    border: none;
+    rotate: -1deg;
+  }
+  body[data-theme='scrapbook'] .wishes li:nth-child(even) { background: #cfe5e2; rotate: 1.2deg; }
+  body[data-theme='scrapbook'] .wish-num { font-family: var(--font-accent); font-weight: 700; color: var(--text); }
+  body[data-theme='scrapbook'] .wishes li h3,
+  body[data-theme='scrapbook'] .wishes li p { color: var(--text); }
+
+  body[data-theme='scrapbook'] .btn {
+    border-radius: 2px;
+    font-family: var(--font-label);
+    letter-spacing: 0.04em;
+  }
+  body[data-theme='scrapbook'] .btn:not(.btn--ghost) { box-shadow: 3px 3px 0 var(--text); }
+  body[data-theme='scrapbook'] .countdown-grid span { font-family: var(--font-accent); font-weight: 700; }
+  body[data-theme='scrapbook'] .stack { --card-bg: #fffdf8; }
+
+  .sb-end {
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    padding: clamp(56px, 10vw, 96px) 24px clamp(28px, 6vw, 56px);
+    text-align: center;
+  }
+  /* пустой полароид: место для общего снимка со свадьбы */
+  .sb-blank {
+    width: min(62vw, 240px);
+    margin: 0;
+    padding: 10px 10px 8px;
+    background: #fffdf8;
+    rotate: 3deg;
+    box-shadow: 0 16px 30px -14px rgba(47, 42, 36, 0.5);
+  }
+  .sb-blank div {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    padding: 16px;
+    border: 1.5px dashed var(--line-strong);
+    color: var(--muted);
+    font-family: var(--font-accent);
+    font-size: 1.3rem;
+    line-height: 1.15;
+  }
+  .sb-blank figcaption { padding-top: 6px; font-family: var(--font-accent); font-size: 1.2rem; }
+  .sb-end-text { font-family: var(--font-accent); font-weight: 700; font-size: clamp(1.8rem, 7vw, 2.4rem); }
+</style>

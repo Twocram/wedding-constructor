@@ -1,0 +1,84 @@
+---
+// тема terracotta — тёплый юг: общие секции (ClassicBody) на штукатурке, арки, плитка и закатный финал
+import type { Props } from '../../components/ClassicBody.astro'
+import ClassicBody from '../../components/ClassicBody.astro'
+
+const { inv, slug, cal } = Astro.props as Props
+---
+
+<ClassicBody inv={inv} slug={slug} cal={cal} />
+
+<section class="tc-end fade-up">
+  <span class="tc-end-sun" aria-hidden="true"></span>
+  <p class="tc-end-big">Солнце, вино и все, кого мы любим</p>
+  <p class="tc-end-note">Этого достаточно для счастливого дня</p>
+</section>
+
+<style is:global>
+  /* поверхность — плитка сверху и тёплая стена */
+  body[data-theme='terracotta'] .section--surface {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 14'%3E%3Cpath d='M0 0h28v2H0Z' fill='%23a84a2c'/%3E%3Cpath d='M14 3l6 5-6 5-6-5Z' fill='%23a84a2c' fill-opacity='0.5'/%3E%3C/svg%3E") top left / 28px 14px repeat-x,
+      var(--surface);
+  }
+
+  body[data-theme='terracotta'] .section h2 { font-weight: 400; }
+  body[data-theme='terracotta'] .eyebrow { color: var(--accent-2); }
+  /* у Yeseva один тяжёлый вес: для абзаца он слишком плотный */
+  body[data-theme='terracotta'] .lead { font-family: var(--font-accent); font-style: italic; font-size: clamp(1.35rem, 5vw, 1.6rem); line-height: 1.4; }
+
+  /* солнце вместо ромба под заголовками */
+  body[data-theme='terracotta'] .ornament { display: none; }
+  body[data-theme='terracotta'] .section-head::after {
+    content: '';
+    width: 120px;
+    height: 20px;
+    margin-top: 4px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 20' fill='none' stroke='%23a84a2c' stroke-linecap='round'%3E%3Cpath d='M0 10h42M78 10h42' stroke-opacity='0.45'/%3E%3Ccircle cx='60' cy='10' r='4.500' fill='%23a84a2c' stroke='none'/%3E%3Cpath d='M60 1v2M60 17v2M51 10h2M67 10h2M53.600 3.600l1.500 1.500M64.900 14.900l1.500 1.500M53.600 16.400l1.500-1.500M64.900 5.100l1.500-1.500'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  body[data-theme='terracotta'] .plate {
+    background: rgba(168, 74, 44, 0.07);
+    border: 1px solid rgba(168, 74, 44, 0.2);
+  }
+  body[data-theme='terracotta'] .plate > .plate-inner {
+    background: #fbf4e9;
+    box-shadow: none;
+  }
+  /* адрес — в арочном проёме, как и фото на первом экране */
+  body[data-theme='terracotta'] .venue.plate,
+  body[data-theme='terracotta'] .venue > .plate-inner { border-radius: 180px 180px var(--r-lg) var(--r-lg); }
+  body[data-theme='terracotta'] .venue > .plate-inner { padding-top: 48px; }
+
+  body[data-theme='terracotta'] .btn { border-radius: 99px; }
+  body[data-theme='terracotta'] .btn:not(.btn--ghost) { background: var(--accent); color: var(--accent-ink); }
+  body[data-theme='terracotta'] .stack { --card-bg: #fbf4e9; }
+  body[data-theme='terracotta'] .stack img { filter: sepia(0.12); }
+  body[data-theme='terracotta'] .map-embed { filter: sepia(0.25) saturate(0.85); }
+
+  .tc-end {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    padding: clamp(96px, 16vw, 160px) 24px clamp(56px, 10vw, 96px);
+    text-align: center;
+    color: #fff3e2;
+    background: linear-gradient(to bottom, #cf6a42, #a84a2c 60%, #843520);
+  }
+  .tc-end-sun {
+    position: absolute;
+    top: -38%;
+    left: 50%;
+    z-index: -1;
+    width: min(92vw, 560px);
+    aspect-ratio: 1;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 214, 160, 0.75), rgba(255, 214, 160, 0) 68%);
+  }
+  .tc-end-big { max-width: 16em; font-family: var(--font-display); font-size: clamp(1.9rem, 7.6vw, 3rem); line-height: 1.15; }
+  .tc-end-note { font-family: var(--font-accent); font-style: italic; font-size: clamp(1.2rem, 4.6vw, 1.5rem); }
+</style>

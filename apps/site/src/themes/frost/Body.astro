@@ -1,0 +1,87 @@
+---
+// тема frost — зимняя: общие секции (ClassicBody) под медленным снегом, ледяные плашки и снежинка вместо орнамента
+import type { Props } from '../../components/ClassicBody.astro'
+import ClassicBody from '../../components/ClassicBody.astro'
+
+const { inv, slug, cal } = Astro.props as Props
+---
+
+<div class="fr-snow" aria-hidden="true"></div>
+
+<ClassicBody inv={inv} slug={slug} cal={cal} />
+
+<section class="fr-end fade-up">
+  <p class="fr-end-big">Пусть за окном зима</p>
+  <p class="fr-end-note">Рядом с вами в этот день будет тепло</p>
+</section>
+
+<style is:global>
+  body[data-theme='frost'] { background: var(--bg); }
+  body[data-theme='frost'] main { position: relative; }
+
+  /* снег за всей страницей: слой вдвое выше экрана едет вниз на высоту плитки и бесшовно повторяется */
+  .fr-snow {
+    position: fixed;
+    inset: -480px 0 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(2px 2px at 12% 14%, #fff 50%, transparent 51%),
+      radial-gradient(1.6px 1.6px at 34% 62%, #fff 50%, transparent 51%),
+      radial-gradient(2.6px 2.6px at 58% 30%, #fff 50%, transparent 51%),
+      radial-gradient(1.6px 1.6px at 78% 80%, #fff 50%, transparent 51%),
+      radial-gradient(2.2px 2.2px at 92% 44%, #fff 50%, transparent 51%);
+    background-size: 340px 480px;
+    animation: fr-page-snow 26s linear infinite;
+  }
+  @keyframes fr-page-snow {
+    to { transform: translate3d(0, 480px, 0); }
+  }
+
+  body[data-theme='frost'] .section--surface { background: rgba(214, 228, 239, 0.5); }
+  body[data-theme='frost'] .section h2 { font-weight: 400; }
+
+  body[data-theme='frost'] .ornament { display: none; }
+  body[data-theme='frost'] .section-head::after {
+    content: '';
+    width: 120px;
+    height: 20px;
+    margin-top: 4px;
+    background: var(--accent-2);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 20' fill='none' stroke='black' stroke-linecap='round'%3E%3Cpath d='M0 10h46M74 10h46' stroke-opacity='0.5'/%3E%3Cpath d='M60 1v18M52.200 5.500l15.600 9M52.200 14.500l15.600-9'/%3E%3Cpath d='M57.500 3l2.500 2.500L62.500 3M57.500 17l2.500-2.500 2.500 2.500'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 20' fill='none' stroke='black' stroke-linecap='round'%3E%3Cpath d='M0 10h46M74 10h46' stroke-opacity='0.5'/%3E%3Cpath d='M60 1v18M52.200 5.500l15.600 9M52.200 14.500l15.600-9'/%3E%3Cpath d='M57.500 3l2.500 2.500L62.500 3M57.500 17l2.500-2.500 2.500 2.500'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  /* плашки как лёд: белый свет сверху и тонкая холодная кромка */
+  body[data-theme='frost'] .plate {
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(63, 111, 150, 0.22);
+  }
+  body[data-theme='frost'] .plate > .plate-inner {
+    background: linear-gradient(170deg, #ffffff, #f2f7fb);
+    box-shadow: inset 0 1px 0 #fff, 0 18px 40px -26px rgba(30, 51, 72, 0.5);
+  }
+
+  body[data-theme='frost'] .btn:not(.btn--ghost) {
+    background: linear-gradient(135deg, #5b8db4, #33607f);
+    color: #fff;
+  }
+  body[data-theme='frost'] .countdown-grid span { color: var(--accent); }
+  body[data-theme='frost'] .stack { --card-bg: #ffffff; }
+  body[data-theme='frost'] .stack img { filter: saturate(0.75) brightness(1.03); }
+  body[data-theme='frost'] .map-embed { filter: saturate(0.5) brightness(1.04); }
+
+  .fr-end {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: clamp(64px, 11vw, 112px) 24px clamp(32px, 7vw, 64px);
+    text-align: center;
+  }
+  .fr-end-big { font-family: var(--font-display); font-size: clamp(2rem, 8.4vw, 3.2rem); line-height: 1.1; }
+  .fr-end-note { color: var(--text-2); max-width: 30ch; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fr-snow { animation: none; }
+  }
+</style>

@@ -1,0 +1,258 @@
+---
+import HeroMedia from './HeroMedia.astro'
+import ScrollHint from './ScrollHint.astro'
+
+interface Props {
+  groom: string
+  bride: string
+  date: string
+  city?: string
+  heroPhoto?: string
+  heroVideo?: string
+}
+const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props
+
+// снег и лес случайны, но с фиксированным зерном — одинаковы при каждой сборке
+let seed = 23
+const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+const flakes = Array.from({ length: 34 }, () => ({
+  x: (rand() * 100).toFixed(1),
+  s: (2 + rand() * 4).toFixed(1),
+  t: (9 + rand() * 11).toFixed(1),
+  d: (-rand() * 20).toFixed(1),
+  dx: ((rand() - 0.5) * 60).toFixed(0),
+}))
+
+function pine(x: number, base: number, h: number) {
+  const w = h * 0.42
+  const tiers = 4
+  const left: string[] = []
+  const right: string[] = []
+  for (let i = 0; i < tiers; i++) {
+    const y = base - h * (i / tiers)
+    const half = (w / 2) * (1 - i / (tiers + 0.6))
+    const inner = half * 0.5
+    const next = base - h * ((i + 0.8) / tiers)
+    left.push(`L${(x - half).toFixed(1)} ${y.toFixed(1)}L${(x - inner).toFixed(1)} ${next.toFixed(1)}`)
+    right.unshift(`L${(x + inner).toFixed(1)} ${next.toFixed(1)}L${(x + half).toFixed(1)} ${y.toFixed(1)}`)
+  }
+  return `M${x} ${base}${left.join('')}L${x} ${(base - h).toFixed(1)}${right.join('')}Z`
+}
+function forest(count: number, base: number, min: number, spread: number) {
+  return Array.from({ length: count }, (_, i) => pine((i + 0.5 + (rand() - 0.5) * 0.7) * (820 / count) - 10, base, min + rand() * spread)).join('')
+}
+const layers = [
+  { d: forest(26, 200, 60, 50), fill: '#cfdfeb' },
+  { d: forest(18, 212, 80, 70), fill: '#adc7da' },
+  { d: forest(11, 226, 110, 80), fill: '#7fa4bf' },
+]
+
+const rays = [0, 60, 120, 180, 240, 300]
+---
+
+<header class="hero-fr">
+  <div class="fr-flakes" aria-hidden="true">
+    {flakes.map(f => <i style={`--x:${f.x}%;--s:${f.s}px;--t:${f.t}s;--d:${f.d}s;--dx:${f.dx}px`} />)}
+  </div>
+
+  <div class="fr-crystal">
+    {/* снежинка вокруг снимка: шесть одинаковых лучей */}
+    <svg class="fr-flake" viewBox="-120 -120 240 240" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
+      {rays.map(r => (
+        <g transform={`rotate(${r})`}>
+          <path d="M0 -62V-116" stroke-width="1.4" />
+          <path d="M0 -78l-11 -11M0 -78l11 -11M0 -94l-9 -9M0 -94l9 -9M0 -108l-5 -5M0 -108l5 -5" stroke-width="1.1" />
+          <path d="M0 -112l3 4-3 4-3-4Z" fill="currentColor" stroke="none" />
+          <path d="M28 -49l6 -10" stroke-width="1" stroke-opacity="0.6" />
+        </g>
+      ))}
+    </svg>
+    {(heroPhoto || heroVideo) && (
+      <div class="fr-photo">
+        <HeroMedia photo={heroPhoto} video={heroVideo} />
+      </div>
+    )}
+  </div>
+
+  <div class="fr-content">
+    <p class="fr-eyebrow">Приглашение на свадьбу</p>
+    <h1>
+      <span>{groom}</span>
+      <i>и</i>
+      <span>{bride}</span>
+    </h1>
+    <p class="fr-date">{date}{city && ` · ${city}`}</p>
+    <ScrollHint />
+  </div>
+
+  {/* лес втрое шире кадра: при любой ширине экрана обрезаются края, а не верхушки деревьев */}
+  <svg class="fr-forest" viewBox="0 0 2400 240" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <g id="fr-trees">{layers.map(l => <path d={l.d} fill={l.fill} />)}</g>
+    </defs>
+    <use href="#fr-trees" />
+    <use href="#fr-trees" x="800" />
+    <use href="#fr-trees" x="1600" />
+    <path d="M0 240V226c120-22 240 14 400 2s280-20 400-4 260 18 400 6 280-16 400-2 260 16 400 4 280-14 400-6v14Z" fill="#fbfdff" />
+  </svg>
+</header>
+
+<style>
+  .hero-fr {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(12px, 3svh, 26px);
+    overflow: hidden;
+    isolation: isolate;
+    padding: clamp(56px, 9svh, 92px) 24px clamp(120px, 24svh, 240px);
+    text-align: center;
+    color: var(--text);
+    background:
+      radial-gradient(70% 40% at 50% 26%, #ffffff, transparent 72%),
+      linear-gradient(to bottom, #d3e3ef, #e9f1f7 55%, #f6fafd);
+  }
+
+  .fr-flakes { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  .fr-flakes i {
+    position: absolute;
+    top: -8px;
+    left: var(--x);
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(120, 165, 200, 0.75);
+    animation: fr-fall var(--t) linear var(--d) infinite;
+  }
+  @keyframes fr-fall {
+    from { transform: translate3d(0, -10px, 0); }
+    to { transform: translate3d(var(--dx), 104svh, 0); }
+  }
+
+  .fr-crystal {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: min(70vw, 38svh, 340px);
+    aspect-ratio: 1;
+    animation: fr-rise 1.3s var(--ease-out) 0.2s both;
+  }
+  .fr-flake {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: #6f9bbd;
+    animation: fr-turn 160s linear infinite;
+  }
+  @keyframes fr-turn {
+    to { transform: rotate(360deg); }
+  }
+  .fr-photo {
+    width: 58%;
+    aspect-ratio: 1;
+    padding: 4px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #ffffff, #b7cfe1 55%, #ffffff);
+    box-shadow: 0 0 0 1px rgba(63, 111, 150, 0.2), 0 18px 40px -16px rgba(30, 51, 72, 0.45);
+  }
+  .fr-photo :global(img),
+  .fr-photo :global(video) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    filter: saturate(0.6) brightness(1.05);
+  }
+
+  .fr-content { position: relative; z-index: 1; display: grid; justify-items: center; gap: 8px; max-width: 100%; }
+  .fr-content > * { animation: fr-rise 1.2s var(--ease-out) both; }
+  .fr-content > :nth-child(1) { animation-delay: 0.45s; }
+  .fr-content > :nth-child(2) { animation-delay: 0.6s; }
+  .fr-content > :nth-child(3) { animation-delay: 0.8s; }
+  @keyframes fr-rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .fr-eyebrow {
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  /* блик идёт по буквам, как свет по насту */
+  h1 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    column-gap: 0.26em;
+    max-width: 100%;
+    font-weight: 400;
+    font-size: min(clamp(2.5rem, 11.5vw, 4.8rem), 8.5svh);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+    color: var(--text);
+    background: linear-gradient(100deg, #1e3348 42%, #6f9bbd 50%, #1e3348 58%) 0 0 / 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fr-rise 1.2s var(--ease-out) 0.6s both, fr-glint 9s ease-in-out 2s infinite;
+  }
+  @keyframes fr-glint {
+    0% { background-position: 100% 0; }
+    40%, 100% { background-position: 0 0; }
+  }
+  h1 i { font-style: normal; font-size: 0.6em; }
+
+  .fr-date {
+    font-family: var(--font-label);
+    font-size: 0.74rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .fr-forest {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 0;
+    width: 100%;
+    height: clamp(120px, 26svh, 260px);
+  }
+
+  @media (max-height: 640px) {
+    .hero-fr { padding-bottom: 96px; }
+    .fr-crystal { width: min(60vw, 32svh); }
+    .fr-forest { height: 104px; }
+    .fr-content :global(.scroll-hint) { display: none; }
+  }
+  /* компьютер: снежинка и имена в ряд */
+  @media (min-width: 900px) {
+    .hero-fr { flex-direction: row; justify-content: center; align-items: center; gap: clamp(40px, 6vw, 96px); padding-block: 48px clamp(150px, 24svh, 240px); }
+    .fr-crystal { width: min(44svh, 400px); }
+    .fr-content { justify-items: start; text-align: left; }
+    h1 { justify-content: flex-start; max-width: 12em; }
+  }
+  /* телефон лёжа: всё в ряд, лес ниже */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-fr { flex-direction: row; justify-content: center; align-items: center; gap: 28px; padding: 16px max(32px, env(safe-area-inset-left)) 56px; }
+    .fr-crystal { width: 56svh; }
+    .fr-content { justify-items: start; text-align: left; }
+    h1 { justify-content: flex-start; font-size: clamp(2rem, 13svh, 3rem); }
+    .fr-forest { height: 84px; }
+    .fr-content :global(.scroll-hint) { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fr-flakes { display: none; }
+    .fr-crystal, .fr-flake, .fr-content > *, h1 { animation: none; }
+  }
+</style>

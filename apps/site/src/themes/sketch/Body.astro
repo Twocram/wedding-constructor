@@ -1,0 +1,106 @@
+---
+// тема sketch — рисунок от руки: общие секции (ClassicBody) в чернилах на бумаге, неровные контуры и карта пером
+import type { Props } from '../../components/ClassicBody.astro'
+import ClassicBody from '../../components/ClassicBody.astro'
+
+const { inv, slug, cal } = Astro.props as Props
+---
+
+<ClassicBody inv={inv} slug={slug} cal={cal} />
+
+<section class="sk-end fade-up">
+  <svg class="sk-rings" viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true">
+    <path pathLength="1" d="M44 16c16-2 29 9 29 22 0 13-13 24-29 23C28 60 16 50 16 37 16 25 28 18 44 16Z" />
+    <path pathLength="1" d="M76 14c16 0 28 10 28 23 0 13-12 23-28 23-15 0-28-10-28-23 0-13 13-23 28-23Z" />
+    <path pathLength="1" d="M96 6l2 6M104 10l-5 4M86 4l3 6" />
+  </svg>
+  <p class="sk-end-text">До встречи на этой странице</p>
+</section>
+
+<style is:global>
+  /* неровная бумага: сетка почти не видна, но фон перестаёт быть плоским */
+  body[data-theme='sketch'] {
+    background-color: var(--bg);
+    background-image: radial-gradient(rgba(35, 33, 29, 0.05) 0.7px, transparent 0.8px);
+    background-size: 14px 14px;
+  }
+  body[data-theme='sketch'] .section--surface { background: rgba(232, 224, 205, 0.45); }
+  /* размытое фото за анкетой ложится на бумагу серыми пятнами */
+  body[data-theme='sketch'] .section-bg,
+  body[data-theme='sketch'] .section--photo::before { display: none; }
+
+  body[data-theme='sketch'] .section h2 { font-weight: 300; font-style: italic; letter-spacing: -0.01em; }
+  body[data-theme='sketch'] .eyebrow { font-family: var(--font-accent); font-size: 1.1rem; letter-spacing: 0; text-transform: none; color: var(--text-2); }
+  body[data-theme='sketch'] .eyebrow::before,
+  body[data-theme='sketch'] .eyebrow::after { display: none; }
+
+  /* подчёркивание пером: прорисовывается слева направо, когда секция появилась */
+  body[data-theme='sketch'] .ornament { display: none; }
+  body[data-theme='sketch'] .section-head::after {
+    content: '';
+    width: 150px;
+    height: 12px;
+    margin-top: 4px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 12' fill='none' stroke='%2323211d' stroke-width='1.2' stroke-linecap='round'%3E%3Cpath d='M3 7c22-5 42 2 66-1s52-4 78 1'/%3E%3Cpath d='M12 10c30-3 66-1 118-2' stroke-opacity='0.45'/%3E%3C/svg%3E") center / contain no-repeat;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1.1s ease-out 0.35s;
+  }
+  body[data-theme='sketch'] .visible .section-head::after { clip-path: inset(0); }
+
+  /* контур как проведённый рукой: разные радиусы углов дают неровную линию */
+  body[data-theme='sketch'] .plate {
+    padding: 0;
+    background: transparent;
+    border: 1.3px solid var(--text);
+    border-radius: 46px 14px 38px 14px / 14px 38px 14px 46px;
+  }
+  body[data-theme='sketch'] .plate > .plate-inner {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: inherit;
+  }
+
+  /* карта к месту: дорога от дома до креста, вместо значка-булавки */
+  body[data-theme='sketch'] .venue-pin { display: none; }
+  body[data-theme='sketch'] .venue .plate-inner::before {
+    content: '';
+    display: block;
+    width: min(100%, 260px);
+    aspect-ratio: 2 / 1;
+    margin: 0 auto 10px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120' fill='none' stroke='%2323211d' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 92c34-8 52 8 86-6s44-44 82-46 44 8 60 4' stroke-opacity='0.12' stroke-width='7'/%3E%3Cpath d='M18 90c30-6 48 6 76-6s42-40 76-40 34 2 44 0' stroke-dasharray='7 6'/%3E%3Cpath d='M8 92V76l9-7 9 7v16ZM14 92v-8h6v8'/%3E%3Cpath d='M206 34l14 14M220 34l-14 14' stroke-width='2'/%3E%3Cpath d='M62 44c-6-1-9-5-8-10 0-6 6-10 11-8 4-5 12-3 13 3 5 1 7 6 4 10-3 5-11 7-15 5ZM68 44v12'/%3E%3Cpath d='M136 96c-5-1-8-5-7-9 0-5 5-8 9-7 4-4 10-2 11 3 4 1 6 5 3 8-3 4-9 6-12 4ZM141 96v10'/%3E%3Cpath d='M26 22h22M37 16v12M37 22l-5 3M37 22l5-3' stroke-opacity='0.6'/%3E%3Cpath d='M176 92c6 4 10 4 16 0s10-4 16 0 10 4 16 0' stroke-opacity='0.5'/%3E%3C/svg%3E") center / contain no-repeat;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1.6s ease-out 0.4s;
+  }
+  body[data-theme='sketch'] .visible .venue .plate-inner::before { clip-path: inset(0); }
+
+  body[data-theme='sketch'] .btn:not(.btn--ghost) { background: var(--text); color: var(--bg); }
+  body[data-theme='sketch'] .btn,
+  body[data-theme='sketch'] .btn--ghost {
+    border: 1.3px solid var(--text);
+    border-radius: 40px 12px 32px 12px / 12px 32px 12px 40px;
+  }
+
+  body[data-theme='sketch'] .stack { --card-bg: #fffdf7; }
+  body[data-theme='sketch'] .stack img { filter: grayscale(0.85) contrast(1.05); transition: filter 0.6s; }
+  body[data-theme='sketch'] .stack .card:hover img { filter: none; }
+
+  .sk-end {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    padding: clamp(56px, 10vw, 96px) 24px clamp(32px, 6vw, 56px);
+    text-align: center;
+  }
+  .sk-rings { width: 120px; color: var(--text); }
+  .sk-rings path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.6s ease-out 0.3s; }
+  .sk-end.visible .sk-rings path { stroke-dashoffset: 0; }
+  .sk-end-text { font-family: var(--font-accent); font-size: clamp(1.4rem, 5.4vw, 1.9rem); }
+
+  @media (prefers-reduced-motion: reduce) {
+    body[data-theme='sketch'] .section-head::after,
+    body[data-theme='sketch'] .venue .plate-inner::before { clip-path: none; transition: none; }
+    .sk-rings path { stroke-dashoffset: 0; transition: none; }
+  }
+</style>

@@ -1,0 +1,219 @@
+---
+import HeroMedia from './HeroMedia.astro'
+import ScrollHint from './ScrollHint.astro'
+
+interface Props {
+  groom: string
+  bride: string
+  date: string
+  city?: string
+  heroPhoto?: string
+  heroVideo?: string
+}
+const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props
+---
+
+<header class="hero-sb">
+  <div class="sb-stage">
+    <figure class="sb-polaroid sb-item" style="--r:-3deg;--i:0">
+      <span class="sb-tape" aria-hidden="true"></span>
+      <div class="sb-shot">
+        {heroPhoto || heroVideo
+          ? <HeroMedia photo={heroPhoto} video={heroVideo} />
+          : (
+              <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <path d="M40 62C22 50 14 40 16 30c2-9 14-11 24 0 10-11 22-9 24 0 2 10-6 20-24 32Z" />
+              </svg>
+            )}
+      </div>
+      <figcaption>это мы</figcaption>
+    </figure>
+
+    <div class="sb-sticky sb-item" style="--r:5deg;--i:2">
+      <span>запомните</span>
+      <strong>{date}</strong>
+    </div>
+
+    {city && (
+      <div class="sb-stub sb-item" style="--r:-5deg;--i:3">
+        <span>приглашение на двоих</span>
+        <strong>{city}</strong>
+      </div>
+    )}
+
+    <svg class="sb-doodle sb-doodle--heart" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M20 33C8 25 3 18 5 12c2-6 10-7 15 0 5-7 13-6 15 0 2 6-3 13-15 21Z" />
+      <path d="M12 10c-2 1-3 3-3 5" />
+    </svg>
+    <svg class="sb-doodle sb-doodle--star" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 4l5 12 12 1-9 8 3 12-11-7-11 7 3-12-9-8 12-1Z" />
+    </svg>
+  </div>
+
+  <div class="sb-title">
+    <p class="sb-kicker">новая страница нашего альбома</p>
+    <h1>
+      <span>{groom}</span>
+      <i>+</i>
+      <span>{bride}</span>
+    </h1>
+    <p class="sb-say">мы женимся и зовём вас</p>
+    <ScrollHint />
+  </div>
+</header>
+
+<style>
+  .hero-sb {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(14px, 3svh, 28px);
+    overflow: hidden;
+    padding: clamp(52px, 8svh, 80px) 20px clamp(20px, 4svh, 40px);
+    text-align: center;
+    color: var(--text);
+    /* лист в клетку */
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(rgba(46, 111, 115, 0.13) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(46, 111, 115, 0.13) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .sb-stage {
+    position: relative;
+    width: min(70vw, 42svh, 340px);
+  }
+
+  /* каждая вещь падает на лист и ложится со своим наклоном */
+  .sb-item {
+    rotate: var(--r);
+    animation: sb-drop 0.8s cubic-bezier(0.2, 1.3, 0.4, 1) calc(0.2s + var(--i) * 0.16s) both;
+  }
+  @keyframes sb-drop {
+    from { opacity: 0; transform: translateY(-34px) rotate(9deg) scale(1.12); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .sb-polaroid {
+    position: relative;
+    margin: 0;
+    padding: 10px 10px 8px;
+    background: #fffdf8;
+    box-shadow: 0 16px 30px -14px rgba(47, 42, 36, 0.5), 0 2px 4px rgba(47, 42, 36, 0.14);
+  }
+  .sb-tape {
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    width: 96px;
+    height: 26px;
+    translate: -50% 0;
+    rotate: 2deg;
+    background: rgba(230, 205, 130, 0.72);
+    clip-path: polygon(0 0, 3% 25%, 0 50%, 3% 75%, 0 100%, 100% 100%, 97% 75%, 100% 50%, 97% 25%, 100% 0);
+  }
+  .sb-shot { aspect-ratio: 1; overflow: hidden; background: var(--surface); color: var(--accent); display: grid; place-items: center; }
+  .sb-shot svg { width: 42%; }
+  .sb-shot :global(img),
+  .sb-shot :global(video) { display: block; width: 100%; height: 100%; object-fit: cover; }
+  figcaption {
+    padding: 6px 12% 0 0;
+    text-align: right;
+    font-family: var(--font-accent);
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  .sb-sticky {
+    position: absolute;
+    top: -4%;
+    right: -14%;
+    display: grid;
+    gap: 2px;
+    max-width: 58%;
+    padding: 10px 12px 12px;
+    background: #fbe58a;
+    box-shadow: 0 10px 16px -10px rgba(47, 42, 36, 0.55);
+    font-family: var(--font-accent);
+    line-height: 1.05;
+  }
+  .sb-sticky span { font-size: 1rem; color: var(--text-2); }
+  .sb-sticky strong { font-size: clamp(1.2rem, 5vw, 1.5rem); font-weight: 700; }
+
+  .sb-stub {
+    position: absolute;
+    left: -11%;
+    bottom: 5%;
+    display: grid;
+    gap: 2px;
+    max-width: 66%;
+    padding: 7px 18px 8px 12px;
+    color: #fff9ee;
+    background: var(--accent-2);
+    /* вырезы по краю, как на отрывном билете */
+    -webkit-mask: radial-gradient(circle 5px at 100% 50%, transparent 98%, #000) right / 100% 100%;
+    mask: radial-gradient(circle 5px at 100% 50%, transparent 98%, #000) right / 100% 100%;
+    text-align: left;
+  }
+  .sb-stub span { font-family: var(--font-label); font-size: 0.54rem; white-space: nowrap; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }
+  .sb-stub strong { font-family: var(--font-accent); font-size: 1.3rem; line-height: 1; font-weight: 700; overflow-wrap: anywhere; }
+
+  .sb-doodle { position: absolute; color: var(--accent); }
+  .sb-doodle--heart { width: 32px; right: -7%; bottom: -4%; rotate: 12deg; }
+  .sb-doodle--star { width: 26px; left: -12%; top: 12%; rotate: -10deg; color: var(--accent-2); }
+
+  .sb-title { display: grid; justify-items: center; gap: 4px; max-width: 100%; animation: sb-up 1s var(--ease-out) 0.7s both; }
+  @keyframes sb-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  .sb-kicker { font-family: var(--font-label); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  h1 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    column-gap: 0.22em;
+    max-width: 100%;
+    font-weight: 700;
+    font-size: min(clamp(3rem, 15vw, 5.6rem), 11svh);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+  /* маркерная полоса под именами */
+  h1 span {
+    background: linear-gradient(to top, transparent 8%, #fbe58a 8%, #fbe58a 40%, transparent 40%);
+    padding-inline: 0.08em;
+  }
+  h1 i { font-style: normal; font-size: 0.7em; color: var(--accent); }
+  .sb-say { font-family: var(--font-accent); font-size: clamp(1.3rem, 5.4vw, 1.7rem); color: var(--text-2); }
+
+  @media (max-height: 700px) {
+    .sb-title :global(.scroll-hint) { display: none; }
+    .sb-kicker { display: none; }
+  }
+  @media (min-width: 900px) {
+    .hero-sb {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      gap: clamp(32px, 6vw, 96px);
+      padding-inline: clamp(48px, 8vw, 120px);
+    }
+    .sb-stage { width: min(38vw, 62svh, 460px); justify-self: end; }
+    .sb-title { justify-items: start; text-align: left; }
+    h1 { justify-content: flex-start; }
+  }
+  /* телефон лёжа: полароид слева, имена справа */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-sb { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 44px; padding: 28px max(44px, env(safe-area-inset-left)); }
+    .sb-stage { width: 56svh; }
+    .sb-title { justify-items: start; text-align: left; }
+    h1 { justify-content: flex-start; font-size: clamp(2.4rem, 18svh, 3.6rem); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sb-item, .sb-title { animation: none; }
+  }
+</style>

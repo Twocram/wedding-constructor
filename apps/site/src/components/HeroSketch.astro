@@ -1,0 +1,247 @@
+---
+import HeroMedia from './HeroMedia.astro'
+
+interface Props {
+  groom: string
+  bride: string
+  date: string
+  city?: string
+  heroPhoto?: string
+  heroVideo?: string
+}
+const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props
+
+// усадьба рисуется штрихами: зерно фиксировано, поэтому рисунок одинаков при каждой сборке
+let seed = 11
+const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+const wobble = (n: number) => (rand() - 0.5) * n * 2
+const fix = (n: number) => n.toFixed(1)
+
+function line(x1: number, y1: number, x2: number, y2: number) {
+  const mx = (x1 + x2) / 2 + wobble(1.3)
+  const my = (y1 + y2) / 2 + wobble(1.3)
+  return `M${fix(x1 + wobble(0.8))} ${fix(y1 + wobble(0.8))}Q${fix(mx)} ${fix(my)} ${fix(x2 + wobble(0.8))} ${fix(y2 + wobble(0.8))}`
+}
+const box = (x: number, y: number, w: number, h: number) => [line(x, y, x + w, y), line(x + w, y, x + w, y + h), line(x + w, y + h, x, y + h), line(x, y + h, x, y)]
+
+// крона: неровный круг из дуг
+function crown(cx: number, cy: number, rx: number, ry: number) {
+  const parts = 9
+  const point = (i: number, k = 1) => {
+    const a = (i / parts) * Math.PI * 2
+    return [cx + Math.cos(a) * rx * k + wobble(1.6), cy + Math.sin(a) * ry * k + wobble(1.6)]
+  }
+  const [sx, sy] = point(0)
+  let d = `M${fix(sx!)} ${fix(sy!)}`
+  for (let i = 1; i <= parts; i++) {
+    const [qx, qy] = point(i - 0.5, 1.2)
+    const [x, y] = point(i)
+    d += `Q${fix(qx!)} ${fix(qy!)} ${fix(x!)} ${fix(y!)}`
+  }
+  return d
+}
+
+function scene() {
+  return [
+    line(8, 216, 392, 217),
+    ...box(120, 132, 160, 84),
+    line(110, 132, 290, 132),
+    line(112, 132, 132, 106),
+    line(132, 106, 268, 106),
+    line(268, 106, 288, 132),
+    ...box(146, 92, 9, 14),
+    ...box(246, 92, 9, 14),
+    line(158, 132, 200, 100),
+    line(200, 100, 242, 132),
+    ...[166, 182, 218, 234].flatMap(x => [line(x, 133, x, 214), line(x + 5, 133, x + 5, 214)]),
+    line(156, 214, 244, 214),
+    line(150, 219, 250, 219),
+    line(144, 224, 256, 224),
+    'M192 214v-30a8 8 0 0 1 16 0v30',
+    line(200, 176, 200, 214),
+    ...[128, 142, 248, 262].flatMap(x => [...box(x, 148, 10, 20), line(x + 5, 148, x + 5, 168), line(x, 158, x + 10, 158)]),
+    ...[128, 142, 248, 262].flatMap(x => [...box(x, 182, 10, 20), line(x + 5, 182, x + 5, 202), line(x, 192, x + 10, 192)]),
+    line(60, 216, 62, 168),
+    line(70, 216, 67, 168),
+    crown(64, 138, 38, 42),
+    crown(50, 150, 16, 15),
+    crown(78, 126, 15, 14),
+    line(338, 216, 338, 186),
+    crown(338, 136, 13, 52),
+    line(366, 216, 364, 180),
+    line(373, 216, 371, 180),
+    crown(368, 156, 25, 30),
+    'M300 52q6-7 11 0q5-7 11 0',
+    'M326 70q4-5 8 0q4-5 8 0',
+    'M84 40c8-8 18-8 24-2c8-7 22-5 26 4c6 0 10 3 10 7H78c-4-3-3-7 6-9Z',
+    'M196 236c-10 8-30 10-52 14M204 236c12 8 34 10 58 14',
+  ]
+}
+const ink = scene()
+const ghost = scene()
+const hatch = Array.from({ length: 19 }, (_, i) => line(137 + i * 7, 109, 132 + i * 7, 130))
+---
+
+<header class="hero-sk">
+  <p class="sk-note">
+    мы женимся!
+    <svg class="sk-arrow" viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path pathLength="1" d="M4 6c14 2 30 10 42 26" />
+      <path pathLength="1" d="M34 30l12 3 2-13" />
+    </svg>
+  </p>
+  <h1>
+    <span>{groom}</span>
+    <i>&amp;</i>
+    <span>{bride}</span>
+  </h1>
+  <p class="sk-date">{date}{city && ` · ${city}`}</p>
+
+  {(heroPhoto || heroVideo) && (
+    <div class="sk-photo">
+      <HeroMedia photo={heroPhoto} video={heroVideo} />
+    </div>
+  )}
+
+  <svg class="sk-scene" viewBox="0 0 400 256" fill="none" aria-hidden="true">
+    <g class="sk-ghost">{ghost.map(d => <path pathLength="1" d={d} />)}</g>
+    <g class="sk-ink">{ink.map((d, i) => <path pathLength="1" d={d} style={`--n:${i}`} />)}</g>
+    <g class="sk-hatch">{hatch.map((d, i) => <path pathLength="1" d={d} style={`--n:${i + ink.length}`} />)}</g>
+  </svg>
+</header>
+
+<style>
+  .hero-sk {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    padding: clamp(56px, 9svh, 96px) 24px 0;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .sk-note {
+    position: relative;
+    font-family: var(--font-accent);
+    font-size: clamp(1.25rem, 5vw, 1.6rem);
+    rotate: -3deg;
+    animation: sk-rise 0.9s var(--ease-out) 0.2s both;
+  }
+  .sk-arrow {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 60%;
+    width: 44px;
+  }
+  .sk-arrow path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: sk-draw 0.7s ease-out 1.1s forwards;
+  }
+
+  h1 {
+    display: grid;
+    justify-items: center;
+    margin-top: 6px;
+    max-width: 100%;
+    font-weight: 300;
+    font-style: italic;
+    font-size: min(clamp(2.8rem, 13vw, 5.2rem), 9.5svh);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+    animation: sk-rise 1s var(--ease-out) 0.35s both;
+  }
+  h1 i { font-size: 0.6em; line-height: 1.1; color: var(--muted); }
+
+  .sk-date {
+    margin-top: 12px;
+    font-family: var(--font-label);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    animation: sk-rise 1s var(--ease-out) 0.55s both;
+  }
+
+  /* снимок в рамке, как вклеенный в блокнот: чёрно-белый и с неровным контуром */
+  .sk-photo {
+    width: min(44vw, 20svh, 200px);
+    aspect-ratio: 4 / 5;
+    margin-top: clamp(14px, 3svh, 28px);
+    padding: 5px;
+    border: 1.3px solid var(--text);
+    border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px;
+    rotate: 2deg;
+    animation: sk-rise 1s var(--ease-out) 0.7s both;
+  }
+  .sk-photo :global(img),
+  .sk-photo :global(video) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    filter: grayscale(1) contrast(1.08);
+  }
+
+  .sk-scene {
+    width: min(112vw, 720px);
+    max-height: 40svh;
+    min-height: 0;
+    margin-top: auto;
+    stroke: var(--text);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .sk-ink path,
+  .sk-hatch path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: sk-draw 0.6s ease-out calc(0.5s + var(--n) * 22ms) forwards;
+  }
+  .sk-hatch { opacity: 0.45; }
+  .sk-ghost {
+    opacity: 0;
+    animation: sk-ghost 1.4s ease-out 2.6s forwards;
+  }
+
+  @keyframes sk-draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes sk-ghost {
+    to { opacity: 0.32; }
+  }
+  @keyframes sk-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* низкий экран: рисунок важнее снимка, он и есть обложка */
+  @media (max-height: 740px) {
+    .sk-photo { display: none; }
+  }
+  @media (min-width: 900px) {
+    h1 { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: 0.28em; font-size: min(6.4rem, 12svh); }
+    .sk-photo { display: none; }
+    .sk-scene { width: min(86vw, 1000px); max-height: 60svh; }
+  }
+  /* телефон лёжа: текст слева, усадьба справа */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-sk { align-items: flex-start; justify-content: center; padding: 20px max(32px, env(safe-area-inset-left)); }
+    .sk-note, h1, .sk-date { margin-inline: 0; width: 48vw; justify-content: flex-start; text-align: left; }
+    h1 { font-size: clamp(2rem, 13svh, 3rem); }
+    .sk-arrow { display: none; }
+    .sk-scene { position: absolute; right: 2vw; bottom: 0; width: 46vw; max-height: 90svh; margin: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sk-note, h1, .sk-date, .sk-photo { animation: none; }
+    .sk-ink path, .sk-hatch path, .sk-arrow path { animation: none; stroke-dashoffset: 0; }
+    .sk-ghost { animation: none; opacity: 0.32; }
+  }
+</style>

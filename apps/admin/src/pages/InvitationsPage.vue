@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { InvitationItem } from '@/composables/useInvitations'
 import { LinkIcon, MailIcon, PlusIcon } from '@lucide/vue'
+import { answersUrl } from '@saywed/shared'
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -9,7 +10,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { coupleUrl, invitationHost, useCreateInvitation, useInvitations } from '@/composables/useInvitations'
+import { invitationHost, useCreateInvitation, useInvitations } from '@/composables/useInvitations'
 import { ApiError } from '@/lib/api'
 import { formatAgo, formatDateTime } from '@/lib/format'
 
@@ -21,7 +22,7 @@ const open = (item: InvitationItem) => void router.push({ name: 'invitation', pa
 
 async function copyLink(item: InvitationItem) {
   try {
-    await navigator.clipboard.writeText(coupleUrl(item.token))
+    await navigator.clipboard.writeText(answersUrl(item.token))
     toast.success('Ссылка для пары скопирована')
   }
   catch {

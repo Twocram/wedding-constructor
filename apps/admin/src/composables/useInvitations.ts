@@ -6,9 +6,6 @@ import { api, unwrap } from '@/lib/api'
 
 export { invitationHost, invitationUrl } from '@saywed/shared'
 
-export const siteOrigin = 'https://saywed.ru'
-export const coupleUrl = (token: string) => `${siteOrigin}/answers#${token}`
-
 const fetchInvitations = () => unwrap(api.admin.invitations.get())
 const fetchRsvps = (id: number) => unwrap(api.admin.invitations({ id }).rsvps.get())
 

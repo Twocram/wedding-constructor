@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { InvitationPatch } from '@saywed/shared'
 import { CheckIcon, CopyIcon, DownloadIcon, ExternalLinkIcon, PencilIcon, RefreshCwIcon, SendIcon, Trash2Icon } from '@lucide/vue'
-import { answeredForOther, attendingLabels, latestAnswers, peopleNote, rsvpSummary, rsvpXlsx, xlsxType } from '@saywed/shared'
+import { answeredForOther, answersUrl, attendingLabels, latestAnswers, peopleNote, rsvpSummary, rsvpXlsx, xlsxType } from '@saywed/shared'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -14,7 +14,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  coupleUrl,
   invitationHost,
   invitationUrl,
   useDeleteInvitation,
@@ -69,7 +68,7 @@ const stats = computed(() => [
 ])
 
 // ── ссылки для пары ──
-const coupleLink = computed(() => (invitation.value ? coupleUrl(invitation.value.token) : ''))
+const coupleLink = computed(() => (invitation.value ? answersUrl(invitation.value.token) : ''))
 const notifyLink = computed(() => data.value?.notifyLink ?? null)
 const chats = computed(() => data.value?.chats ?? [])
 const copied = ref<'answers' | 'bot' | null>(null)

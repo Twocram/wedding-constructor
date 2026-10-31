@@ -264,7 +264,7 @@ const windows = [
   h1 {
     display: grid;
     justify-items: center;
-    font-size: clamp(2.4rem, 10.5vw, 4.4rem);
+    font-size: min(clamp(2.4rem, 10.5vw, 4.4rem), 8svh);
     line-height: 1.04;
     letter-spacing: 0.01em;
     text-shadow: 0 2px 24px rgba(10, 8, 40, 0.6);
@@ -278,7 +278,7 @@ const windows = [
 
   /* волшебное зеркальце: овал в золотой оправе */
   .ft-mirror {
-    width: min(30vw, 18svh, 150px);
+    width: min(30vw, 15svh, 150px);
     aspect-ratio: 4 / 5;
     padding: 4px;
     border-radius: 50%;
@@ -307,6 +307,20 @@ const windows = [
     color: var(--accent);
   }
 
+  /* низкий экран: без подсказки и присказки, иначе замок уходит за край */
+  @media (max-height: 800px) {
+    .ft-tale { display: none; }
+    .ft-content :global(.scroll-hint) { display: none; }
+  }
+  /* телефон лёжа: текст слева, замок справа */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-ft { align-items: center; justify-items: start; padding: 24px max(32px, env(safe-area-inset-left)); }
+    .ft-content { width: 54vw; gap: 8px; }
+    .ft-mirror { display: none; }
+    .ft-tale { display: block; }
+    h1 { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: 0.25em; font-size: clamp(2rem, 13svh, 3rem); }
+    .ft-castle { left: auto; right: -2%; translate: none; width: 46vw; height: 74svh; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .ft-content > *, .ft-sky > i, .ft-windows path, .ft-flags path { animation: none; }
     .ft-comet, .ft-burst { display: none; }

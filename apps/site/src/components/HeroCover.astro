@@ -43,6 +43,7 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     position: relative;
     min-height: 100svh;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-items: end;
     overflow: hidden;
     color: #fbf8f2;
@@ -189,7 +190,16 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     .hero-side { display: block; }
     .hero-label { display: none; }
     .hero-frame { inset: 28px; }
-    h1 { grid-template-columns: auto auto auto; align-items: baseline; column-gap: 0.18em; line-height: 1.05; }
+    /* длинные имена переносятся на вторую строку, а не уезжают за край */
+    h1 { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: 0.18em; line-height: 1.05; }
+    .hero-amp { margin: 0; align-self: center; }
+  }
+  /* телефон лёжа: имена в одну строку и мельче, иначе подпись и дата уходят за край */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-monogram { display: none; }
+    .hero-label { display: block; }
+    .hero-content { gap: 10px; padding-bottom: 24px; }
+    h1 { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: 0.18em; font-size: clamp(2.6rem, 18svh, 4.5rem); line-height: 1.05; }
     .hero-amp { margin: 0; align-self: center; }
   }
   @media (prefers-reduced-motion: reduce) {

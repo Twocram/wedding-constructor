@@ -69,6 +69,7 @@ const dateParts = date.split(' ');
     min-height: 100svh;
     display: grid;
     align-content: center;
+    grid-template-columns: minmax(0, 1fr);
     justify-items: start; /* editorial — левосторонний и на мобильном */
     gap: 0;
     padding: 72px 24px 32px;
@@ -129,8 +130,9 @@ const dateParts = date.split(' ');
   }
   .hero-ed-date {
     display: inline-flex;
+    flex-wrap: wrap; /* день недели, дата и город на узком экране в строку не влезают */
     align-items: center;
-    gap: 14px;
+    gap: 4px 14px;
     margin-top: 6px;
     padding: 12px 0;
     border-top: 1px solid var(--line-strong);
@@ -218,6 +220,22 @@ const dateParts = date.split(' ');
     .hero-ed-name { font-size: clamp(5rem, 8.5vw, 8.5rem); }
     .hero-ed-figure { grid-area: figure; width: min(420px, 100%); justify-self: end; margin: 0; }
     .hero-ed-hint { grid-area: hint; justify-self: center; margin-top: 40px; }
+  }
+  /* телефон лёжа: имена и фото рядом, иначе на экран влезает только первое имя */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-ed {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+      grid-template-areas: 'text figure';
+      align-items: center;
+      column-gap: 28px;
+      padding: 24px max(32px, env(safe-area-inset-left));
+    }
+    .hero-ed-text { grid-area: text; gap: 10px; }
+    .hero-ed-name { font-size: clamp(2.4rem, 16svh, 3.6rem); }
+    .hero-ed-amp { font-size: 1.4rem; }
+    .hero-ed-figure { grid-area: figure; justify-self: end; width: min(48svh, 100%); margin: 0; }
+    .hero-ed-stamp { display: none; }
+    .hero-ed-hint { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .hero-ed-arch img, .hero-ed > *, .hero-ed-mark, .hero-ed-stamp { animation: none; }

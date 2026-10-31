@@ -104,6 +104,13 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     color: var(--text-2);
   }
   .lx-date svg { width: 8px; height: 8px; fill: var(--accent); }
+  /* телефон лёжа: фото слева, имена справа — иначе на первом экране только фото */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .lx-content { grid-template-columns: auto minmax(0, 1fr); column-gap: 36px; row-gap: 8px; align-items: center; }
+    .lx-arch { grid-row: 1 / span 4; width: min(52svh, 210px); }
+    h1 { font-size: clamp(2rem, 13svh, 3rem); }
+    :global(.hero-lx .scroll-hint-line) { display: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .lx-content > * { animation: none; }
   }

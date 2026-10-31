@@ -786,6 +786,43 @@ if (root) {
     .scene-photo img { object-position: center 25%; }
   }
 
+  /* телефон лёжа: полосы тоньше, текст мельче; сцена прокручивается, если контента всё равно больше экрана */
+  @media (orientation: landscape) and (max-height: 500px) {
+    :global(body:has(.cine)) { --bar-h: 32px; --bar-bh: 44px; --music: 38px; }
+    :global(body:has(.cine) #music-btn) { width: 38px; height: 38px; }
+    .scene-photo img { object-position: center 25%; }
+    .scene-body { align-content: safe center; gap: 8px; padding-block: 10px; overflow-y: auto; scrollbar-width: none; }
+    .scene--title .scene-body { align-content: safe center; padding-bottom: 10px; }
+    .scene--frame .scene-body,
+    .scene--welcome .scene-body { align-content: safe end; }
+    .kicker { font-size: 0.6rem; }
+    .names { display: flex; justify-content: center; align-items: baseline; gap: 0.25em; font-size: clamp(2.4rem, 17svh, 4rem); }
+    .names .amp { font-size: 0.6em; }
+    .big { max-width: none; font-size: clamp(1.7rem, 11svh, 2.6rem); }
+    .subtitle { max-width: none; font-size: 1.05rem; }
+    .subs-line { max-width: 60ch; font-size: 1.1rem; }
+    .center { gap: 6px; }
+    .cine-hint { margin-top: 0; padding-block: 4px; }
+    .cd { margin-top: 2px; }
+    .cd b { font-size: 1.5rem; }
+    .cine-btn { margin-top: 4px; padding: 9px 16px; }
+    .cine-cal { margin-top: 2px; }
+    .cine-cal .cine-btn { padding: 8px 14px; }
+    .cine-cal-caption { display: none; }
+    .sheet { width: min(100%, 720px); gap: 10px; }
+    .script { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 28px; }
+    .script li { grid-template-columns: 46px 1fr; gap: 10px; padding-bottom: 6px; }
+    .script strong { font-size: 1rem; }
+    .script span { font-size: 0.8rem; line-height: 1.3; }
+    .notes { gap: 8px; }
+    .notes li { font-size: 1.05rem; line-height: 1.25; }
+    .notes li + li::before { margin-bottom: 8px; }
+    .swatches li { width: 28px; height: 28px; }
+    .credits { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 40px; width: 100%; }
+    .credits p { font-size: 1.05rem; }
+    .credits .fin { flex-basis: 100%; margin-top: 0; font-size: 1.8rem; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .scene-photo,
     .cine[data-dir='back'] .scene-photo { clip-path: none; }

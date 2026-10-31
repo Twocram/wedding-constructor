@@ -54,6 +54,15 @@ const link = 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-
 <div class="st">
   <img class="st-backdrop" src={stories[0].photo} alt="" aria-hidden="true" />
 
+  <div class="st-rotate">
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="15" y="6" width="18" height="36" rx="3" />
+      <path d="M22 37h4M6 18a12 12 0 0 1 5-8M11 6v5H6M42 30a12 12 0 0 1-5 8M37 42v-5h5" />
+    </svg>
+    <p>Поверните телефон</p>
+    <small>Эта история смотрится вертикально</small>
+  </div>
+
   <button class="st-arrow st-arrow--prev" type="button" aria-label="Предыдущая история" data-prev>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
   </button>
@@ -398,6 +407,11 @@ if (root) {
   })
   root.querySelector('[data-replay]')?.addEventListener('click', () => show(0))
   pauseBtn.addEventListener('click', () => hold('button', !holds.has('button')))
+  // пока просим повернуть телефон, сторис не листаются сами
+  const rotate = matchMedia('(orientation: landscape) and (max-height: 500px) and (pointer: coarse)')
+  const syncRotate = () => hold('rotate', rotate.matches)
+  rotate.addEventListener('change', syncRotate)
+  syncRotate()
 
   addEventListener('keydown', (e) => {
     if (document.querySelector('dialog[open]'))
@@ -967,6 +981,27 @@ if (root) {
     cursor: pointer;
   }
   .sheet-close svg { width: 18px; height: 18px; }
+
+  /* телефон лёжа: рамка 9:16 выходит шириной 200px, и текст в ней не читается — просим повернуть; анкета открыта в dialog поверх */
+  .st-rotate { display: none; }
+  @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+    .st-rotate {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: 6px;
+      padding: 24px;
+      background: rgb(0 0 0 / 0.78);
+      color: #fff;
+      text-align: center;
+    }
+    .st-rotate svg { width: 48px; height: 48px; margin-bottom: 6px; }
+    .st-rotate p { margin: 0; font-size: 1.15rem; font-weight: 600; }
+    .st-rotate small { font-size: 0.85rem; opacity: 0.75; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .story.is-active .pop { animation: none; opacity: 1; transform: rotate(var(--r, 0deg)); }

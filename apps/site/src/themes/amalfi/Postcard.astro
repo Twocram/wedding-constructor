@@ -151,6 +151,7 @@ const ring = `${place.toUpperCase()} · ${place.toUpperCase()} · `;
     text-transform: uppercase;
     color: #f3d88f;
     text-shadow: 0 2px 0 rgba(12, 21, 32, 0.35);
+    overflow-wrap: anywhere; /* город может быть длинным: «Санкт-Петербург» */
   }
 
   .am-card-back {
@@ -276,6 +277,8 @@ const ring = `${place.toUpperCase()} · ${place.toUpperCase()} · `;
     /* фото растягивается на высоту оборота, а не задаёт её своими пропорциями */
     .am-card-front { min-height: 460px; }
     .am-card-front img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; }
+    /* фото здесь в половину открытки: размер от ширины окна его переполнял */
+    .am-card-greet strong { font-size: clamp(2rem, 5.6vw, 4.2rem); }
     .am-card-back { padding: 30px 30px 26px 44px; }
     /* разделительная линия оборота открытки */
     .am-card-back::before {

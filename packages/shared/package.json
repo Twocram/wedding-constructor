@@ -4,12 +4,14 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./domain": "./src/domain.ts",
     "./rsvp-report": "./src/rsvpReport.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "fflate": "^0.8.3",
     "zod": "^4.1.0"
   },
   "devDependencies": {

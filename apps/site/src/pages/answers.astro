@@ -28,7 +28,7 @@ import Base from '../layouts/Base.astro'
         <section class="answers-list">
           <div class="answers-list-head">
             <h2>Все ответы</h2>
-            <button type="button" class="btn btn--ghost answers-csv">Скачать для Excel</button>
+            <button type="button" class="btn btn--ghost answers-xlsx">Скачать в Excel</button>
           </div>
           <ul class="answers-items"></ul>
         </section>
@@ -39,7 +39,8 @@ import Base from '../layouts/Base.astro'
 
 <script>
 import type { RsvpAnswer } from '@saywed/shared/rsvp-report'
-import { answeredForOther, attendingLabels, latestAnswers, rsvpCsv, rsvpSummary } from '@saywed/shared/rsvp-report'
+import { invitationHost } from '@saywed/shared/domain'
+import { answeredForOther, attendingLabels, latestAnswers, rsvpSummary, rsvpXlsx, xlsxType } from '@saywed/shared/rsvp-report'
 
 interface Payload { ok: true, invitation: { title: string, slug: string }, items: RsvpAnswer[] }
 
@@ -68,7 +69,7 @@ function render({ invitation, items: all }: Payload) {
   const items = latestAnswers(all)
   root.dataset.state = 'ready'
   $('.answers-title').textContent = invitation.title
-  $('.answers-sub').textContent = `saywed.ru/${invitation.slug}`
+  $('.answers-sub').textContent = invitationHost(invitation.slug)
   document.title = `Ответы гостей — ${invitation.title}`
 
   const summary = rsvpSummary(items)
@@ -83,7 +84,7 @@ function render({ invitation, items: all }: Payload) {
   const list = $('.answers-items')
   if (!items.length) {
     list.replaceChildren(el('li', 'answers-empty', 'Пока никто не ответил. Ответы появятся здесь, как только гости заполнят анкету в приглашении.'))
-    $('.answers-csv').hidden = true
+    $('.answers-xlsx').hidden = true
     return
   }
   list.replaceChildren(...items.map((item) => {
@@ -105,9 +106,9 @@ function render({ invitation, items: all }: Payload) {
     return li
   }))
 
-  $('.answers-csv').onclick = () => {
-    const url = URL.createObjectURL(new Blob([rsvpCsv(items)], { type: 'text/csv;charset=utf-8' }))
-    const a = Object.assign(document.createElement('a'), { href: url, download: `${invitation.slug}-otvety.csv` })
+  $('.answers-xlsx').onclick = () => {
+    const url = URL.createObjectURL(new Blob([rsvpXlsx(items)], { type: xlsxType }))
+    const a = Object.assign(document.createElement('a'), { href: url, download: `${invitation.slug}-otvety.xlsx` })
     a.click()
     URL.revokeObjectURL(url)
   }

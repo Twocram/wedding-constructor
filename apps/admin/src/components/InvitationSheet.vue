@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { InvitationPatch } from '@saywed/shared'
 import { CheckIcon, CopyIcon, DownloadIcon, ExternalLinkIcon, PencilIcon, RefreshCwIcon, SendIcon, Trash2Icon } from '@lucide/vue'
-import { answeredForOther, attendingLabels, latestAnswers, rsvpCsv, rsvpSummary } from '@saywed/shared'
+import { answeredForOther, attendingLabels, latestAnswers, rsvpSummary, rsvpXlsx, xlsxType } from '@saywed/shared'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -149,13 +149,13 @@ function deleteRsvp(id: number) {
   })
 }
 
-function downloadCsv() {
+function downloadXlsx() {
   if (!invitation.value)
     return
-  const url = URL.createObjectURL(new Blob([rsvpCsv(items.value)], { type: 'text/csv;charset=utf-8' }))
+  const url = URL.createObjectURL(new Blob([rsvpXlsx(items.value)], { type: xlsxType }))
   const link = document.createElement('a')
   link.href = url
-  link.download = `${invitation.value.slug}-otvety.csv`
+  link.download = `${invitation.value.slug}-otvety.xlsx`
   link.click()
   URL.revokeObjectURL(url)
 }
@@ -315,9 +315,9 @@ function deleteInvitation() {
               <h3 class="text-sm font-medium">
                 Ответы гостей
               </h3>
-              <Button variant="outline" size="sm" :disabled="!items.length" @click="downloadCsv">
+              <Button variant="outline" size="sm" :disabled="!items.length" @click="downloadXlsx">
                 <DownloadIcon />
-                Скачать Excel (CSV)
+                Скачать Excel
               </Button>
             </div>
 

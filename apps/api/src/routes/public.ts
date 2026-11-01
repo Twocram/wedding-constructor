@@ -67,7 +67,7 @@ export const publicRoutes = new Elysia({ prefix: '/public' })
         return status(404, noInvitation)
       }
 
-      // «не смогу» с парой и напитками бессмысленно: в сводке и выгрузке это только путает
+      // кто не придёт, отвечает только именем: старая вкладка или запрос в обход формы не должны добавить лишнего
       const declined = answer.attending === 'no'
       const rsvp = db
         .insert(rsvps)
@@ -75,7 +75,7 @@ export const publicRoutes = new Elysia({ prefix: '/public' })
           ...answer,
           plusOne: declined ? false : answer.plusOne,
           drinks: declined ? [] : answer.drinks,
-          notes: answer.notes || null,
+          notes: declined ? null : answer.notes || null,
           guest: answer.guest || null,
           invitationId: invitation.id,
           ipHash: ipHash(request, server),

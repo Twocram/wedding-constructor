@@ -70,6 +70,14 @@ const isDemo = Boolean((await getEntry('invitations', slug))?.data.demo);
 
 <script>
 const form = document.querySelector<HTMLFormElement>('#rsvp-form')
+// кто не придёт, отвечает только именем: напитки, пара и пожелания ему не нужны
+function syncAttending() {
+  const declined = new FormData(form!).get('attending') === 'no'
+  form!.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[name="drinks"], input[name="plusOne"], textarea[name="notes"]').forEach((el) => {
+    el.disabled = declined
+  })
+}
+form?.addEventListener('change', syncAttending)
 form?.addEventListener('submit', async (e) => {
   e.preventDefault()
   const status = form.querySelector<HTMLElement>('.form-status')!
@@ -77,6 +85,7 @@ form?.addEventListener('submit', async (e) => {
   const finish = () => {
     form.dispatchEvent(new CustomEvent('rsvpsent', { detail: new FormData(form).get('attending') }))
     form.reset()
+    syncAttending()
   }
   if (!form.reportValidity()) {
     status.textContent = 'Заполните имя и выберите ответ.'
@@ -171,5 +180,9 @@ form?.addEventListener('submit', async (e) => {
   .check:has(:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
   .check:has(:checked) i { background: var(--accent); border-color: var(--accent); box-shadow: inset 0 0 0 3px var(--bg); }
   .check:has(:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .check:has(:disabled) { opacity: 0.45; cursor: not-allowed; }
+  .check input:disabled { cursor: not-allowed; }
+  .rsvp-plate .field:has(:disabled) > span,
+  .rsvp-plate textarea:disabled { opacity: 0.45; }
   .check--line { width: fit-content; }
 </style>

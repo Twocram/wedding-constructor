@@ -350,8 +350,7 @@ if (root) {
     if (my)
       my.textContent = a.textContent
     const radio = root.querySelector<HTMLInputElement>(`input[name="attending"][value="${a.dataset.answer}"]`)
-    if (radio)
-      radio.checked = true
+    radio?.click()
     advance()
   }))
 

@@ -465,8 +465,7 @@ if (root) {
       return
     if (answer) {
       const radio = sheet.querySelector<HTMLInputElement>(`input[name="attending"][value="${answer}"]`)
-      if (radio)
-        radio.checked = true
+      radio?.click()
     }
     sheet.showModal()
     hold('sheet', true)

@@ -68,10 +68,10 @@ import { orderContactTo, orderTelegram } from '../site';
               </label>
             </div>
             <label class="field">
-              <span>Гостей с именными ссылками</span>
-              <input name="namedLinks" type="number" min="0" max="1000" inputmode="numeric" placeholder="0" />
+              <span>Свой адрес приглашения</span>
+              <input name="customAddress" type="text" maxlength="63" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="anna-dmitry" />
               <small class="lead-hint" data-estimate></small>
-              <small class="lead-err" data-err="namedLinks"></small>
+              <small class="lead-err" data-err="customAddress"></small>
             </label>
             <label class="field">
               <span>Комментарий</span>
@@ -110,7 +110,7 @@ import { orderContactTo, orderTelegram } from '../site';
 </dialog>
 
 <script>
-interface Prices { template: number, authored: number, custom: number, named: number }
+interface Prices { template: number, authored: number, custom: number, address: number }
 const UTM_KEY = 'saywed:utm'
 
 // метки рекламы и внешний источник перехода запоминаем при первом заходе: заявку оставят позже, с другой страницы
@@ -136,7 +136,7 @@ if (dialog) {
   const submit = form.querySelector<HTMLButtonElement>('[type="submit"]')!
   const more = form.querySelector<HTMLDetailsElement>('.lead-more')!
   const contact = form.elements.namedItem('contact') as HTMLInputElement
-  const named = form.elements.namedItem('namedLinks') as HTMLInputElement
+  const address = form.elements.namedItem('customAddress') as HTMLInputElement
   const theme = form.elements.namedItem('themeSlug') as HTMLSelectElement
   const estimate = form.querySelector<HTMLElement>('[data-estimate]')!
   const prices: Prices = JSON.parse(dialog.dataset.prices!)
@@ -157,7 +157,7 @@ if (dialog) {
       slots.add(el.dataset.err!)
       el.textContent = errors[el.dataset.err!]?.[0] ?? ''
     })
-    if (Object.keys(errors).some(k => slots.has(k) && ['eventDate', 'namedLinks'].includes(k)))
+    if (Object.keys(errors).some(k => slots.has(k) && ['eventDate', 'customAddress'].includes(k)))
       more.open = true
     return Object.entries(errors).filter(([k]) => !slots.has(k)).flatMap(([, v]) => v ?? [])
   }
@@ -172,10 +172,10 @@ if (dialog) {
     contact.placeholder = method === 'telegram' ? '@username или +7 999 000-00-00' : '+7 999 000-00-00'
     contact.inputMode = method === 'telegram' ? 'text' : 'tel'
     contact.autocomplete = method === 'telegram' ? 'off' : 'tel'
-    const n = Math.max(0, Math.round(Number(named.value) || 0))
-    estimate.textContent = product === 'template' && n > 0
-      ? `Ориентир: ${((authored.includes(theme.value) ? prices.authored : prices.template) + n * prices.named).toLocaleString('ru-RU')} ₽ — шаблон и ${n} именных ссылок`
-      : `+${prices.named} ₽ за гостя`
+    const wanted = address.value.trim()
+    estimate.textContent = wanted
+      ? `${wanted.toLowerCase()}.saywed.ru, +${prices.address} ₽ разово${product === 'template' ? `. Ориентир: ${((authored.includes(theme.value) ? prices.authored : prices.template) + prices.address).toLocaleString('ru-RU')} ₽` : ''}`
+      : `+${prices.address} ₽ разово. Пусто — адрес будет коротким id, вроде k3f9a2.saywed.ru`
   }
   form.addEventListener('input', sync)
   form.addEventListener('change', sync)
@@ -190,8 +190,8 @@ if (dialog) {
     // контекст прошлой кнопки не переносим: «Написать нам» после карточки темы — уже без темы
     setRadio('product', data.leadProduct ?? 'unsure')
     theme.value = data.leadTheme ?? ''
-    named.value = data.leadNamed ?? ''
-    more.open = Boolean(data.leadTheme || data.leadNamed)
+    address.value = ''
+    more.open = Boolean(data.leadTheme || data.leadMore)
     sync()
     // время заполнения — с первого открытия за визит: случайно закрытую и открытую заново форму не считаем ботом
     openedAt ||= Date.now()
@@ -206,8 +206,7 @@ if (dialog) {
       return
     e.preventDefault()
     // калькулятор цен передаёт текущее число гостей
-    const calc = trigger.dataset.leadNamedFrom ? document.querySelector<HTMLInputElement>(trigger.dataset.leadNamedFrom) : null
-    open(calc ? { ...trigger.dataset, leadNamed: calc.value } : trigger.dataset)
+    open(trigger.dataset)
   })
   dialog.querySelectorAll('[data-close-lead]').forEach(b => b.addEventListener('click', () => dialog.close()))
   dialog.addEventListener('click', (e) => {
@@ -237,7 +236,6 @@ if (dialog) {
     }
     catch {}
     const product = value('product')
-    const n = Math.round(Number(named.value) || 0)
     const payload = {
       name: value('name'),
       contactMethod: value('contactMethod'),
@@ -246,7 +244,7 @@ if (dialog) {
       eventType: value('eventType'),
       eventDate: value('eventDate') || undefined,
       themeSlug: product === 'template' && theme.value ? theme.value : undefined,
-      namedLinks: n > 0 ? n : undefined,
+      customAddress: address.value.trim() || undefined,
       message: value('message') || undefined,
       source,
       sourcePath: location.pathname,

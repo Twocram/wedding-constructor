@@ -42,7 +42,7 @@ const plans = [
     name: 'Шаблон',
     price: prices.template,
     lead: 'Базовый дизайн из каталога, собранный под вашу пару',
-    points: ['Ваши тексты, фото, видео и музыка', 'Программа дня, карта и дресс-код', 'Анкета гостя с ответами в Telegram', 'Таймер и «Добавить в календарь»', 'Готово за 1–2 дня'],
+    points: ['Ваши тексты, фото, видео и музыка', 'Программа дня, карта и дресс-код', 'Анкета гостя с ответами в Telegram', 'Личные ссылки с именами гостей', 'Таймер и «Добавить в календарь»', 'Готово за 1–2 дня'],
     cta: 'Выбрать дизайн',
     href: '#themes',
   },
@@ -65,7 +65,6 @@ const plans = [
     featured: true,
   },
 ]
-const namedCount = 20
 
 const faq = [
   {
@@ -77,8 +76,12 @@ const faq = [
     a: ['Музыку по кнопке, видео на первом экране, галерею ваших фото, подборку образов к дресс-коду, вопросы в анкете — напитки, «приду с парой», аллергии. А ещё чат гостей в Telegram, трансфер, контакты организатора и пожелания по цветам и подаркам.', 'Не нашли нужного раздела — напишите, обсудим.'],
   },
   {
-    q: 'Что такое именные ссылки?',
-    a: [`Для каждого гостя делаем свою ссылку: он откроет приглашение и увидит обращение по имени, а в анкете его имя уже будет вписано. Стоимость — ${rub(prices.named)} за ссылку, пару или семью можно пригласить одной.`],
+    q: 'Что такое личные ссылки?',
+    a: ['Для каждого гостя своя ссылка: он откроет приглашение и увидит обращение по имени, а в анкете его имя уже будет вписано. Это входит в стоимость, пару или семью можно пригласить одной ссылкой.'],
+  },
+  {
+    q: 'Какой будет адрес у приглашения?',
+    a: [`Короткий адрес вида k3f9a2.saywed.ru входит в стоимость. Свой адрес вроде anna-dmitry.saywed.ru стоит ${rub(prices.address)} разово. Выбирайте его до рассылки: после смены адреса старая ссылка перестаёт работать.`],
   },
   {
     q: 'Как гости отвечают на анкету?',
@@ -185,13 +188,13 @@ const steps = [
     <section class="shop-block" id="named" aria-labelledby="named-title">
       <div class="shop-wide named">
         <div class="named-copy">
-          <p class="eyebrow">Именные ссылки</p>
+          <p class="eyebrow">Личные ссылки</p>
           <h2 id="named-title">Каждый гость — <em>по&nbsp;имени</em></h2>
           <p class="named-lead">Для каждого гостя — своя ссылка. Открыв её, он увидит приглашение, обращённое лично к нему.</p>
           <ul class="named-points">
             {namedPoints.map(p => <li>{p}</li>)}
           </ul>
-          <p class="named-price"><b>+{rub(prices.named)}</b> за гостя</p>
+          <p class="named-price"><b>Бесплатно</b> в любом шаблоне</p>
         </div>
 
         <div class="named-try fade-up" data-named-try>
@@ -269,24 +272,16 @@ const steps = [
           ))}
         </ul>
 
-        <div class="addon fade-up" data-calc data-base={prices.template} data-unit={prices.named}>
+        <div class="addon fade-up">
           <div class="addon-info">
-            <h3>Именные ссылки</h3>
-            <p><b>+{rub(prices.named)}</b> за каждого гостя с личной ссылкой</p>
+            <h3>Свой адрес</h3>
+            <p><b>+{rub(prices.address)}</b> разово, за всё приглашение</p>
           </div>
-          <div class="addon-calc">
-            <span class="addon-label" id="calc-label">Гостей</span>
-            <div class="stepper" role="group" aria-labelledby="calc-label">
-              <button type="button" data-step="-5" aria-label="Минус 5 гостей">−</button>
-              <input id="calc-guests" type="number" inputmode="numeric" min="0" max="300" value={namedCount} aria-labelledby="calc-label" />
-              <button type="button" data-step="5" aria-label="Плюс 5 гостей">+</button>
-            </div>
-          </div>
-          <p class="addon-total" aria-live="polite">
-            <small>Шаблон + <span data-calc-count>{namedCount}</span> именных</small>
-            <b data-calc-total>{rub(prices.template + namedCount * prices.named)}</b>
-            <a class="addon-cta" href={orderUrl()} target="_blank" rel="noopener" data-lead data-lead-source="prices" data-lead-product="template" data-lead-named-from="#calc-guests">Оставить заявку →</a>
-          </p>
+          <dl class="addon-urls">
+            <div><dt>Обычный</dt><dd>k3f9a2.saywed.ru</dd></div>
+            <div><dt>Свой</dt><dd>anna-dmitry.saywed.ru</dd></div>
+          </dl>
+          <a class="addon-cta" href={orderUrl()} target="_blank" rel="noopener" data-lead data-lead-source="prices" data-lead-product="template" data-lead-more="1">Оставить заявку →</a>
         </div>
       </div>
     </section>
@@ -349,30 +344,6 @@ if (tryBox) {
   const fallback = preview.textContent ?? ''
   input.addEventListener('input', () => {
     preview.textContent = input.value.trim() || fallback
-  })
-}
-
-const calc = document.querySelector<HTMLElement>('[data-calc]')
-if (calc) {
-  const base = Number(calc.dataset.base)
-  const unit = Number(calc.dataset.unit)
-  const input = calc.querySelector<HTMLInputElement>('input')!
-  const count = calc.querySelector<HTMLElement>('[data-calc-count]')!
-  const total = calc.querySelector<HTMLElement>('[data-calc-total]')!
-  const clamp = (n: number) => Math.max(0, Math.min(300, Math.round(n) || 0))
-  const render = (n: number) => {
-    count.textContent = String(n)
-    total.textContent = `${(base + n * unit).toLocaleString('ru-RU')} ₽`
-  }
-  calc.querySelectorAll<HTMLButtonElement>('[data-step]').forEach(b =>
-    b.addEventListener('click', () => {
-      input.value = String(clamp(Number(input.value) + Number(b.dataset.step)))
-      render(Number(input.value))
-    }),
-  )
-  input.addEventListener('input', () => render(clamp(Number(input.value))))
-  input.addEventListener('change', () => {
-    input.value = String(clamp(Number(input.value)))
   })
 }
 </script>
@@ -620,43 +591,15 @@ if (calc) {
   .addon-info h3 { font-size: 1.5rem; }
   .addon-info p { margin: 4px 0 0; color: var(--text-2); line-height: 1.5; }
   .addon-info b { font-weight: 500; color: var(--accent); }
-  .addon-calc { display: grid; gap: 8px; }
-  .addon-label { font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
-  .stepper { display: flex; align-items: center; border: 1px solid var(--line-strong); border-radius: 99px; width: max-content; }
-  .stepper button {
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--text);
-    font: 300 1.3rem/1 var(--font-body);
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  .stepper button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
-  .stepper input {
-    width: 4ch;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    text-align: center;
-    font: 400 1.15rem/1 var(--font-body);
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-    -moz-appearance: textfield;
-  }
-  .stepper input::-webkit-inner-spin-button, .stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-  .addon-total { margin: 0; display: grid; gap: 2px; }
-  @media (min-width: 760px) { .addon-total { justify-items: end; text-align: right; } }
-  .addon-total small { font-size: 0.8rem; color: var(--muted); }
+  .addon-urls { display: grid; gap: 6px; margin: 0; }
+  .addon-urls div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+  .addon-urls dt { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .addon-urls dd { margin: 0; color: var(--text); overflow-wrap: anywhere; }
   .addon-cta { margin-top: 6px; font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); text-decoration: none; padding: 6px 0; border-bottom: 1px solid currentColor; width: fit-content; }
   @media (min-width: 760px) { .addon-cta { justify-self: end; } }
   .shop-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); background: var(--text); color: color-mix(in srgb, var(--bg) 55%, transparent); font-size: 0.8rem; letter-spacing: 0.04em; border-top: 1px solid color-mix(in srgb, var(--bg) 10%, transparent); }
   .shop-foot a { color: inherit; text-underline-offset: 3px; }
   .shop-foot a:hover { color: var(--bg); }
-  .addon-total b { font-family: var(--font-display); font-weight: 400; font-size: 2rem; line-height: 1.1; color: var(--text); font-variant-numeric: lining-nums tabular-nums; }
 
   /* ── FAQ ── */
   .faq { max-width: 760px; margin: 0 auto; border-top: 1px solid var(--line-strong); }

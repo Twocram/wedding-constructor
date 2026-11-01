@@ -127,7 +127,7 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
 
   // hero-фото: глушим CSS-зум (конфликт transform), GSAP совмещает зум + параллакс
   const hero = document.querySelector('header.hero, header.hero-ed, header.hero-am, header.hero-deco')
-  const heroImg = hero?.querySelector<HTMLElement>('.hero-photo, .hero-ed-arch img, .hero-am-frame img')
+  const heroImg = hero?.querySelector<HTMLElement>('.hero-photo')
   if (heroImg && hero) {
     heroImg.style.animation = 'none'
     gsap.fromTo(heroImg, { scale: 1 }, {
@@ -139,14 +139,12 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       // стопим вечный зум, пока hero за экраном
       scrollTrigger: { trigger: hero, start: 'top bottom', end: 'bottom top', toggleActions: 'play pause resume pause' },
     })
-    // сдвиг только у полноэкранного фото — у рамок-арок он рвёт рамку
-    if (heroImg.classList.contains('hero-photo')) {
-      gsap.to(heroImg, {
-        yPercent: 10,
-        ease: 'none',
-        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
-      })
-    }
+    // зум и сдвиг только у полноэкранного фото: в рамке-арке снимок вылез бы за её край
+    gsap.to(heroImg, {
+      yPercent: 10,
+      ease: 'none',
+      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
+    })
   }
 
   // контент hero уплывает вверх и тает, только когда сам уходит за верх экрана:

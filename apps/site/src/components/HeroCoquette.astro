@@ -121,7 +121,9 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     border: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent);
     border-radius: 999px 999px 18px 18px;
   }
-  .cq-arch :is(img, video) {
+  .cq-arch :global(img),
+  .cq-arch :global(video) {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;

@@ -90,7 +90,8 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     box-shadow: 0 24px 44px -22px color-mix(in srgb, var(--accent) 45%, transparent);
     rotate: -1.5deg;
   }
-  .wc-arch img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+  .wc-arch :global(img),
+  .wc-arch :global(video) { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
   .wc-date {
     font-family: var(--font-accent);
     font-weight: 700;

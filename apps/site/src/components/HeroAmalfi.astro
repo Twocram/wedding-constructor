@@ -132,16 +132,16 @@ const stars = Array.from({ length: 42 }, (_, i) => ({
     border-radius: 999px 999px 22px 22px;
     pointer-events: none;
   }
-  .hero-am-frame img {
+  .hero-am-frame :global(img),
+  .hero-am-frame :global(video) {
+    display: block;
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
     border-radius: 999px 999px 16px 16px;
     box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.05);
     filter: saturate(0.9) contrast(1.04);
-    animation: am-zoom 24s var(--ease-out) infinite alternate;
   }
-  @keyframes am-zoom { from { transform: scale(1); } to { transform: scale(1.05); } }
 
   .hero-am-hint { margin-top: 32px; color: var(--accent); }
 
@@ -188,6 +188,6 @@ const stars = Array.from({ length: 42 }, (_, i) => ({
   }
   @media (prefers-reduced-motion: reduce) {
     .stars { display: none; }
-    .hero-am > *, .hero-am-frame img { animation: none !important; }
+    .hero-am > * { animation: none !important; }
   }
 </style>

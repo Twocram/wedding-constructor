@@ -158,15 +158,15 @@ const dateParts = date.split(' ');
     border-radius: 999px 999px 24px 24px;
     background: color-mix(in srgb, var(--text) 3%, transparent);
   }
-  .hero-ed-arch img {
+  .hero-ed-arch :global(img),
+  .hero-ed-arch :global(video) {
+    display: block;
     width: 100%;
     aspect-ratio: 3 / 4;
     object-fit: cover;
     border-radius: 999px 999px 16px 16px;
     box-shadow: var(--shadow);
-    animation: slowzoom 22s var(--ease-out) infinite alternate;
   }
-  @keyframes slowzoom { from { transform: scale(1); } to { transform: scale(1.04); } }
 
   .hero-ed-hint { margin-top: 28px; color: var(--text-2); }
 
@@ -238,6 +238,6 @@ const dateParts = date.split(' ');
     .hero-ed-hint { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-ed-arch img, .hero-ed > *, .hero-ed-mark, .hero-ed-stamp { animation: none; }
+    .hero-ed > *, .hero-ed-mark, .hero-ed-stamp { animation: none; }
   }
 </style>

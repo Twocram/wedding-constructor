@@ -82,7 +82,8 @@ const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props;
     border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
     border-radius: 999px 999px 6px 6px;
   }
-  .lx-arch img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+  .lx-arch :global(img),
+  .lx-arch :global(video) { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
   .lx-label {
     font-family: var(--font-label);
     font-size: 0.64rem;

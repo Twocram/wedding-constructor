@@ -5,7 +5,7 @@ import { orderContactTo, orderTelegram } from '../site';
 // диалог заявки: открывается любой кнопкой с data-lead, контекст кнопки (тема, продукт, источник) подставляется в поля
 ---
 
-<dialog class="lead" aria-labelledby="lead-title" data-prices={JSON.stringify(prices)}>
+<dialog class="lead" aria-labelledby="lead-title" data-prices={JSON.stringify(prices)} data-authored={Object.keys(themes).filter(k => themes[k].authored).join(' ')}>
   <div class="plate">
     <div class="plate-inner lead-body" tabindex="-1" autofocus>
       <button type="button" class="lead-close" data-close-lead aria-label="Закрыть">
@@ -110,7 +110,7 @@ import { orderContactTo, orderTelegram } from '../site';
 </dialog>
 
 <script>
-interface Prices { template: number, custom: number, named: number }
+interface Prices { template: number, authored: number, custom: number, named: number }
 const UTM_KEY = 'saywed:utm'
 
 // метки рекламы и внешний источник перехода запоминаем при первом заходе: заявку оставят позже, с другой страницы
@@ -140,6 +140,7 @@ if (dialog) {
   const theme = form.elements.namedItem('themeSlug') as HTMLSelectElement
   const estimate = form.querySelector<HTMLElement>('[data-estimate]')!
   const prices: Prices = JSON.parse(dialog.dataset.prices!)
+  const authored = dialog.dataset.authored!.split(' ')
   let source = 'other'
   let openedAt = 0
 
@@ -173,7 +174,7 @@ if (dialog) {
     contact.autocomplete = method === 'telegram' ? 'off' : 'tel'
     const n = Math.max(0, Math.round(Number(named.value) || 0))
     estimate.textContent = product === 'template' && n > 0
-      ? `Ориентир: ${(prices.template + n * prices.named).toLocaleString('ru-RU')} ₽ — шаблон и ${n} именных ссылок`
+      ? `Ориентир: ${((authored.includes(theme.value) ? prices.authored : prices.template) + n * prices.named).toLocaleString('ru-RU')} ₽ — шаблон и ${n} именных ссылок`
       : `+${prices.named} ₽ за гостя`
   }
   form.addEventListener('input', sync)

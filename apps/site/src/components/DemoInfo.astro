@@ -1,5 +1,5 @@
 ---
-import { orderUrl, prices, rub } from '../site'
+import { orderUrl, prices, rub, themePrice, themes } from '../site'
 
 // поп-ап демо: что меняется в шаблоне и сколько стоит; оформляется токенами текущей темы
 interface Props {
@@ -36,7 +36,7 @@ const editable = [
       <p class="demo-info-warn">Шрифты в шаблоне не меняются — они часть дизайна</p>
 
       <dl class="demo-info-prices">
-        <div><dt>Шаблон</dt><dd>{rub(prices.template)}</dd></div>
+        <div><dt>{themes[theme]?.authored ? 'Авторская тема' : 'Шаблон'}</dt><dd>{rub(themePrice(theme))}</dd></div>
         <div><dt>Именные ссылки</dt><dd>{rub(prices.named)}<small>/гость</small></dd></div>
       </dl>
 

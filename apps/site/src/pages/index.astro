@@ -11,6 +11,11 @@ const invitations = (await getCollection('invitations')).filter(inv => inv.data.
   (a, b) => order.indexOf(a.data.theme) - order.indexOf(b.data.theme),
 )
 
+const shelves = [
+  { title: 'Авторские', price: prices.authored, note: 'У каждой своя идея и своя структура страницы', items: invitations.filter(inv => themes[inv.data.theme].authored) },
+  { title: 'Базовые', price: prices.template, note: 'Разделы приглашения в разных стилях', items: invitations.filter(inv => !themes[inv.data.theme].authored) },
+]
+
 const features = [
   { title: 'Личное обращение', text: 'У каждого гостя своя ссылка — он увидит в приглашении своё имя', icon: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0' },
   { title: 'Анкета гостя', text: 'Ответы «приду / не приду» сразу прилетают вам в Telegram', icon: 'M4 5h16v11H8l-4 4zM8 10h8M8 13h5' },
@@ -36,9 +41,17 @@ const plans = [
   {
     name: 'Шаблон',
     price: prices.template,
-    lead: 'Любой дизайн из каталога, собранный под вашу пару',
+    lead: 'Базовый дизайн из каталога, собранный под вашу пару',
     points: ['Ваши тексты, фото, видео и музыка', 'Программа дня, карта и дресс-код', 'Анкета гостя с ответами в Telegram', 'Таймер и «Добавить в календарь»', 'Готово за 1–2 дня'],
     cta: 'Выбрать дизайн',
+    href: '#themes',
+  },
+  {
+    name: 'Авторская тема',
+    price: prices.authored,
+    lead: 'Приглашение со своей идеей: переписка, счастливый билет, сторис или кино',
+    points: ['Всё, что входит в шаблон', 'Своя структура страницы', 'Гость не просто листает, а участвует'],
+    cta: 'Смотреть темы',
     href: '#themes',
   },
   {
@@ -104,7 +117,7 @@ const steps = [
           <li>Ответы гостей в Telegram</li>
           <li>Без приложений и регистрации</li>
           <li>Таймер до свадьбы — уже внутри, а не за +500 ₽</li>
-          <li>Шаблон — {rub(prices.template)}</li>
+          <li>Шаблон — от {rub(prices.template)}</li>
         </ul>
       </div>
     </header>
@@ -117,28 +130,37 @@ const steps = [
           <p>Нажмите на карточку — откроется живое демо с примером пары.</p>
           <p class="shop-note">Любые тексты, фото и цвета дресс-кода меняем под вашу пару — это входит в стоимость. Живой таймер обратного отсчёта до свадьбы вы тоже получаете вместе с приглашением — без доплат</p>
         </div>
-        <ul class="themes">
-          {invitations.map((inv, i) => {
-            const t = themes[inv.data.theme]
-            return (
-              <li class="theme fade-up" style={`--i:${i % 3}`}>
-                <a class="theme-phone" href={`/${inv.id}`} aria-label={`Демо ${t.name}: ${inv.data.groom} и ${inv.data.bride}`}>
-                  {t.isNew && <span class="theme-new">New</span>}
-                  <img src={`/previews/${inv.id}.webp`} alt="" width="600" height="1298" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
-                </a>
-                <div class="theme-info">
-                  <div class="theme-tags">{t.tags.map(tag => <span>{tag}</span>)}</div>
-                  <h3>{t.name}</h3>
-                  <p>{t.tagline}</p>
-                  <div class="theme-actions">
-                    <a class="theme-link" href={`/${inv.id}`}>Смотреть демо</a>
-                    <a class="theme-link theme-link--accent" href={orderUrl(t.name)} target="_blank" rel="noopener" data-lead data-lead-source="catalog-card" data-lead-product="template" data-lead-theme={inv.data.theme}>Заказать →</a>
-                  </div>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
+        {shelves.map(shelf => (
+          <div class="shelf">
+            <div class="shelf-head">
+              <h3>{shelf.title}</h3>
+              <b>{rub(shelf.price)}</b>
+              <p>{shelf.note}</p>
+            </div>
+            <ul class="themes">
+              {shelf.items.map((inv, i) => {
+                const t = themes[inv.data.theme]
+                return (
+                  <li class="theme fade-up" style={`--i:${i % 3}`}>
+                    <a class="theme-phone" href={`/${inv.id}`} aria-label={`Демо ${t.name}: ${inv.data.groom} и ${inv.data.bride}`}>
+                      {t.isNew && <span class="theme-new">New</span>}
+                      <img src={`/previews/${inv.id}.webp`} alt="" width="600" height="1298" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
+                    </a>
+                    <div class="theme-info">
+                      <div class="theme-tags">{t.tags.map(tag => <span>{tag}</span>)}</div>
+                      <h3>{t.name}</h3>
+                      <p>{t.tagline}</p>
+                      <div class="theme-actions">
+                        <a class="theme-link" href={`/${inv.id}`}>Смотреть демо</a>
+                        <a class="theme-link theme-link--accent" href={orderUrl(t.name)} target="_blank" rel="noopener" data-lead data-lead-source="catalog-card" data-lead-product="template" data-lead-theme={inv.data.theme}>Заказать →</a>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ))}
       </div>
     </section>
 
@@ -379,6 +401,11 @@ if (calc) {
   .shop-head p:not(.eyebrow) { margin: 0; color: var(--muted); max-width: 40ch; }
 
   /* ── каталог ── */
+  .shelf + .shelf { margin-top: clamp(56px, 9vh, 88px); }
+  .shelf-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 24px; }
+  .shelf-head h3 { font-size: clamp(1.5rem, 4.4vw, 2rem); line-height: 1.15; }
+  .shelf-head b { font-weight: 500; color: var(--accent); }
+  .shelf-head p { flex-basis: 100%; margin: 0; color: var(--muted); }
   .themes { list-style: none; padding: 0; margin: 0; display: grid; gap: 56px 32px; grid-template-columns: 1fr; }
   /* телефон: карусель со свайпом, иначе шесть макетов — это ~4000px ленты */
   @media (max-width: 639px) {
@@ -561,8 +588,8 @@ if (calc) {
   .shop-custom .btn { --btn-bg: var(--bg); --btn-fg: var(--text); box-shadow: none; }
 
   /* ── цены ── */
-  .plans { list-style: none; padding: 0; margin: 0 auto; display: grid; gap: 20px; max-width: 920px; }
-  @media (min-width: 760px) { .plans { grid-template-columns: 1fr 1fr; gap: 24px; } }
+  .plans { list-style: none; padding: 0; margin: 0 auto; display: grid; gap: 20px; max-width: 1120px; }
+  @media (min-width: 860px) { .plans { grid-template-columns: repeat(3, 1fr); gap: 24px; } }
   .plan {
     display: grid;
     grid-template-rows: auto auto auto 1fr auto;

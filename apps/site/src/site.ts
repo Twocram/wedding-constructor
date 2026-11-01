@@ -1,5 +1,5 @@
 // Витрина: контакты для заказа; цены и темы — в @saywed/shared.
-export { prices, rub, type ThemeInfo, themes } from '@saywed/shared'
+export { prices, rub, type ThemeInfo, themePrice, themes } from '@saywed/shared'
 
 // Telegram для заказов (без @); на сайте показываем имя, а не логин
 export const orderTelegram = 'Pie_lie_die96'

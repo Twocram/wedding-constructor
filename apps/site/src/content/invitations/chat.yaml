@@ -1,0 +1,47 @@
+theme: chat
+groom: Лев
+bride: Мира
+date: 18 июня 2027
+city: Москва
+countdown: '2027-06-18T16:00:00'
+heroPhoto: /photos/story/story-3.jpg
+gallery:
+  - /photos/story/story-3.jpg
+  - /photos/story/story-1.jpg
+  - /photos/story/story-7.jpg
+  - /photos/story/story-8.jpg
+welcome: Хотим провести этот день с самыми близкими. Будет вкусно, красиво и очень душевно.
+venue:
+  name: Лофт «Оранжерея»
+  address: Москва, Садовническая улица, 9
+timeline:
+  - time: '16:00'
+    title: Сбор гостей
+    text: Лимонад, закуски и обнимашки.
+  - time: '17:00'
+    title: Церемония
+    text: Короткая и без лишнего пафоса.
+  - time: '18:00'
+    title: Ужин
+    text: Тосты разрешены, микрофон по желанию.
+  - time: '21:00'
+    title: Танцы
+    text: Плейлист собирали полгода.
+dressCode:
+  text: Светлые оттенки и всё, в чём удобно танцевать. Кроссовки тоже подойдут.
+  colors: ['#f4efe6', '#d9d4f5', '#f2c6d6', '#c9d8c5', '#1d1b2b']
+wishes:
+  - title: Подарки
+    text: Вклад в наше свадебное путешествие будет лучшим подарком.
+  - title: Цветы
+    text: Вместо букетов принесите, пожалуйста, бутылку вина. Откроем на годовщину.
+rsvp:
+  deadline: 01.05.2027
+  plusOne: true
+  drinks:
+    - Игристое
+    - Вино
+    - Крепкое
+    - Безалкогольное
+music: /music/song.mp3
+demo: true

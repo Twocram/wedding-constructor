@@ -1,0 +1,104 @@
+---
+// тема scratch — счастливый билет: общие секции (ClassicBody) как лотерейные купоны, вишня, крем и золотая фольга
+import type { Props } from '../../components/ClassicBody.astro'
+import ClassicBody from '../../components/ClassicBody.astro'
+
+const { inv, slug, cal } = Astro.props as Props
+---
+
+<ClassicBody inv={inv} slug={slug} cal={cal} />
+
+<section class="sc-end fade-up">
+  <p class="sc-end-kicker">Условия розыгрыша</p>
+  <p class="sc-end-big">Приз выдаётся только лично</p>
+  <p class="sc-end-note">{inv.date}{inv.city && `, ${inv.city}`}</p>
+</section>
+
+<style is:global>
+  /* ссылка без подложки терялась бы и на вишнёвом билете, и на кремовых секциях */
+  body[data-theme='scratch'] .back-home {
+    margin: 0;
+    padding: 6px 12px;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    color: var(--text);
+    opacity: 0.9;
+  }
+
+  /* поверхность — мелкая гильош-сетка, как защитный фон на билетах */
+  body[data-theme='scratch'] .section--surface {
+    background:
+      repeating-radial-gradient(circle at 50% 0, transparent 0 11px, rgba(163, 20, 46, 0.05) 11px 12px),
+      var(--surface);
+  }
+
+  body[data-theme='scratch'] .section h2 {
+    font-weight: 700;
+    font-size: clamp(1.45rem, 6.2vw, 2.3rem);
+    line-height: 1.16;
+    letter-spacing: -0.01em;
+    color: var(--accent);
+    overflow-wrap: anywhere;
+  }
+  body[data-theme='scratch'] .eyebrow { color: var(--accent-2); }
+  body[data-theme='scratch'] .lead { font-family: var(--font-accent); font-style: italic; font-size: clamp(1.3rem, 5vw, 1.55rem); line-height: 1.38; }
+
+  /* вместо ромба — золотое сердце */
+  body[data-theme='scratch'] .ornament { display: none; }
+  body[data-theme='scratch'] .section-head::after {
+    content: '';
+    width: 30px;
+    height: 27px;
+    margin-top: 6px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='1' y2='1'%3E%3Cstop stop-color='%23f7dc8a'/%3E%3Cstop offset='.5' stop-color='%23c99a2e'/%3E%3Cstop offset='1' stop-color='%23efcf74'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M55 99C20 75 1 54 1 31 1 13 15 1 31 1c10 0 19 5 24 14C60 6 69 1 79 1c16 0 30 12 30 30 0 23-19 44-54 68Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  /* плашка — купон с вырезами по бокам; вырез делает фон плашки, тень даёт контур */
+  body[data-theme='scratch'] .plate {
+    padding: 0;
+    background: none;
+    border: none;
+    filter: drop-shadow(0 12px 16px rgba(58, 13, 21, 0.16));
+  }
+  body[data-theme='scratch'] .plate > .plate-inner {
+    background: var(--surface-2);
+    border: none;
+    box-shadow: none;
+    -webkit-mask:
+      radial-gradient(circle 10px at 0 40px, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 10px at 100% 40px, #0000 97%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 10px at 0 40px, #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 10px at 100% 40px, #0000 97%, #000) right / 51% 100% no-repeat;
+  }
+  body[data-theme='scratch'] .map-plate { filter: none; }
+
+  /* кнопка покрыта той же фольгой, что сердца на билете */
+  body[data-theme='scratch'] .btn:not(.btn--ghost) {
+    border: none;
+    color: #3a0d15;
+    background: linear-gradient(115deg, #f7dc8a, #c99a2e 34%, #fff0b8 52%, #b98a1f 74%, #efcf74);
+    font-weight: 500;
+  }
+  body[data-theme='scratch'] .btn--ghost { border-color: var(--accent); color: var(--accent); }
+
+  /* Unbounded широкий: в общих размерах цифры таймера и программы наезжают на соседей */
+  body[data-theme='scratch'] .countdown-grid span { font-weight: 700; font-size: clamp(1.7rem, 7.6vw, 3rem); color: var(--accent); }
+  body[data-theme='scratch'] .tl-time { font-size: 1rem; font-weight: 700; color: var(--accent); }
+  body[data-theme='scratch'] .foot-note { font-family: var(--font-accent); font-style: italic; font-size: 1.2rem; font-weight: 500; }
+  body[data-theme='scratch'] .wish-num { font-family: var(--font-display); font-weight: 700; color: var(--accent-2); }
+  body[data-theme='scratch'] .stack { --card-bg: #fff4df; }
+
+  .sc-end {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: clamp(64px, 12vw, 112px) 24px;
+    text-align: center;
+    color: #fff4df;
+    background: radial-gradient(90% 90% at 50% 20%, #b01a35, #8c1226 60%, #640b1b);
+  }
+  .sc-end-kicker { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #e8c15a; }
+  .sc-end-big { max-width: 14em; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.5rem, 6.4vw, 2.3rem); line-height: 1.18; overflow-wrap: anywhere; }
+  .sc-end-note { font-family: var(--font-accent); font-style: italic; font-size: clamp(1.2rem, 4.8vw, 1.5rem); }
+</style>

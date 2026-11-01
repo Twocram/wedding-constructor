@@ -7,6 +7,8 @@ export const rub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 export interface ThemeInfo { name: string, tagline: string, tags: string[], isNew?: boolean }
 
 export const themes: Record<string, ThemeInfo> = {
+  chat: { name: 'Chat', tagline: 'Переписка с парой: «печатает…», голосовое и ответ кнопками', tags: ['Новинка', 'Одним экраном'], isNew: true },
+  scratch: { name: 'Scratch', tagline: 'Счастливый билет: гость стирает фольгу и узнаёт дату', tags: ['Новинка', 'Необычная'], isNew: true },
   stories: { name: 'Stories', tagline: 'Как сторис в Instagram: тапы, стикеры, опрос «Придёте?»', tags: ['Новинка', 'Одним экраном'], isNew: true },
   deco: { name: 'Deco', tagline: 'Ар-деко: золотая рамка, геометрия, Гэтсби', tags: ['Тёмная', 'Вечерняя'] },
   cover: { name: 'Cover', tagline: 'Классика с конвертом и сургучной печатью', tags: ['Светлая', 'Конверт'] },

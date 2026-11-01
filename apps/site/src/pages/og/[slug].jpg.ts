@@ -35,6 +35,8 @@ const looks: Record<Theme, Look> = {
   frost: { bg: '#eef4f9', text: '#1e3348', muted: '#587289', accent: '#3f6f96', font: 'Prata' },
   scrapbook: { bg: '#f6f0e3', text: '#2f2a24', muted: '#70675a', accent: '#c7472d', font: 'Playfair Display', italic: true },
   terracotta: { bg: '#f5ece0', text: '#3d2a20', muted: '#7c6655', accent: '#a84a2c', font: 'Playfair Display', italic: true },
+  chat: { bg: '#efeaff', text: '#1d1b2b', muted: '#7a7690', accent: '#6a5be2', font: 'Playfair Display', italic: true },
+  scratch: { bg: '#8c1226', text: '#fff4df', muted: '#e6c9a8', accent: '#e8c15a', font: 'Playfair Display', italic: true },
   toile: { bg: '#f3f0e7', text: '#24344e', muted: '#6d7a90', accent: '#3a5a80', font: 'Cormorant Garamond' },
 }
 

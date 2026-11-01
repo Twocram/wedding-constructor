@@ -1,0 +1,53 @@
+theme: scratch
+groom: Глеб
+bride: Вера
+date: 14 августа 2027
+city: Казань
+countdown: '2027-08-14T15:00:00'
+heroPhoto: /photos/story/story-6.jpg
+gallery:
+  - /photos/story/story-6.jpg
+  - /photos/story/story-11.jpg
+  - /photos/story/story-12.jpg
+  - /photos/story/story-10.jpg
+welcome: Нам выпал счастливый билет, и мы хотим разделить его с вами. Приходите праздновать.
+venue:
+  name: Усадьба «Светлая»
+  address: Казань, улица Сосновая, 12
+timeline:
+  - time: '15:00'
+    title: Сбор гостей
+    text: Игристое и живая музыка в саду.
+    icon: glass
+  - time: '16:00'
+    title: Церемония
+    text: Тот самый момент.
+    icon: rings
+  - time: '17:30'
+    title: Ужин
+    text: Тосты, истории и немного слёз.
+    icon: dinner
+  - time: '21:00'
+    title: Танцы
+    text: До последнего гостя.
+    icon: music
+dressCode:
+  text: Вечерний образ. Будем рады глубоким винным и золотым оттенкам.
+  colors: ['#fbf0dc', '#e8c15a', '#a3142e', '#640b1b', '#3a0d15']
+wishes:
+  - title: Подарки
+    text: Вклад в наш общий счастливый билет будет лучшим подарком.
+  - title: Цветы
+    text: Вместо букетов возьмите с собой хорошее настроение.
+  - title: Парковка
+    text: На территории усадьбы есть бесплатная парковка.
+rsvp:
+  deadline: 01.07.2027
+  plusOne: true
+  drinks:
+    - Игристое
+    - Вино
+    - Крепкое
+    - Безалкогольное
+music: /music/song.mp3
+demo: true

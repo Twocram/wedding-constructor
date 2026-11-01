@@ -1,0 +1,526 @@
+---
+import HeroMedia from './HeroMedia.astro'
+import ScrollHint from './ScrollHint.astro'
+
+interface Props {
+  groom: string
+  bride: string
+  date: string
+  city?: string
+  heroPhoto?: string
+  heroVideo?: string
+}
+const { groom, bride, date, city, heroPhoto, heroVideo } = Astro.props
+
+// дата без дня недели делится на три сердца: день, месяц, год; другой формат прячем под одно
+const plain = date.split(',').at(-1)!.trim()
+const parts = plain.split(/\s+/)
+const cells = parts.length === 3 ? parts : [plain]
+---
+
+<header class="hero-sc">
+  <noscript><style is:inline>.sc-heart b{visibility:visible!important}.sc-coin,.sc-skip{display:none!important}.sc-after{opacity:1!important}</style></noscript>
+  {(heroPhoto || heroVideo) && <div class="sc-bg" aria-hidden="true"><HeroMedia photo={heroPhoto} video={heroVideo} /></div>}
+
+  <div class="sc-shadow">
+    <article class="sc-ticket">
+      <p class="sc-series"><span>Серия «Любовь»</span><span>№ 000001</span></p>
+      <p class="sc-lucky">Счастливый билет</p>
+      <h1>
+        <span>{groom}</span>
+        <i>и</i>
+        <span>{bride}</span>
+      </h1>
+      <p class="sc-say" data-guest="{g}, сотрите три сердца">Сотрите три сердца и узнайте дату</p>
+
+      <div class:list={['sc-cells', { 'sc-cells--one': cells.length === 1 }]}>
+        {cells.map((c, i) => (
+          <div class="sc-cell">
+            <div class="sc-heart">
+              <b class:list={{ 'sc-long': c.length > 4 }}>{c}</b>
+              <canvas data-foil aria-hidden="true"></canvas>
+            </div>
+            {i === 0 && <span class="sc-coin" aria-hidden="true"></span>}
+          </div>
+        ))}
+      </div>
+
+      <div class="sc-after">
+        <p class="sc-result">Вы приглашены на свадьбу!</p>
+        {city && <p class="sc-city">{city}</p>}
+      </div>
+      <button type="button" class="sc-skip">Открыть без стирания</button>
+
+      <span class="sc-stamp" aria-hidden="true">Выигрыш</span>
+    </article>
+  </div>
+
+  <div class="sc-next"><ScrollHint /></div>
+</header>
+
+<script>
+const hero = document.querySelector<HTMLElement>('.hero-sc')
+if (hero) {
+  hero.classList.add('is-live')
+  const canvases = [...hero.querySelectorAll<HTMLCanvasElement>('[data-foil]')]
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches
+  let left = canvases.length
+
+  const paintFoil = (canvas: HTMLCanvasElement) => {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+    const ratio = Math.min(devicePixelRatio, 2)
+    const { clientWidth: w, clientHeight: h } = canvas
+    canvas.width = w * ratio
+    canvas.height = h * ratio
+    ctx.scale(ratio, ratio)
+    const gold = ctx.createLinearGradient(0, 0, w, h)
+    gold.addColorStop(0, '#f7dc8a')
+    gold.addColorStop(0.32, '#c99a2e')
+    gold.addColorStop(0.5, '#fff0b8')
+    gold.addColorStop(0.72, '#b98a1f')
+    gold.addColorStop(1, '#efcf74')
+    ctx.fillStyle = gold
+    ctx.fillRect(0, 0, w, h)
+    // мелкое зерно: без него заливка выглядит пластиком, а не фольгой
+    for (let i = 0; i < (w * h) / 14; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,.22)' : 'rgba(90,55,0,.14)'
+      ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1)
+    }
+    ctx.globalCompositeOperation = 'destination-out'
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.lineWidth = Math.max(18, w * 0.2)
+    return ctx
+  }
+
+  const burst = (count: number, origin: DOMRect, power: number) => {
+    if (calm)
+      return
+    const sky = document.createElement('canvas')
+    sky.className = 'sc-sky'
+    sky.width = innerWidth
+    sky.height = innerHeight
+    document.body.append(sky)
+    const ctx = sky.getContext('2d')!
+    const colors = ['#e8c15a', '#fff0b8', '#c9182f', '#ffffff', '#f08a4b']
+    const flakes = Array.from({ length: count }, () => {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 2.1
+      const speed = power * (0.35 + Math.random() * 0.75)
+      return {
+        x: origin.left + origin.width / 2,
+        y: origin.top + origin.height / 2,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 5 + Math.random() * 6,
+        spin: Math.random() * 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      }
+    })
+    const start = performance.now()
+    const frame = (now: number) => {
+      const t = now - start
+      ctx.clearRect(0, 0, sky.width, sky.height)
+      for (const f of flakes) {
+        f.vy += 0.16
+        f.vx *= 0.992
+        f.x += f.vx
+        f.y += f.vy
+        f.spin += 0.16
+        ctx.globalAlpha = Math.max(0, 1 - t / 2400)
+        ctx.fillStyle = f.color
+        ctx.save()
+        ctx.translate(f.x, f.y)
+        ctx.rotate(f.spin)
+        ctx.scale(1, Math.cos(f.spin * 1.4))
+        ctx.fillRect(-f.size / 2, -f.size / 3, f.size, f.size * 0.66)
+        ctx.restore()
+      }
+      if (t < 2400)
+        requestAnimationFrame(frame)
+      else sky.remove()
+    }
+    requestAnimationFrame(frame)
+  }
+
+  const win = () => {
+    hero.classList.add('is-won')
+    navigator.vibrate?.([30, 40, 60])
+    burst(170, hero.querySelector('.sc-cells')!.getBoundingClientRect(), 19)
+  }
+
+  const clear = (canvas: HTMLCanvasElement) => {
+    if (canvas.classList.contains('is-clear'))
+      return
+    canvas.classList.add('is-clear')
+    canvas.closest('.sc-heart')!.classList.add('is-open')
+    left -= 1
+    if (left === 0)
+      win()
+  }
+
+  canvases.forEach((canvas) => {
+    const ctx = paintFoil(canvas)
+    let last: { x: number, y: number } | null = null
+    let moves = 0
+
+    const point = (e: PointerEvent) => {
+      const box = canvas.getBoundingClientRect()
+      return { x: e.clientX - box.left, y: e.clientY - box.top }
+    }
+    const stroke = (to: { x: number, y: number }) => {
+      ctx.beginPath()
+      ctx.moveTo(last!.x, last!.y)
+      ctx.lineTo(to.x + 0.01, to.y)
+      ctx.stroke()
+      last = to
+    }
+    // сердце занимает около 70% холста: при 42% стёртого внутри него видно уже почти всё
+    const check = () => {
+      const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      let empty = 0
+      for (let i = 3; i < data.length; i += 64) {
+        if (data[i] === 0)
+          empty += 1
+      }
+      if (empty / (data.length / 64) > 0.42)
+        clear(canvas)
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      hero.classList.add('is-touched')
+      canvas.setPointerCapture(e.pointerId)
+      last = point(e)
+      stroke(last)
+    })
+    canvas.addEventListener('pointermove', (e) => {
+      if (!last)
+        return
+      stroke(point(e))
+      moves += 1
+      if (moves % 6 === 0)
+        check()
+    })
+    const release = () => {
+      last = null
+      check()
+    }
+    canvas.addEventListener('pointerup', release)
+    canvas.addEventListener('pointercancel', release)
+  })
+
+  hero.querySelector('.sc-skip')?.addEventListener('click', () => {
+    hero.classList.add('is-touched')
+    canvases.forEach(clear)
+  })
+}
+</script>
+
+<style>
+  .hero-sc {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(8px, 2svh, 18px);
+    overflow: hidden;
+    isolation: isolate;
+    padding: clamp(52px, 8svh, 72px) 16px clamp(14px, 3svh, 28px);
+    background:
+      radial-gradient(90% 60% at 50% 42%, #b01a35, #8c1226 62%, #640b1b);
+  }
+  .sc-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.34;
+    mix-blend-mode: multiply;
+  }
+  .sc-bg :global(img),
+  .sc-bg :global(video) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.15);
+  }
+
+  /* drop-shadow на обёртке: у самого билета маска с вырезами срезала бы тень */
+  .sc-shadow {
+    width: min(100%, 400px);
+    filter: drop-shadow(0 22px 30px rgb(40 0 8 / 0.5));
+    animation: sc-in 0.9s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+  }
+  @keyframes sc-in {
+    from { opacity: 0; transform: translateY(26px) rotate(-3deg) scale(0.94); }
+    to { opacity: 1; transform: none; }
+  }
+  .is-won .sc-shadow { animation: sc-win 0.6s cubic-bezier(0.2, 1.5, 0.4, 1); }
+  @keyframes sc-win {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.035) rotate(-0.8deg); }
+    100% { transform: none; }
+  }
+
+  .sc-ticket {
+    --cut: 76px; /* линия отрыва: расстояние от низа билета */
+    position: relative;
+    display: grid;
+    justify-items: center;
+    padding: 14px 18px 20px;
+    text-align: center;
+    color: var(--text);
+    background: #fff4df;
+    border-radius: 14px;
+    -webkit-mask:
+      radial-gradient(circle 11px at 0 calc(100% - var(--cut)), #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 11px at 100% calc(100% - var(--cut)), #0000 97%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 11px at 0 calc(100% - var(--cut)), #0000 97%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 11px at 100% calc(100% - var(--cut)), #0000 97%, #000) right / 51% 100% no-repeat;
+  }
+  .sc-ticket::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: var(--cut);
+    border-top: 2px dashed var(--line-strong);
+    pointer-events: none;
+  }
+
+  .sc-series {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-family: var(--font-display);
+    font-size: 0.56rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .sc-lucky {
+    margin-top: 12px;
+    font-family: var(--font-display);
+    font-size: clamp(0.8rem, 3.8vw, 0.95rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    column-gap: 0.22em;
+    max-width: 100%;
+    margin-top: 4px;
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-weight: 500;
+    font-size: min(clamp(2.3rem, 11.5vw, 3.2rem), 8.5svh);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+  h1 i { font-size: 0.7em; color: var(--accent); }
+  .sc-say { grid-area: 4 / 1; margin-top: 6px; font-size: 0.95rem; color: var(--text-2); transition: opacity 0.2s; }
+  .is-won .sc-say { opacity: 0; }
+
+  .sc-cells {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    width: 100%;
+    margin-top: 14px;
+  }
+  .sc-cells--one { grid-template-columns: minmax(0, 200px); justify-content: center; }
+  .sc-cell { position: relative; min-width: 0; }
+
+  .sc-heart {
+    --heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 100'%3E%3Cpath d='M55 99C20 75 1 54 1 31 1 13 15 1 31 1c10 0 19 5 24 14C60 6 69 1 79 1c16 0 30 12 30 30 0 23-19 44-54 68Z'/%3E%3C/svg%3E");
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 11 / 10;
+    background: linear-gradient(135deg, #f7dc8a, #c99a2e);
+    -webkit-mask: var(--heart) center / 100% 100% no-repeat;
+    mask: var(--heart) center / 100% 100% no-repeat;
+  }
+  /* под фольгой — ярко: выигрышная надпись должна читаться с первых же царапин */
+  .sc-heart::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #a3142e;
+  }
+  .sc-heart b {
+    position: relative;
+    visibility: hidden;
+    padding-bottom: 12%;
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 5.6vw, 1.7rem);
+    font-weight: 700;
+    line-height: 1;
+    color: #fff4df;
+  }
+  .sc-heart b.sc-long { font-size: clamp(0.62rem, 3.1vw, 0.86rem); }
+  .sc-cells--one b { font-size: clamp(0.9rem, 4.4vw, 1.1rem); }
+  .is-live .sc-heart b { visibility: visible; }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+    transition: opacity 0.5s var(--ease-out);
+  }
+  canvas:active { cursor: grabbing; }
+  canvas.is-clear { opacity: 0; pointer-events: none; }
+
+  /* блик скользит по фольге, пока она цела */
+  .sc-heart::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -60%;
+    width: 40%;
+    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.65), transparent);
+    pointer-events: none;
+    animation: sc-sheen 2.8s ease-in-out 1.2s infinite;
+  }
+  .sc-heart.is-open::after { display: none; }
+  @keyframes sc-sheen {
+    0% { transform: translateX(0); }
+    45%, 100% { transform: translateX(420%); }
+  }
+
+  /* монетка показывает жест, пока гость не коснулся фольги */
+  .sc-coin {
+    position: absolute;
+    top: 26%;
+    left: 24%;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44' fill='none' stroke='%237a5608' stroke-width='2'%3E%3Ccircle cx='22' cy='22' r='17' stroke-dasharray='2 3'/%3E%3Cpath d='M22 31c-7-5-10-8-10-12 0-3 2-5 5-5 2 0 4 1 5 3 1-2 3-3 5-3 3 0 5 2 5 5 0 4-3 7-10 12Z' fill='%23fff0b8'/%3E%3C/svg%3E"),
+      radial-gradient(circle at 34% 30%, #fff0b8, #e8c15a 52%, #a97c12);
+    box-shadow: 0 5px 10px rgb(60 30 0 / 0.45);
+    pointer-events: none;
+    animation: sc-coin 1.5s ease-in-out 1s infinite alternate;
+  }
+  .is-touched .sc-coin { display: none; }
+  @keyframes sc-coin {
+    from { transform: translate(-12px, 8px) rotate(-14deg); }
+    to { transform: translate(26px, -8px) rotate(14deg); }
+  }
+
+  .sc-after {
+    grid-area: 6 / 1;
+    align-self: center;
+    margin-top: 16px;
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out) 0.25s;
+  }
+  .sc-skip {
+    grid-area: 6 / 1;
+    align-self: center;
+    min-height: 44px;
+    margin-top: 16px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.82rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: opacity 0.25s;
+  }
+  .is-won .sc-after { opacity: 1; }
+  .is-won .sc-skip { opacity: 0; pointer-events: none; }
+  .sc-result { font-family: var(--font-accent); font-style: italic; font-size: clamp(1rem, 5vw, 1.28rem); line-height: 1.15; color: var(--accent); }
+  .sc-city { font-size: 0.82rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-2); }
+
+  /* печать ложится на место подсказки: дату уже стёрли, а заголовок она бы закрыла */
+  .sc-stamp {
+    grid-area: 4 / 1;
+    align-self: center;
+    margin-top: 6px;
+    padding: 3px 12px;
+    border: 3px double var(--accent);
+    border-radius: 6px;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0;
+    rotate: -3deg;
+    pointer-events: none;
+  }
+  .is-won .sc-stamp { animation: sc-stamp 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) 0.35s both; }
+  @keyframes sc-stamp {
+    from { opacity: 0; transform: scale(2.6); }
+    to { opacity: 0.86; transform: none; }
+  }
+
+  .sc-next {
+    color: #fff4df;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s var(--ease-out) 0.7s;
+  }
+  .is-won .sc-next { opacity: 1; pointer-events: auto; }
+
+  :global(.sc-sky) {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-envelope);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  @media (max-height: 640px) {
+    .sc-lucky { margin-top: 6px; }
+    .sc-cells { width: 84%; margin-top: 8px; }
+    .sc-ticket { --cut: 64px; }
+    .sc-after, .sc-skip { margin-top: 8px; }
+  }
+  /* телефон лёжа: высоты мало, сердца встают рядом с именами */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-sc { padding: 12px max(32px, env(safe-area-inset-left)); }
+    .sc-shadow { width: min(100%, 640px); }
+    .sc-ticket {
+      --cut: 0px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 18px;
+      align-items: center;
+      padding: 10px 16px 12px;
+      -webkit-mask: none;
+      mask: none;
+    }
+    .sc-ticket::after { display: none; }
+    .sc-series { grid-column: 1 / -1; }
+    .sc-lucky, h1, .sc-say, .sc-stamp { grid-column: 1; }
+    .sc-lucky { margin-top: 2px; }
+    h1 { font-size: clamp(1.8rem, 11svh, 2.4rem); }
+    .sc-heart b { font-size: 1.15rem; }
+    .sc-heart b.sc-long { font-size: 0.7rem; }
+    .sc-cells { grid-area: 2 / 2 / span 3 / auto; width: 100%; margin: 0; }
+    .sc-after, .sc-skip { grid-area: 5 / 1 / auto / -1; margin-top: 2px; min-height: 28px; }
+    .sc-after { display: flex; gap: 12px; justify-content: center; align-items: baseline; }
+    .sc-next { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sc-shadow, .sc-heart::after, .sc-coin, .is-won .sc-shadow { animation: none; }
+    .is-won .sc-stamp { animation: none; opacity: 0.86; }
+  }
+</style>

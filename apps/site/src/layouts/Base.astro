@@ -2,7 +2,7 @@
 interface Props {
   title: string
   description?: string
-  theme?: 'cover' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories' | 'coquette' | 'toile' | 'fairytale' | 'sketch' | 'frost' | 'scrapbook' | 'terracotta'
+  theme?: 'cover' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories' | 'coquette' | 'toile' | 'fairytale' | 'sketch' | 'frost' | 'scrapbook' | 'terracotta' | 'chat' | 'scratch'
   image?: string
   noindex?: boolean
 }
@@ -43,6 +43,10 @@ const fontSets: Record<string, string> = {
     'https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=PT+Mono&family=Jost:wght@300;400;500&display=swap',
   terracotta:
     'https://fonts.googleapis.com/css2?family=Yeseva+One&family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Jost:wght@300;400;500&display=swap',
+  chat:
+    'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap',
+  scratch:
+    'https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Playfair+Display:ital,wght@1,500&family=Jost:wght@300;400;500&display=swap',
   cinema:
     'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@300;400;500&display=swap',
 }
@@ -65,9 +69,11 @@ const accents: Record<string, [string, string]> = {
   frost: ['%23eef4f9', '%233f6f96'],
   scrapbook: ['%23fbe58a', '%23c7472d'],
   terracotta: ['%23f5ece0', '%23a84a2c'],
+  chat: ['%236a5be2', '%23ffffff'],
+  scratch: ['%238c1226', '%23e8c15a'],
 }
 const [favBg, favFg] = accents[theme]
-const themeColors: Record<string, string> = { cover: '#f6f2ea', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000', coquette: '#faeef1', toile: '#f3f0e7', fairytale: '#0e1130', sketch: '#f8f4ea', frost: '#dfeaf3', scrapbook: '#f6f0e3', terracotta: '#f5ece0' }
+const themeColors: Record<string, string> = { chat: '#6a5be2', scratch: '#8c1226', cover: '#f6f2ea', editorial: '#f4efe6', watercolor: '#f8f2f0', luxe: '#faf7f1', amalfi: '#0c1520', deco: '#141311', vogue: '#111110', ticket: '#f3efe6', cinema: '#0b0a09', stories: '#000000', coquette: '#faeef1', toile: '#f3f0e7', fairytale: '#0e1130', sketch: '#f8f4ea', frost: '#dfeaf3', scrapbook: '#f6f0e3', terracotta: '#f5ece0' }
 const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='${favBg}'/><text x='32' y='44' font-family='Georgia,serif' font-style='italic' font-size='36' text-anchor='middle' fill='${favFg}'>&amp;amp;</text></svg>`;
 ---
 
@@ -405,6 +411,44 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     --r-swatch: 50%;
   }
 
+  body[data-theme='chat'] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f0eefb;
+    --text: #1d1b2b;
+    --text-2: #4a4760;
+    --muted: #7a7690;
+    --accent: #6a5be2;
+    --accent-2: #e56b9b;
+    --accent-ink: #ffffff;
+    --line: rgba(29, 27, 43, 0.1);
+    --line-strong: rgba(29, 27, 43, 0.22);
+    --font-display: 'Manrope', system-ui, sans-serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
+    --font-label: 'Manrope', system-ui, sans-serif;
+    --font-accent: 'Manrope', system-ui, sans-serif;
+    --r-lg: 18px;
+    --r-md: 14px;
+    --r-btn: 14px;
+  }
+  body[data-theme='scratch'] {
+    --bg: #fbf0dc;
+    --surface: #f6e3c2;
+    --surface-2: #fff8ea;
+    --text: #3a0d15;
+    --text-2: #5e2a30;
+    --muted: #84595a;
+    --accent: #a3142e;
+    --accent-2: #b98a1f;
+    --accent-ink: #fff4df;
+    --line: rgba(58, 13, 21, 0.14);
+    --line-strong: rgba(58, 13, 21, 0.3);
+    --font-display: 'Unbounded', 'Arial Black', sans-serif;
+    --font-accent: 'Playfair Display', Georgia, serif;
+    --r-lg: 10px;
+    --r-md: 8px;
+    --r-btn: 8px;
+  }
   body[data-theme='luxe'] {
     --bg: #faf7f1;
     --surface: #f1ebe0;

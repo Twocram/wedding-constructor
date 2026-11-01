@@ -3,6 +3,7 @@
 /* eslint-disable perfectionist/sort-imports */
 import Base from '../layouts/Base.astro'
 import { getCollection } from 'astro:content'
+import Chat from '../components/Chat.astro'
 import Cinema from '../components/Cinema.astro'
 import ClassicBody from '../components/ClassicBody.astro'
 import DemoInfo from '../components/DemoInfo.astro'
@@ -17,6 +18,7 @@ import HeroEditorial from '../components/HeroEditorial.astro'
 import HeroFrost from '../components/HeroFrost.astro'
 import HeroLuxe from '../components/HeroLuxe.astro'
 import HeroScrapbook from '../components/HeroScrapbook.astro'
+import HeroScratch from '../components/HeroScratch.astro'
 import HeroSketch from '../components/HeroSketch.astro'
 import HeroTerracotta from '../components/HeroTerracotta.astro'
 import HeroTicket from '../components/HeroTicket.astro'
@@ -37,6 +39,7 @@ import EditorialBody from '../themes/editorial/Body.astro'
 import FrostBody from '../themes/frost/Body.astro'
 import LuxeBody from '../themes/luxe/Body.astro'
 import ScrapbookBody from '../themes/scrapbook/Body.astro'
+import ScratchBody from '../themes/scratch/Body.astro'
 import SketchBody from '../themes/sketch/Body.astro'
 import TerracottaBody from '../themes/terracotta/Body.astro'
 import TicketBody from '../themes/ticket/Body.astro'
@@ -56,11 +59,11 @@ const { inv } = Astro.props
 const title = `${inv.groom} & ${inv.bride}`
 const slug = Astro.params.slug!
 const cal = calendarEvent(inv, invitationPageUrl(slug, inv.demo, Astro.site))
-const heroes = { cover: HeroCover, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile, fairytale: HeroFairytale, sketch: HeroSketch, frost: HeroFrost, scrapbook: HeroScrapbook, terracotta: HeroTerracotta }
-// cinema и stories — отдельные одноэкранные форматы, у них нет hero и ленты секций
-const Hero = inv.theme === 'cinema' || inv.theme === 'stories' ? null : heroes[inv.theme]
+const heroes = { cover: HeroCover, watercolor: HeroWatercolor, luxe: HeroLuxe, vogue: HeroVogue, editorial: HeroEditorial, amalfi: HeroAmalfi, deco: HeroDeco, ticket: HeroTicket, coquette: HeroCoquette, toile: HeroToile, fairytale: HeroFairytale, sketch: HeroSketch, frost: HeroFrost, scrapbook: HeroScrapbook, terracotta: HeroTerracotta, scratch: HeroScratch }
+// cinema, stories и chat — отдельные одноэкранные форматы, у них нет hero и ленты секций
+const Hero = inv.theme === 'cinema' || inv.theme === 'stories' || inv.theme === 'chat' ? null : heroes[inv.theme]
 // у каждой темы своё тело страницы; cover — базовая классика на общих секциях
-const bodies = { cover: ClassicBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody, fairytale: FairytaleBody, sketch: SketchBody, frost: FrostBody, scrapbook: ScrapbookBody, terracotta: TerracottaBody }
+const bodies = { cover: ClassicBody, watercolor: WatercolorBody, luxe: LuxeBody, vogue: VogueBody, editorial: EditorialBody, amalfi: AmalfiBody, deco: DecoBody, ticket: TicketBody, coquette: CoquetteBody, toile: ToileBody, fairytale: FairytaleBody, sketch: SketchBody, frost: FrostBody, scrapbook: ScrapbookBody, terracotta: TerracottaBody, scratch: ScratchBody }
 const Body = Hero ? bodies[inv.theme as keyof typeof bodies] : null
 // день недели к дате на первом экране: «суббота, 3 октября 2026» — из ISO-даты таймера
 const weekday = inv.countdown
@@ -77,6 +80,7 @@ const heroDate = weekday ? `${weekday}, ${inv.date}` : inv.date;
 
   {inv.theme === 'cinema' && <Cinema inv={inv} slug={slug} google={cal?.google} />}
   {inv.theme === 'stories' && <Stories inv={inv} slug={slug} google={cal?.google} />}
+  {inv.theme === 'chat' && <Chat inv={inv} slug={slug} google={cal?.google} />}
 
   {Hero && <Hero groom={inv.groom} bride={inv.bride} date={heroDate} city={inv.city} heroPhoto={inv.heroPhoto} heroVideo={inv.heroVideo} />}
 

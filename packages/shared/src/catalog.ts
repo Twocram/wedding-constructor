@@ -1,6 +1,6 @@
 // Каталог и цены — общие для сайта, API и админки. Порядок тем в `themes` = порядок карточек в каталоге.
 
-export const prices = { template: 4000, authored: 6000, custom: 8000, named: 200 }
+export const prices = { template: 4000, authored: 6000, custom: 8000, address: 200 }
 
 export const rub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 

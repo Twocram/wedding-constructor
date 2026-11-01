@@ -1,5 +1,6 @@
 import * as z from 'zod'
 import { themes } from './catalog'
+import { invitationSlugSchema } from './rsvp'
 
 // стандартные ошибки валидации — по-русски: их видят и клиенты на сайте, и мы в админке
 z.config(z.locales.ru())
@@ -95,7 +96,7 @@ export const leadInput = z
     eventType: z.enum(eventTypes).default('wedding'),
     eventDate: z.iso.date().optional(),
     themeSlug: themeSlugSchema.optional(),
-    namedLinks: z.number().int().min(0).max(1000).optional(),
+    customAddress: invitationSlugSchema.optional(),
     message: optionalText(2000),
     source: z.enum(leadSources).default('other'),
     sourcePath: trackingText(300),

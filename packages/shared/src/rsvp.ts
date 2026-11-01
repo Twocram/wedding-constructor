@@ -29,7 +29,8 @@ export const rsvpInput = z.object({
 export type RsvpInput = z.input<typeof rsvpInput>
 
 export const invitationInput = z.object({
-  slug: invitationSlugSchema,
+  // без адреса API возьмёт купленный из заявки или выдаст короткий id
+  slug: invitationSlugSchema.optional(),
   title: z.string().trim().min(2, 'Минимум 2 символа').max(120, 'Не длиннее 120 символов'),
   leadId: z.number().int().positive().nullable().optional(),
 })

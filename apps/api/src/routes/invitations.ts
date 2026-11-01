@@ -1,5 +1,5 @@
 import type { InvitationRow } from '../db/schema'
-import { invitationInput, invitationPatch, rsvpSummary } from '@saywed/shared'
+import { invitationInput, invitationPatch, invitationSlugSchema, rsvpSummary } from '@saywed/shared'
 import { and, desc, eq, ne } from 'drizzle-orm'
 import { Elysia } from 'elysia'
 import * as z from 'zod'
@@ -25,6 +25,17 @@ const findInvitation = (id: number) => db.select().from(invitations).where(eq(in
 
 function publicInvitation(row: InvitationRow) {
   return { ...row, createdAt: iso(row.createdAt) }
+}
+
+// адрес по умолчанию: без похожих символов, чтобы его можно было продиктовать
+const slugChars = 'abcdefghjkmnpqrstuvwxyz23456789'
+function newSlug() {
+  for (;;) {
+    const slug = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => slugChars[n % slugChars.length]).join('')
+    const taken = db.select({ id: invitations.id }).from(invitations).where(eq(invitations.slug, slug)).get()
+    if (!taken && invitationSlugSchema.safeParse(slug).success)
+      return slug
+  }
 }
 
 // адрес и заявка проверяются одинаково при создании и правке
@@ -71,10 +82,15 @@ export const invitationRoutes = new Elysia({ prefix: '/admin' }).use(auth).guard
         const error = checkRefs(body)
         if (error)
           return status(422, error)
+        const lead = body.leadId ? db.select({ customAddress: leads.customAddress }).from(leads).where(eq(leads.id, body.leadId)).get() : undefined
+        const slug = body.slug ?? lead?.customAddress ?? newSlug()
+        const taken = body.slug ? undefined : checkRefs({ slug })
+        if (taken)
+          return status(422, taken)
         try {
           const row = db
             .insert(invitations)
-            .values({ ...body, leadId: body.leadId ?? null, token: newToken() })
+            .values({ ...body, slug, leadId: body.leadId ?? null, token: newToken() })
             .returning()
             .get()
           return status(201, { ok: true as const, invitation: publicInvitation(row) })

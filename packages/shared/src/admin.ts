@@ -11,6 +11,7 @@ import {
   products,
   themeSlugSchema,
 } from './lead'
+import { invitationSlugSchema } from './rsvp'
 
 export const leadListQuery = z.object({
   status: z.enum([...leadStatuses, 'all']).default('all'),
@@ -63,7 +64,7 @@ export const leadPatch = z
     eventType: z.enum(eventTypes).optional(),
     eventDate: z.iso.date('Неверная дата').nullable().optional(),
     themeSlug: themeSlugSchema.nullable().optional(),
-    namedLinks: z.number().int('Целое число').min(0, 'Не меньше нуля').max(1000, 'Не больше 1000').nullable().optional(),
+    customAddress: invitationSlugSchema.nullable().optional(),
     message: nullableText(2000),
   })
   .refine(patch => Object.keys(patch).length > 0, 'Нет изменений')
@@ -82,18 +83,18 @@ export const leadFieldLabels: Record<keyof z.input<typeof leadPatch>, string> = 
   eventType: 'Событие',
   eventDate: 'Дата события',
   themeSlug: 'Дизайн',
-  namedLinks: 'Именные ссылки',
+  customAddress: 'Свой адрес',
   message: 'Комментарий клиента',
 }
 
 export const commentInput = z.object({ text: z.string().trim().min(1, 'Пустой комментарий').max(2000) })
 
 // подсказка суммы по прайсу: в карточке заявки её можно поправить вручную
-export function estimateAmount(product: Product, namedLinks: number | null | undefined, themeSlug?: string | null): AmountBreakdown | null {
+export function estimateAmount(product: Product, customAddress: string | null | undefined, themeSlug?: string | null): AmountBreakdown | null {
   const base = product === 'custom' ? prices.custom : product === 'template' ? themePrice(themeSlug) : 0
   if (!base)
     return null
-  return { base, namedLinks: (namedLinks ?? 0) * prices.named, extras: 0, discount: 0 }
+  return { base, namedLinks: 0, extras: customAddress ? prices.address : 0, discount: 0 }
 }
 
 export const breakdownTotal = (b: AmountBreakdown) => Math.max(0, b.base + b.namedLinks + b.extras - b.discount)

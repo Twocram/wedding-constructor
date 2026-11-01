@@ -7,6 +7,7 @@ import {
   contactMethodLabels,
   estimateAmount,
   eventTypeLabels,
+  invitationHost,
 
   leadSourceLabels,
 
@@ -90,7 +91,7 @@ watch(
   { immediate: true },
 )
 
-const estimate = computed(() => (lead.value ? estimateAmount(lead.value.product, lead.value.namedLinks, lead.value.themeSlug) : null))
+const estimate = computed(() => (lead.value ? estimateAmount(lead.value.product, lead.value.customAddress, lead.value.themeSlug) : null))
 const amountDirty = computed(() => lead.value != null && amountValue.value !== lead.value.amount)
 
 function applyEstimate() {
@@ -181,6 +182,7 @@ const details = computed(() => {
     { label: 'Дизайн', value: l.themeSlug ? themes[l.themeSlug]?.name ?? l.themeSlug : null },
     { label: 'Событие', value: eventTypeLabels[l.eventType] },
     { label: 'Дата события', value: l.eventDate ? formatEventDate(l.eventDate) : null },
+    { label: 'Свой адрес', value: l.customAddress ? invitationHost(l.customAddress) : null },
     { label: 'Именные ссылки', value: l.namedLinks ? String(l.namedLinks) : null },
     { label: 'Источник', value: `${leadSourceLabels[l.source]}${l.sourcePath ? ` · ${l.sourcePath}` : ''}` },
     { label: 'UTM', value: utm || null },
@@ -285,7 +287,7 @@ const details = computed(() => {
             <div v-if="estimate" class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               <span>
                 По прайсу: {{ rub(breakdownTotal(estimate)) }}
-                <template v-if="estimate.namedLinks"> ({{ rub(estimate.base) }} + {{ rub(estimate.namedLinks) }} за ссылки)</template>
+                <template v-if="estimate.extras"> ({{ rub(estimate.base) }} + {{ rub(estimate.extras) }} за адрес)</template>
               </span>
               <button v-if="amountValue !== breakdownTotal(estimate)" type="button" class="font-medium text-foreground underline-offset-4 hover:underline" @click="applyEstimate">
                 Подставить

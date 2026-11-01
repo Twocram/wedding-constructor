@@ -36,7 +36,7 @@ const initial: {
   themeSlug: string
   eventType: EventType
   eventDate: string
-  namedLinks: string | number
+  customAddress: string
   message: string
 } = {
   name: props.lead.name,
@@ -46,7 +46,7 @@ const initial: {
   themeSlug: props.lead.themeSlug ?? NO_THEME,
   eventType: props.lead.eventType as EventType,
   eventDate: props.lead.eventDate ?? '',
-  namedLinks: props.lead.namedLinks == null ? '' : String(props.lead.namedLinks),
+  customAddress: props.lead.customAddress ?? '',
   message: props.lead.message ?? '',
 }
 const form = reactive({ ...initial })
@@ -62,7 +62,7 @@ function toPatch(f: typeof initial) {
     themeSlug: f.themeSlug === NO_THEME ? null : f.themeSlug,
     eventType: f.eventType,
     eventDate: f.eventDate || null,
-    namedLinks: String(f.namedLinks ?? '').trim() === '' ? null : Math.round(Number(f.namedLinks)),
+    customAddress: f.customAddress.trim() || null,
     message: f.message.trim() || null,
   }
 }
@@ -176,12 +176,12 @@ function submit() {
           <Input id="edit-date" v-model="form.eventDate" type="date" />
           <FieldError :errors="errors.eventDate" />
         </Field>
-        <Field :data-invalid="Boolean(errors.namedLinks)">
-          <FieldLabel for="edit-named">
-            Именные ссылки
+        <Field :data-invalid="Boolean(errors.customAddress)">
+          <FieldLabel for="edit-address">
+            Свой адрес
           </FieldLabel>
-          <Input id="edit-named" v-model="form.namedLinks" type="number" min="0" inputmode="numeric" placeholder="0" />
-          <FieldError :errors="errors.namedLinks" />
+          <Input id="edit-address" v-model="form.customAddress" autocomplete="off" placeholder="anna-dmitry" />
+          <FieldError :errors="errors.customAddress" />
         </Field>
       </div>
       <Field :data-invalid="Boolean(errors.message)">

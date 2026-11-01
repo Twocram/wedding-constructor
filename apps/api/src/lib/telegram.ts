@@ -7,6 +7,7 @@ import {
   contactUrl,
   estimateAmount,
   eventTypeLabels,
+  invitationHost,
   leadSourceLabels,
   peopleLabel,
   peopleNote,
@@ -89,7 +90,7 @@ export async function sendTelegram(html: string) {
 
 export async function notifyNewLead(lead: LeadRow) {
   const theme = lead.themeSlug ? themes[lead.themeSlug]?.name ?? lead.themeSlug : undefined
-  const estimate = estimateAmount(lead.product, lead.namedLinks, lead.themeSlug)
+  const estimate = estimateAmount(lead.product, lead.customAddress, lead.themeSlug)
   const total = estimate && breakdownTotal(estimate)
   const utm = [lead.utmSource, lead.utmMedium, lead.utmCampaign].filter(Boolean).join(' / ')
   const contacts = env.tgNotifyContacts
@@ -105,7 +106,7 @@ export async function notifyNewLead(lead: LeadRow) {
     '',
     `${productLabels[lead.product]}${theme ? ` · ${escape(theme)}` : ''}`,
     `${eventTypeLabels[lead.eventType]}${lead.eventDate ? `, ${lead.eventDate}` : ''}`,
-    lead.namedLinks ? `Именных ссылок: ${lead.namedLinks}` : '',
+    lead.customAddress ? `Свой адрес: ${escape(invitationHost(lead.customAddress))}` : '',
     total ? `Ориентир: ${rub(total)}` : '',
     lead.message ? (env.tgNotifyContacts ? `\n💬 ${escape(lead.message)}` : '\n💬 Есть комментарий') : '',
     '',

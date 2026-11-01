@@ -53,7 +53,7 @@ async function submit() {
     return
   }
   try {
-    const { invitation } = await create.mutateAsync({ slug: form.slug, title: form.title, leadId: leadIdNumber.value })
+    const { invitation } = await create.mutateAsync({ slug: form.slug.trim() || undefined, title: form.title, leadId: leadIdNumber.value })
     creating.value = false
     toast.success('Приглашение создано')
     void router.push({ name: 'invitation', params: { id: invitation.id }, query: { tab: 'couple' } })
@@ -93,14 +93,14 @@ async function submit() {
         <div class="min-w-0 space-y-1.5">
           <label for="new-slug" class="text-xs font-medium text-muted-foreground">Адрес</label>
           <div class="flex min-w-0 items-center gap-2">
-            <Input id="new-slug" v-model="form.slug" placeholder="anna-dmitry" autocomplete="off" autofocus :aria-invalid="Boolean(errors.slug)" />
+            <Input id="new-slug" v-model="form.slug" placeholder="необязательно" autocomplete="off" autofocus :aria-invalid="Boolean(errors.slug)" />
             <span class="text-sm text-muted-foreground">.saywed.ru</span>
           </div>
           <p v-if="errors.slug" class="text-sm text-destructive">
             {{ errors.slug[0] }}
           </p>
           <p v-else class="text-xs text-muted-foreground">
-            Поддомен приглашения: латиница, цифры и дефис — как имя yaml-файла приглашения
+            Пусто — возьмём свой адрес из заявки или выдадим короткий id. Должен совпадать с именем yaml-файла приглашения
           </p>
         </div>
         <div class="min-w-0 space-y-1.5">

@@ -1,0 +1,1 @@
+ALTER TABLE `leads` ADD `custom_address` text;

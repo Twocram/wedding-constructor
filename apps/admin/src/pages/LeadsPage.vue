@@ -98,7 +98,7 @@ const goPage = (page: number) => void router.replace({ name: 'leads', query: { .
 const open = (lead: LeadItem) => void router.push({ name: 'lead', params: { id: lead.id }, query: route.query })
 
 function orderLine(lead: LeadItem) {
-  return [productLabels[lead.product], lead.themeSlug ? themes[lead.themeSlug]?.name : null, lead.namedLinks ? `${lead.namedLinks} ссылок` : null]
+  return [productLabels[lead.product], lead.themeSlug ? themes[lead.themeSlug]?.name : null, lead.customAddress ? 'свой адрес' : null]
     .filter(Boolean)
     .join(' · ')
 }

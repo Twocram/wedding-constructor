@@ -36,6 +36,13 @@
       "when": 1793269382132,
       "tag": "0004_invitation_chats",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793520483083,
+      "tag": "0005_lead_custom_address",
+      "breakpoints": true
     }
   ]
 }

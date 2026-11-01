@@ -39,7 +39,9 @@ export const leads = sqliteTable(
     eventType: text('event_type', { enum: eventTypes }).notNull().default('wedding'),
     eventDate: text('event_date'),
     themeSlug: text('theme_slug'),
+    // только у старых заявок: личные ссылки теперь бесплатные
     namedLinks: integer('named_links'),
+    customAddress: text('custom_address'),
     message: text('message'),
     source: text('source', { enum: leadSources }).notNull().default('other'),
     sourcePath: text('source_path'),

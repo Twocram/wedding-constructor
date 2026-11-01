@@ -73,6 +73,11 @@ const form = document.querySelector<HTMLFormElement>('#rsvp-form')
 form?.addEventListener('submit', async (e) => {
   e.preventDefault()
   const status = form.querySelector<HTMLElement>('.form-status')!
+  // тема может продолжить сценарий после ответа: Chat отвечает гостю в переписке
+  const finish = () => {
+    form.dispatchEvent(new CustomEvent('rsvpsent', { detail: new FormData(form).get('attending') }))
+    form.reset()
+  }
   if (!form.reportValidity()) {
     status.textContent = 'Заполните имя и выберите ответ.'
     return
@@ -80,7 +85,7 @@ form?.addEventListener('submit', async (e) => {
   // в демо ответ никуда не уходит: показываем, как анкета работает в настоящем приглашении
   if (form.dataset.demo === 'true') {
     status.textContent = 'Это демо. В вашем приглашении ответ гостя сразу появится в списке ответов.'
-    form.reset()
+    finish()
     return
   }
   const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!
@@ -106,7 +111,7 @@ form?.addEventListener('submit', async (e) => {
     })
     if (res.ok) {
       status.textContent = 'Спасибо! Ваш ответ получен.'
-      form.reset()
+      finish()
     }
     else if (res.status === 422) {
       const body = await res.json().catch(() => ({})) as { errors?: { fieldErrors?: Record<string, string[]> } }

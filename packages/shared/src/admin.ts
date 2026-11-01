@@ -1,6 +1,6 @@
 import type { AmountBreakdown, Product } from './lead'
 import * as z from 'zod'
-import { prices } from './catalog'
+import { prices, themePrice } from './catalog'
 import {
 
   contactMethods,
@@ -89,8 +89,8 @@ export const leadFieldLabels: Record<keyof z.input<typeof leadPatch>, string> = 
 export const commentInput = z.object({ text: z.string().trim().min(1, 'Пустой комментарий').max(2000) })
 
 // подсказка суммы по прайсу: в карточке заявки её можно поправить вручную
-export function estimateAmount(product: Product, namedLinks: number | null | undefined): AmountBreakdown | null {
-  const base = product === 'custom' ? prices.custom : product === 'template' ? prices.template : 0
+export function estimateAmount(product: Product, namedLinks: number | null | undefined, themeSlug?: string | null): AmountBreakdown | null {
+  const base = product === 'custom' ? prices.custom : product === 'template' ? themePrice(themeSlug) : 0
   if (!base)
     return null
   return { base, namedLinks: (namedLinks ?? 0) * prices.named, extras: 0, discount: 0 }

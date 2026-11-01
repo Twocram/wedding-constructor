@@ -90,7 +90,7 @@ watch(
   { immediate: true },
 )
 
-const estimate = computed(() => (lead.value ? estimateAmount(lead.value.product, lead.value.namedLinks) : null))
+const estimate = computed(() => (lead.value ? estimateAmount(lead.value.product, lead.value.namedLinks, lead.value.themeSlug) : null))
 const amountDirty = computed(() => lead.value != null && amountValue.value !== lead.value.amount)
 
 function applyEstimate() {

@@ -89,7 +89,7 @@ export async function sendTelegram(html: string) {
 
 export async function notifyNewLead(lead: LeadRow) {
   const theme = lead.themeSlug ? themes[lead.themeSlug]?.name ?? lead.themeSlug : undefined
-  const estimate = estimateAmount(lead.product, lead.namedLinks)
+  const estimate = estimateAmount(lead.product, lead.namedLinks, lead.themeSlug)
   const total = estimate && breakdownTotal(estimate)
   const utm = [lead.utmSource, lead.utmMedium, lead.utmCampaign].filter(Boolean).join(' / ')
   const contacts = env.tgNotifyContacts

@@ -1,21 +1,255 @@
 ---
-// тема scratch — счастливый билет: общие секции (ClassicBody) как лотерейные купоны, вишня, крем и золотая фольга
+// тема scratch — лента лотерейных билетов вместо ленты секций: своя вёрстка каждого блока, общие только анкета и данные
 import type { Props } from '../../components/ClassicBody.astro'
-import ClassicBody from '../../components/ClassicBody.astro'
+import RsvpFields from '../../components/RsvpFields.astro'
 
 const { inv, slug, cal } = Astro.props as Props
+
+const wishes = (inv.wishes ?? []).map((w, i) => typeof w === 'string'
+  ? { title: `Приз № ${i + 1}`, text: w }
+  : w)
+const routeUrl = inv.venue && `https://yandex.ru/maps/?text=${encodeURIComponent(`${inv.venue.name}, ${inv.venue.address}`)}`
+const tel = inv.organizer?.phone.replace(/[^+\d]/g, '')
+const balls = [{ unit: 'days', word: 'дней' }, { unit: 'hours', word: 'часов' }, { unit: 'minutes', word: 'минут' }]
+
+const has = {
+  draw: Boolean(inv.countdown),
+  rules: Boolean(inv.welcome),
+  winners: Boolean(inv.gallery?.length),
+  place: Boolean(inv.venue),
+  course: Boolean(inv.timeline?.length),
+  dress: Boolean(inv.dressCode),
+  prizes: wishes.length > 0,
+  transfer: Boolean(inv.transfer),
+  club: Boolean(inv.telegramChat),
+  rsvp: Boolean(inv.rsvp),
+  help: Boolean(inv.organizer),
+}
+// номер на корешке идёт по порядку только среди билетов, которые реально есть у пары
+const number = Object.fromEntries(Object.entries(has).filter(([, on]) => on).map(([key], i) => [key, String(i + 1).padStart(2, '0')]));
 ---
 
-<ClassicBody inv={inv} slug={slug} cal={cal} />
+<main id="content" class="sr">
+  {has.draw && (
+    <article class="tk tk--gold fade-up">
+      <p class="tk-stub"><span>№ {number.draw}</span><span>Тираж</span></p>
+      <div class="tk-main sr-draw" data-target={inv.countdown}>
+        <h2>До тиража осталось</h2>
+        <ul class="sr-balls" role="list">
+          {balls.map((b, i) => (
+            <li style={`--i:${i}`}><b data-unit={b.unit}>–</b><small data-word={b.unit}>{b.word}</small></li>
+          ))}
+        </ul>
+        <p class="tk-note">Тираж состоится {inv.date}</p>
+        {cal && (
+          <p class="sr-links">
+            <a href={`/ics/${slug}.ics`}>В календарь</a>
+            <a href={cal.google} target="_blank" rel="noopener">Google Календарь</a>
+          </p>
+        )}
+      </div>
+    </article>
+  )}
 
-<section class="sc-end fade-up">
-  <p class="sc-end-kicker">Условия розыгрыша</p>
-  <p class="sc-end-big">Приз выдаётся только лично</p>
-  <p class="sc-end-note">{inv.date}{inv.city && `, ${inv.city}`}</p>
-</section>
+  {has.rules && (
+    <article class="tk fade-up">
+      <p class="tk-stub"><span>№ {number.rules}</span><span>Условия</span></p>
+      <div class="tk-main">
+        <h2 data-guest="{g}, вы в игре">Условия участия</h2>
+        <p class="sr-lead">{inv.welcome}</p>
+      </div>
+    </article>
+  )}
+
+  {has.winners && (
+    <article class="tk tk--dark fade-up">
+      <p class="tk-stub"><span>№ {number.winners}</span><span>Победители</span></p>
+      <div class="tk-main">
+        <h2>Уже выиграли друг друга</h2>
+        <ul class="sr-film" role="list" tabindex="0" aria-label="Фотографии пары">
+          {inv.gallery!.map((p, i) => <li><img src={p} alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" draggable="false" /></li>)}
+        </ul>
+      </div>
+    </article>
+  )}
+
+  {has.place && (
+    <article class="tk fade-up">
+      <p class="tk-stub"><span>№ {number.place}</span><span>Место</span></p>
+      <div class="tk-main">
+        <h2>Пункт выдачи призов</h2>
+        <p class="sr-place">{inv.venue!.name}</p>
+        <p class="tk-note">{inv.venue!.address}</p>
+        <a class="sr-btn" href={routeUrl} target="_blank" rel="noopener">Построить маршрут</a>
+        {inv.venue!.mapIframe && <iframe class="sr-map" src={inv.venue!.mapIframe} loading="lazy" title="Карта проезда" />}
+      </div>
+    </article>
+  )}
+
+  {has.course && (
+    <article class="tk fade-up">
+      <p class="tk-stub"><span>№ {number.course}</span><span>Ход тиража</span></p>
+      <div class="tk-main">
+        <h2>Ход тиража</h2>
+        <ol class="sr-bingo" role="list">
+          {inv.timeline!.map(t => (
+            <li><b>{t.time}</b><strong>{t.title}</strong>{t.text && <span>{t.text}</span>}</li>
+          ))}
+        </ol>
+      </div>
+    </article>
+  )}
+
+  {has.dress && (
+    <article class="tk fade-up">
+      <p class="tk-stub"><span>№ {number.dress}</span><span>Форма</span></p>
+      <div class="tk-main">
+        <h2>Форма участника</h2>
+        <p class="tk-text">{inv.dressCode!.text}</p>
+        {inv.dressCode!.colors && (
+          <ul class="sr-chips" role="list" aria-label="Оттенки дресс-кода">
+            {inv.dressCode!.colors.map(c => <li style={typeof c === 'string' ? `background-color:${c}` : `background-image:url('${c.image}')`}></li>)}
+          </ul>
+        )}
+        {inv.dressCode!.lookbook?.length && (
+          <ul class="sr-film sr-film--look" role="list" tabindex="0" aria-label="Образы для вдохновения">
+            {inv.dressCode!.lookbook.map(p => <li><img src={p} alt="" loading="lazy" decoding="async" draggable="false" /></li>)}
+          </ul>
+        )}
+      </div>
+    </article>
+  )}
+
+  {has.prizes && (
+    <article class="tk tk--gold fade-up sr-prizes">
+      <p class="tk-stub"><span>№ {number.prizes}</span><span>Призы</span></p>
+      <div class="tk-main">
+        <h2>Сотрите и узнайте</h2>
+        <ul role="list">
+          {wishes.map(w => (
+            <li>
+              <h3>{w.title}</h3>
+              <div class="sr-strip">
+                <p>{w.text}</p>
+                <canvas data-strip aria-hidden="true"></canvas>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <button type="button" class="sr-open" data-open-strips hidden>Открыть всё</button>
+      </div>
+    </article>
+  )}
+
+  {has.transfer && (
+    <article class="tk fade-up">
+      <p class="tk-stub"><span>№ {number.transfer}</span><span>Трансфер</span></p>
+      <div class="tk-main">
+        <h2>Доставка участников</h2>
+        <p class="tk-text">{inv.transfer}</p>
+      </div>
+    </article>
+  )}
+
+  {has.club && (
+    <article class="tk fade-up">
+      <p class="tk-stub"><span>№ {number.club}</span><span>Чат</span></p>
+      <div class="tk-main">
+        <h2>Клуб участников</h2>
+        <p class="tk-text">{inv.telegramChat!.text}</p>
+        <a class="sr-btn" href={inv.telegramChat!.url} target="_blank" rel="noopener">Вступить в чат</a>
+      </div>
+    </article>
+  )}
+
+  {has.rsvp && (
+    <article id="rsvp" class="tk fade-up sr-claim">
+      <p class="tk-stub"><span>№ {number.rsvp}</span><span>Выигрыш</span></p>
+      <div class="tk-main">
+        <h2>Заберите выигрыш</h2>
+        <p class="tk-note">Ответьте, пожалуйста, до {inv.rsvp!.deadline}</p>
+        <RsvpFields drinks={inv.rsvp!.drinks} plusOne={inv.rsvp!.plusOne} />
+        <span class="sr-accepted" aria-hidden="true">Принято</span>
+      </div>
+    </article>
+  )}
+
+  {has.help && (
+    <article class="tk fade-up">
+      <p class="tk-stub"><span>№ {number.help}</span><span>Помощь</span></p>
+      <div class="tk-main">
+        <h2>Горячая линия</h2>
+        <p class="tk-text">{inv.organizer!.name}, свадебный организатор</p>
+        <a class="sr-btn" href={`tel:${tel}`}>{inv.organizer!.phone}</a>
+      </div>
+    </article>
+  )}
+
+  <section class="sr-end fade-up">
+    <p class="sr-end-big">Приз выдаётся только лично</p>
+    <p class="sr-end-note">{inv.date}{inv.city && `, ${inv.city}`}</p>
+    <p class="sr-end-names">{inv.groom} и {inv.bride}</p>
+  </section>
+</main>
+
+<script>
+import { pluralRu } from '@saywed/shared/plural'
+import { confetti, initFoil } from '../../lib/foil'
+
+const forms: Record<string, [string, string, string]> = {
+  days: ['день', 'дня', 'дней'],
+  hours: ['час', 'часа', 'часов'],
+  minutes: ['минута', 'минуты', 'минут'],
+}
+const draw = document.querySelector<HTMLElement>('.sr-draw')
+if (draw) {
+  const target = new Date(draw.dataset.target ?? '').getTime()
+  const set = (unit: string, n: number) => {
+    draw.querySelector(`[data-unit="${unit}"]`)!.textContent = String(n)
+    draw.querySelector(`[data-word="${unit}"]`)!.textContent = pluralRu(n, forms[unit])
+  }
+  const tick = () => {
+    const diff = Math.max(0, target - Date.now())
+    set('days', Math.floor(diff / 864e5))
+    set('hours', Math.floor(diff / 36e5) % 24)
+    set('minutes', Math.floor(diff / 6e4) % 60)
+  }
+  if (!Number.isNaN(target)) {
+    tick()
+    setInterval(tick, 30000)
+  }
+}
+
+// полосы рисуем после загрузки шрифтов: иначе высота текста под фольгой ещё изменится
+const strips = [...document.querySelectorAll<HTMLCanvasElement>('[data-strip]')]
+const openAll = document.querySelector<HTMLElement>('[data-open-strips]')
+if (strips.length) {
+  document.fonts.ready.then(() => {
+    const foils = strips.map(canvas => initFoil(canvas, {
+      threshold: 0.5,
+      onClear: () => {
+        if (strips.every(s => s.classList.contains('is-clear')))
+          openAll!.hidden = true
+      },
+    }))
+    openAll!.hidden = false
+    openAll!.addEventListener('click', () => foils.forEach(f => f.clear()))
+  })
+}
+
+const claim = document.querySelector('.sr-claim')
+claim?.querySelector('#rsvp-form')?.addEventListener('rsvpsent', () => {
+  claim.classList.add('is-claimed')
+  claim.scrollIntoView({ block: 'center' })
+  confetti(claim.querySelector('.sr-accepted')!, 120, 15)
+})
+</script>
 
 <style is:global>
-  /* ссылка без подложки терялась бы и на вишнёвом билете, и на кремовых секциях */
+  body[data-theme='scratch'] { background: #640b1b; }
+  /* финал билетной ленты заменяет общий подвал с монограммой */
+  body[data-theme='scratch'] .foot { display: none; }
+  /* ссылка без подложки терялась бы на вишнёвом фоне и на кремовых билетах */
   body[data-theme='scratch'] .back-home {
     margin: 0;
     padding: 6px 12px;
@@ -25,80 +259,227 @@ const { inv, slug, cal } = Astro.props as Props
     opacity: 0.9;
   }
 
-  /* поверхность — мелкая гильош-сетка, как защитный фон на билетах */
-  body[data-theme='scratch'] .section--surface {
-    background:
-      repeating-radial-gradient(circle at 50% 0, transparent 0 11px, rgba(163, 20, 46, 0.05) 11px 12px),
-      var(--surface);
-  }
-
-  body[data-theme='scratch'] .section h2 {
-    font-weight: 700;
-    font-size: clamp(1.45rem, 6.2vw, 2.3rem);
-    line-height: 1.16;
-    letter-spacing: -0.01em;
-    color: var(--accent);
-    overflow-wrap: anywhere;
-  }
-  body[data-theme='scratch'] .eyebrow { color: var(--accent-2); }
-  body[data-theme='scratch'] .lead { font-family: var(--font-accent); font-style: italic; font-size: clamp(1.3rem, 5vw, 1.55rem); line-height: 1.38; }
-
-  /* вместо ромба — золотое сердце */
-  body[data-theme='scratch'] .ornament { display: none; }
-  body[data-theme='scratch'] .section-head::after {
-    content: '';
-    width: 30px;
-    height: 27px;
-    margin-top: 6px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='1' y2='1'%3E%3Cstop stop-color='%23f7dc8a'/%3E%3Cstop offset='.5' stop-color='%23c99a2e'/%3E%3Cstop offset='1' stop-color='%23efcf74'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M55 99C20 75 1 54 1 31 1 13 15 1 31 1c10 0 19 5 24 14C60 6 69 1 79 1c16 0 30 12 30 30 0 23-19 44-54 68Z'/%3E%3C/svg%3E") center / contain no-repeat;
-  }
-
-  /* плашка — купон с вырезами по бокам; вырез делает фон плашки, тень даёт контур */
-  body[data-theme='scratch'] .plate {
-    padding: 0;
-    background: none;
-    border: none;
-    filter: drop-shadow(0 12px 16px rgba(58, 13, 21, 0.16));
-  }
-  body[data-theme='scratch'] .plate > .plate-inner {
-    background: var(--surface-2);
-    border: none;
-    box-shadow: none;
-    -webkit-mask:
-      radial-gradient(circle 10px at 0 40px, #0000 97%, #000) left / 51% 100% no-repeat,
-      radial-gradient(circle 10px at 100% 40px, #0000 97%, #000) right / 51% 100% no-repeat;
-    mask:
-      radial-gradient(circle 10px at 0 40px, #0000 97%, #000) left / 51% 100% no-repeat,
-      radial-gradient(circle 10px at 100% 40px, #0000 97%, #000) right / 51% 100% no-repeat;
-  }
-  body[data-theme='scratch'] .map-plate { filter: none; }
-
-  /* кнопка покрыта той же фольгой, что сердца на билете */
-  body[data-theme='scratch'] .btn:not(.btn--ghost) {
-    border: none;
-    color: #3a0d15;
-    background: linear-gradient(115deg, #f7dc8a, #c99a2e 34%, #fff0b8 52%, #b98a1f 74%, #efcf74);
-    font-weight: 500;
-  }
-  body[data-theme='scratch'] .btn--ghost { border-color: var(--accent); color: var(--accent); }
-
-  /* Unbounded широкий: в общих размерах цифры таймера и программы наезжают на соседей */
-  body[data-theme='scratch'] .countdown-grid span { font-weight: 700; font-size: clamp(1.7rem, 7.6vw, 3rem); color: var(--accent); }
-  body[data-theme='scratch'] .tl-time { font-size: 1rem; font-weight: 700; color: var(--accent); }
-  body[data-theme='scratch'] .foot-note { font-family: var(--font-accent); font-style: italic; font-size: 1.2rem; font-weight: 500; }
-  body[data-theme='scratch'] .wish-num { font-family: var(--font-display); font-weight: 700; color: var(--accent-2); }
-  body[data-theme='scratch'] .stack { --card-bg: #fff4df; }
-
-  .sc-end {
+  .sr {
+    --stub: 42px;
     display: grid;
     justify-items: center;
+    padding: 0 12px;
+    background:
+      radial-gradient(circle at 1px 1px, rgb(255 244 223 / 0.09) 1px, transparent 1.4px) 0 0 / 18px 18px,
+      linear-gradient(to bottom, #640b1b, #8c1226 30%, #8c1226 70%, #640b1b);
+  }
+
+  /* билеты идут сплошной лентой: стык — линия отрыва с полукруглыми вырезами по краям */
+  .tk {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--stub) minmax(0, 1fr);
+    width: min(100%, 620px);
+    color: var(--text);
+    background: #fff4df;
+    border-top: 2px dashed rgb(58 13 21 / 0.28);
+    -webkit-mask:
+      radial-gradient(circle 9px at 0 0, #0000 97%, #000) top left / 51% 51% no-repeat,
+      radial-gradient(circle 9px at 100% 0, #0000 97%, #000) top right / 51% 51% no-repeat,
+      radial-gradient(circle 9px at 0 100%, #0000 97%, #000) bottom left / 51% 51% no-repeat,
+      radial-gradient(circle 9px at 100% 100%, #0000 97%, #000) bottom right / 51% 51% no-repeat;
+    mask:
+      radial-gradient(circle 9px at 0 0, #0000 97%, #000) top left / 51% 51% no-repeat,
+      radial-gradient(circle 9px at 100% 0, #0000 97%, #000) top right / 51% 51% no-repeat,
+      radial-gradient(circle 9px at 0 100%, #0000 97%, #000) bottom left / 51% 51% no-repeat,
+      radial-gradient(circle 9px at 100% 100%, #0000 97%, #000) bottom right / 51% 51% no-repeat;
+  }
+  .tk:first-child { margin-top: clamp(28px, 6vw, 56px); border-top: 0; }
+  .tk--gold { background: linear-gradient(120deg, #f7dc8a, #e8c15a 45%, #f4d67f); }
+  .tk--dark { background: #3a0d15; color: #fff4df; border-top-color: rgb(255 244 223 / 0.3); }
+
+  .tk-stub {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    border-left: 2px dashed currentColor;
+    font-family: var(--font-display);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    place-self: stretch;
+    place-items: center;
+    opacity: 0.72;
+    width: var(--stub);
+  }
+  .tk-main { min-width: 0; padding: clamp(22px, 5vw, 34px) clamp(16px, 4vw, 30px) clamp(24px, 5vw, 36px); }
+  .tk h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.18rem, 5.2vw, 1.7rem);
+    font-weight: 700;
+    line-height: 1.16;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+  .tk:not(.tk--dark):not(.tk--gold) h2 { color: var(--accent); }
+  .tk-note { margin-top: 6px; font-size: 0.95rem; color: inherit; opacity: 0.78; }
+  .tk-text { margin-top: 10px; font-size: 1.02rem; line-height: 1.5; }
+
+  /* шары из лототрона выкатываются по очереди, когда билет показался */
+  .sr-balls { display: flex; gap: 8px; margin: 16px 0 12px; padding: 0; list-style: none; }
+  .sr-balls li {
+    flex: 1 1 0;
+    display: grid;
+    place-content: center;
+    min-width: 0;
+    max-width: 104px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    text-align: center;
+    color: #3a0d15;
+    background: radial-gradient(circle at 34% 28%, #fff, #fff4df 46%, #e3c79a);
+    box-shadow: 0 8px 14px -8px rgb(58 13 21 / 0.6);
+    opacity: 0;
+    transform: translateX(-46px) rotate(-120deg);
+    transition: opacity 0.4s var(--ease-out) calc(0.2s + var(--i) * 0.14s), transform 0.7s cubic-bezier(0.2, 1.2, 0.4, 1) calc(0.2s + var(--i) * 0.14s);
+  }
+  .sr-balls li:nth-child(2) { background: radial-gradient(circle at 34% 28%, #ff9aa8, #c9182f 50%, #8c1226); color: #fff4df; }
+  .visible .sr-balls li { opacity: 1; transform: none; }
+  .sr-balls b { font-family: var(--font-display); font-size: clamp(1.2rem, 5.6vw, 1.7rem); font-weight: 700; line-height: 1; }
+  .sr-balls small { margin-top: 3px; font-size: 0.7rem; }
+  .sr-links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 0.9rem; }
+  .sr-links a { color: inherit; text-underline-offset: 3px; }
+
+  .sr-lead { margin-top: 12px; font-family: var(--font-accent); font-style: italic; font-size: clamp(1.28rem, 5vw, 1.55rem); line-height: 1.34; }
+
+  .sr-film {
+    display: flex;
     gap: 8px;
-    padding: clamp(64px, 12vw, 112px) 24px;
+    margin: 16px calc(clamp(16px, 4vw, 30px) * -1) 0 0;
+    padding: 0 16px 4px 0;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sr-film::-webkit-scrollbar { display: none; }
+  .sr-film li { flex: none; width: min(72%, 300px); aspect-ratio: 4 / 5; scroll-snap-align: start; }
+  .sr-film img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+  .sr-film--look li { width: min(52%, 200px); }
+
+  .sr-place { margin-top: 12px; font-family: var(--font-accent); font-style: italic; font-size: clamp(1.5rem, 6.4vw, 1.9rem); line-height: 1.18; overflow-wrap: anywhere; }
+  .sr-btn {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 13px 18px;
+    border-radius: 6px;
+    color: #3a0d15;
+    background: linear-gradient(115deg, #f7dc8a, #c99a2e 34%, #fff0b8 52%, #b98a1f 74%, #efcf74);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .sr-map { display: block; width: 100%; height: 240px; margin-top: 16px; border: 0; border-radius: 4px; filter: sepia(0.25); }
+
+  /* программа — карточка лото: время крупно, каждая клетка закрывается отдельно */
+  .sr-bingo {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+    margin: 16px 0 0;
+    padding: 2px;
+    list-style: none;
+    background: var(--accent);
+  }
+  .sr-bingo li { display: grid; align-content: start; gap: 2px; padding: 12px 10px 14px; background: #fff4df; }
+  .sr-bingo li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .sr-bingo b { font-family: var(--font-display); font-size: clamp(1.1rem, 5.4vw, 1.5rem); font-weight: 700; color: var(--accent); }
+  .sr-bingo strong { font-weight: 500; line-height: 1.2; }
+  .sr-bingo span { font-size: 0.86rem; line-height: 1.3; color: var(--text-2); }
+
+  .sr-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .sr-chips li {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 5px dashed #fff4df;
+    outline: 2px solid var(--line-strong);
+    background-size: cover;
+    background-position: center;
+  }
+
+  .sr-prizes ul { display: grid; gap: 14px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .sr-prizes h3 { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; }
+  .sr-strip { position: relative; min-height: 56px; margin-top: 5px; border-radius: 4px; background: #fff4df; }
+  .sr-strip p { padding: 10px 12px; font-size: 0.96rem; line-height: 1.38; }
+  [data-strip] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    cursor: grab;
+    touch-action: pan-y; /* полоса на всю ширину не должна мешать листать страницу */
+    transition: opacity 0.45s var(--ease-out);
+  }
+  [data-strip].is-clear { opacity: 0; pointer-events: none; }
+  .sr-open {
+    min-height: 44px;
+    margin-top: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 0.86rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .sr-claim .plate { margin-top: 16px; padding: 0; border: 0; background: none; }
+  .sr-claim .plate > .plate-inner { padding: 0; border: 0; background: none; box-shadow: none; }
+  .sr-claim .btn { border: none; color: #3a0d15; background: linear-gradient(115deg, #f7dc8a, #c99a2e 34%, #fff0b8 52%, #b98a1f 74%, #efcf74); }
+  /* ответ принят: форма больше не нужна, вместо неё остаётся печать на билете */
+  .is-claimed form > :not(.form-status) { display: none; }
+  .sr-accepted {
+    display: none;
+    width: fit-content;
+    margin-top: 18px;
+    padding: 3px 12px;
+    border: 3px double var(--accent);
+    border-radius: 6px;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    rotate: -3deg;
+    pointer-events: none;
+  }
+  .is-claimed .sr-accepted { display: block; animation: sr-stamp 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+  @keyframes sr-stamp {
+    from { opacity: 0; transform: scale(2.6); }
+    to { opacity: 0.9; transform: none; }
+  }
+
+  .sr-end {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: clamp(56px, 12vw, 104px) 12px clamp(72px, 14vw, 120px);
     text-align: center;
     color: #fff4df;
-    background: radial-gradient(90% 90% at 50% 20%, #b01a35, #8c1226 60%, #640b1b);
   }
-  .sc-end-kicker { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #e8c15a; }
-  .sc-end-big { max-width: 14em; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.5rem, 6.4vw, 2.3rem); line-height: 1.18; overflow-wrap: anywhere; }
-  .sc-end-note { font-family: var(--font-accent); font-style: italic; font-size: clamp(1.2rem, 4.8vw, 1.5rem); }
+  .sr-end-big { max-width: 13em; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.45rem, 6.4vw, 2.3rem); line-height: 1.18; overflow-wrap: anywhere; }
+  .sr-end-note { font-family: var(--font-accent); font-style: italic; font-size: clamp(1.2rem, 4.8vw, 1.5rem); color: #e8c15a; }
+  .sr-end-names { font-size: 0.82rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.8; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sr-balls li { opacity: 1; transform: none; transition: none; }
+    .is-claimed .sr-accepted { animation: none; }
+  }
 </style>

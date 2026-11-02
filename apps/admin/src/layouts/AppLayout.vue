@@ -46,7 +46,7 @@ const currentSection = computed(() => sections.value.find(s => s.pages.some(page
       <header class="sticky top-0 z-30 border-b bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
         <div class="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-6">
           <RouterLink :to="{ name: 'leads' }" class="hidden items-center gap-2.5 font-medium sm:flex">
-            <span class="grid size-7 place-items-center rounded-full bg-[#78865a] font-serif text-base text-[#f6f2ea] italic">&amp;</span>
+            <img src="/favicon.svg" alt="" class="size-7 rounded-md border">
             saywed
           </RouterLink>
 

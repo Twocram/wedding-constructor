@@ -28,6 +28,7 @@ server {
 
     root /var/www/wedding;
     index index.html;
+    error_page 404 /404.html;
 
     # файлы сборки Astro с хешем в имени — кешируются навсегда
     location /_astro/ {

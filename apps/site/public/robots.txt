@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /api/
+Clean-param: g
+
+Sitemap: https://saywed.ru/sitemap.xml

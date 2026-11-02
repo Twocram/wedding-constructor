@@ -99,6 +99,17 @@ sudo -u saywed --preserve-env bash -c 'set -a; . /etc/saywed/api.env; ./saywed-a
 
 Реквизиты оператора (самозанятый: ФИО и ИНН) — в `apps/site/src/site.ts` (`legal`), выводятся на `/privacy`; до запуска продаж заменить заглушки. Затем переменная репозитория `LEAD_FORM_ENABLED = true` и Run workflow (или любой пуш в сайт). Без неё кнопки «Заказать» ведут в Telegram, как раньше.
 
+### Один адрес для поиска и своя страница 404
+
+В `server { … }` для saywed.ru с `listen 443 ssl` (certbot дописал его сам, поэтому `setup-site.sh` его не покрывает) добавить:
+
+```nginx
+if ($host = www.saywed.ru) { return 301 https://saywed.ru$request_uri; }
+error_page 404 /404.html;
+```
+
+Затем `nginx -t && systemctl reload nginx`.
+
 ### 8. Админка на admin.saywed.ru
 
 1. DNS: A-запись `admin.saywed.ru` → IP сервера.

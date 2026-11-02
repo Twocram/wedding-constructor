@@ -5,8 +5,11 @@ interface Props {
   theme?: 'cover' | 'editorial' | 'watercolor' | 'luxe' | 'amalfi' | 'deco' | 'vogue' | 'ticket' | 'cinema' | 'stories' | 'coquette' | 'toile' | 'fairytale' | 'sketch' | 'frost' | 'scrapbook' | 'terracotta' | 'chat' | 'scratch'
   image?: string
   noindex?: boolean
+  brand?: boolean // страницы saywed, а не приглашения: иконка сайта вместо значка темы
 }
-const { title, description = 'Приглашение на свадьбу', theme = 'cover', image, noindex } = Astro.props
+const { title, description = 'Приглашение на свадьбу', theme = 'cover', image, noindex, brand } = Astro.props
+// закрытые от индекса страницы (приглашения пар, ссылки для гостей) канонический адрес не объявляют
+const canonical = !noindex && Astro.site ? new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site).href : undefined
 // og:image мессенджеры берут только по абсолютному URL
 const ogImage = image && Astro.site ? new URL(image, Astro.site).href : image
 // каждая тема — свой набор гарнитур; Jost — общий текстовый шрифт
@@ -86,6 +89,9 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     <title>{title}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:site_name" content="saywed" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -95,10 +101,19 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     <meta property="og:locale" content="ru_RU" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content={themeColors[theme]} />
-    <link rel="icon" href={favicon} />
+    {brand
+      ? (
+          <>
+            <link rel="icon" href="/favicon.ico" sizes="32x32" />
+            <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+            <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+          </>
+        )
+      : <link rel="icon" href={favicon} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href={fontSets[theme]} rel="stylesheet" />
+    <slot name="head" />
   </head>
   <body data-theme={theme}>
     <slot />

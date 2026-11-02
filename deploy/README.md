@@ -101,14 +101,11 @@ sudo -u saywed --preserve-env bash -c 'set -a; . /etc/saywed/api.env; ./saywed-a
 
 ### Один адрес для поиска и своя страница 404
 
-В `server { … }` для saywed.ru с `listen 443 ssl` (certbot дописал его сам, поэтому `setup-site.sh` его не покрывает) добавить:
+Редирект с `www` и 404 живут в HTTPS-блоке saywed.ru, его дописал certbot, поэтому `setup-site.sh` их не покрывает:
 
-```nginx
-if ($host = www.saywed.ru) { return 301 https://saywed.ru$request_uri; }
-error_page 404 /404.html;
+```bash
+ssh root@<IP> bash -s < deploy/nginx-seo.sh
 ```
-
-Затем `nginx -t && systemctl reload nginx`.
 
 ### 8. Админка на admin.saywed.ru
 

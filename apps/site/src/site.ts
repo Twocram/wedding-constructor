@@ -7,12 +7,12 @@ export const orderContactTo = 'Сергею'
 
 export const messageUrl = (text: string) => `https://t.me/${orderTelegram}?text=${encodeURIComponent(text)}`
 
-// оператор персональных данных для /privacy — заполнить до запуска продаж
+// оператор персональных данных для /privacy
 export const legal = {
   // самозанятый: ФИО и ИНН, ОГРНИП у самозанятого нет
-  operator: '[ФИО]',
-  inn: '[ИНН]',
-  updated: '1 ноября 2026',
+  operator: 'Маслов Артём Александрович',
+  inn: '592009943269',
+  updated: '2 ноября 2026',
 }
 
 // форма заявки включается после запуска API: PUBLIC_LEAD_FORM=true при сборке; локально — всегда

@@ -26,13 +26,24 @@ function reply(bot: Bot, chatId: number, text: string) {
   return sendMessage(bot, chatId, text).catch(err => console.error(`[telegram] ответ в чат ${chatId}: ${errorMessage(err)}`))
 }
 
-// /start и /stop, в группах — /start@наш_бот; payload — секрет из ссылки t.me/бот?start=…
+// /start и /stop, в группах — /start@наш_бот; payload — секрет из ссылки t.me/бот?start=…; /guests — только у пар
 function parseCommand(bot: Bot, text: string) {
   const [head = '', payload] = text.trim().split(/\s+/)
   const [command, mention] = head.split('@')
   if (mention && mention.toLowerCase() !== usernames[bot]?.toLowerCase())
     return null
-  return command === '/start' || command === '/stop' ? { command, payload } : null
+  return command === '/start' || command === '/stop' || (bot === 'couple' && command === '/guests') ? { command, payload } : null
+}
+
+// токен берём из базы при каждом запросе: после перевыпуска в админке пара сразу получит рабочую ссылку
+function guestLinks(chatId: number) {
+  const rows = db
+    .select({ slug: invitations.slug, token: invitations.token })
+    .from(invitationChats)
+    .innerJoin(invitations, eq(invitationChats.invitationId, invitations.id))
+    .where(eq(invitationChats.chatId, chatId))
+    .all()
+  return rows.map(r => `<a href="${answersUrl(r.token)}">Гости и ответы${rows.length > 1 ? ` · ${invitationHost(r.slug)}` : ''}</a>`).join('\n')
 }
 
 function stopCouple(chatId: number) {
@@ -49,14 +60,14 @@ async function linkInvitation(chat: TgChat, token: string) {
   if (!invitation)
     return reply('couple', chat.id, 'Ссылка устарела. Попросите новую у saywed.')
   const site = invitationHost(invitation.slug)
-  const answers = `<a href="${answersUrl(invitation.token)}">Открыть страницу с ответами</a>`
+  const answers = `<a href="${answersUrl(invitation.token)}">Гости и ответы</a>`
   const linked = db
     .select({ id: invitationChats.id })
     .from(invitationChats)
     .where(and(eq(invitationChats.invitationId, invitation.id), eq(invitationChats.chatId, chat.id)))
     .get()
   if (linked)
-    return reply('couple', chat.id, `Уведомления об ответах гостей на ${site} уже включены. Отключить — /stop.\n${answers}`)
+    return reply('couple', chat.id, `Уведомления об ответах гостей на ${site} уже включены. Ссылка всегда по команде /guests, отключить — /stop.\n${answers}`)
   const chats = db.select({ n: count() }).from(invitationChats).where(eq(invitationChats.invitationId, invitation.id)).get()?.n ?? 0
   if (chats >= MAX_INVITATION_CHATS)
     return reply('couple', chat.id, 'К этому приглашению подключено слишком много чатов. Напишите в saywed.')
@@ -64,7 +75,7 @@ async function linkInvitation(chat: TgChat, token: string) {
   const name = chatName(chat).slice(0, 100)
   db.insert(invitationChats).values({ invitationId: invitation.id, chatId: chat.id, name, username: chat.username ?? null }).onConflictDoNothing().run()
   console.log(`[telegram] чат ${chat.id} подключён к приглашению #${invitation.id}`)
-  await reply('couple', chat.id, `Готово: сюда будут приходить ответы гостей на ${site}. Отключить — /stop.\n${answers}`)
+  await reply('couple', chat.id, `Готово: сюда будут приходить ответы гостей на ${site}. Ссылка на гостей всегда по команде /guests, отключить — /stop.\n${answers}`)
   if (env.tgChatId) {
     await sendMessage(
       'team',
@@ -89,11 +100,14 @@ async function handleCouple(chat: TgChat, text: string) {
     return
   if (parsed.command === '/stop')
     return stopCouple(chat.id)
-  if (parsed.payload)
+  if (parsed.command === '/start' && parsed.payload)
     return linkInvitation(chat, parsed.payload)
-  if (db.select({ id: invitationChats.id }).from(invitationChats).where(eq(invitationChats.chatId, chat.id)).get())
-    return reply('couple', chat.id, 'Уведомления об ответах гостей уже включены. Отключить — /stop.')
-  return reply('couple', chat.id, 'Чтобы получать ответы гостей, откройте ссылку от saywed.')
+  const links = guestLinks(chat.id)
+  if (!links)
+    return reply('couple', chat.id, 'Чтобы получать ответы гостей, откройте ссылку от saywed.')
+  if (parsed.command === '/guests')
+    return reply('couple', chat.id, links)
+  return reply('couple', chat.id, `Уведомления об ответах гостей уже включены. Ссылка всегда по команде /guests, отключить — /stop.\n${links}`)
 }
 
 async function handleTeam(chat: TgChat, text: string) {

@@ -4,6 +4,7 @@
 import Base from '../layouts/Base.astro'
 import { getCollection } from 'astro:content'
 import LeadForm from '../components/LeadForm.astro'
+import { articles } from '../lib/articles'
 import { leadFormEnabled, messageUrl, orderUrl, prices, rub, themes } from '../site'
 
 const order = Object.keys(themes)
@@ -66,6 +67,7 @@ const plans = [
   },
 ]
 
+const siteUrl = Astro.site ? new URL('/', Astro.site).href : 'https://saywed.ru/'
 const faq = [
   {
     q: 'Что можно изменить в шаблоне?',
@@ -101,10 +103,36 @@ const steps = [
   { title: 'Выберите дизайн', text: 'Откройте демо с телефона — так его увидят гости.' },
   { title: 'Пришлите данные', text: 'Имена, дату, площадку, программу и пару фотографий.' },
   { title: 'Получите ссылку', text: 'Готовое приглашение за 1–2 дня. Рассылаете гостям в мессенджерах.' },
-];
+]
+
+// те же цены и вопросы, что на странице: разметка не должна расходиться с видимым текстом
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'WebSite', 'url': siteUrl, 'name': 'saywed', 'inLanguage': 'ru' },
+    { '@type': 'Organization', '@id': `${siteUrl}#org`, 'name': 'saywed', 'url': siteUrl, 'logo': `${siteUrl}apple-touch-icon.png` },
+    {
+      '@type': 'Service',
+      'name': 'Онлайн-приглашения на свадьбу',
+      'serviceType': 'Сайт-приглашение на свадьбу',
+      'provider': { '@id': `${siteUrl}#org` },
+      'areaServed': 'RU',
+      'offers': plans.map(plan => ({ '@type': 'Offer', 'name': plan.name, 'price': plan.price, 'priceCurrency': 'RUB' })),
+    },
+    {
+      '@type': 'FAQPage',
+      'mainEntity': faq.map(item => ({
+        '@type': 'Question',
+        'name': item.q,
+        'acceptedAnswer': { '@type': 'Answer', 'text': item.a.join(' ') },
+      })),
+    },
+  ],
+}
 ---
 
-<Base title="saywed — онлайн-приглашения на свадьбу" description="Онлайн-приглашения на свадьбу: больше 10 дизайнов, анкета гостя со сводкой ответов для пары, карта, программа дня и дресс-код. Готово за 1–2 дня.">
+<Base title="saywed — онлайн-приглашения на свадьбу" description="Онлайн-приглашения на свадьбу: больше 10 дизайнов, анкета гостя со сводкой ответов для пары, карта, программа дня и дресс-код. Готово за 1–2 дня." image="/og.jpg" brand>
+  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')} />
   <main class="shop">
     <header class="shop-hero">
       <div class="wrap">
@@ -145,16 +173,16 @@ const steps = [
                 const t = themes[inv.data.theme]
                 return (
                   <li class="theme fade-up" style={`--i:${i % 3}`}>
-                    <a class="theme-phone" href={`/${inv.id}`} aria-label={`Демо ${t.name}: ${inv.data.groom} и ${inv.data.bride}`}>
+                    <a class="theme-phone" href={`/${inv.id}/`} aria-label={`Демо ${t.name}: ${inv.data.groom} и ${inv.data.bride}`}>
                       {t.isNew && <span class="theme-new">New</span>}
-                      <img src={`/previews/${inv.id}.webp`} alt="" width="600" height="1298" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
+                      <img src={`/previews/${inv.id}.webp`} alt={`Шаблон приглашения на свадьбу ${t.name}`} width="600" height="1298" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
                     </a>
                     <div class="theme-info">
                       <div class="theme-tags">{t.tags.map(tag => <span>{tag}</span>)}</div>
                       <h3>{t.name}</h3>
                       <p>{t.tagline}</p>
                       <div class="theme-actions">
-                        <a class="theme-link" href={`/${inv.id}`}>Смотреть демо</a>
+                        <a class="theme-link" href={`/${inv.id}/`}>Смотреть демо</a>
                         <a class="theme-link theme-link--accent" href={orderUrl(t.name)} target="_blank" rel="noopener" data-lead data-lead-source="catalog-card" data-lead-product="template" data-lead-theme={inv.data.theme}>Заказать →</a>
                       </div>
                     </div>
@@ -318,6 +346,12 @@ const steps = [
             </details>
           ))}
         </div>
+        <nav class="guides" aria-label="Полезные материалы">
+          <h3>Полезное для подготовки</h3>
+          <ul>
+            {articles.map(a => <li><a href={a.path}>{a.title}</a><span>{a.short}</span></li>)}
+          </ul>
+        </nav>
       </div>
     </section>
 
@@ -602,6 +636,13 @@ if (tryBox) {
   .shop-foot a:hover { color: var(--bg); }
 
   /* ── FAQ ── */
+  .guides { max-width: 760px; margin: 48px auto 0; }
+  .guides h3 { font-size: 1.4rem; }
+  .guides ul { display: grid; gap: 14px 32px; margin: 16px 0 0; padding: 0; list-style: none; }
+  @media (min-width: 640px) { .guides ul { grid-template-columns: 1fr 1fr; } }
+  .guides li { display: grid; gap: 2px; }
+  .guides a { color: var(--text); text-underline-offset: 3px; }
+  .guides span { font-size: 0.9rem; color: var(--muted); }
   .faq { max-width: 760px; margin: 0 auto; border-top: 1px solid var(--line-strong); }
   .faq details { border-bottom: 1px solid var(--line-strong); }
   .faq summary {

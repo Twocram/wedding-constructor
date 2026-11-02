@@ -2,7 +2,7 @@ import * as z from 'zod'
 import { attendingValues } from './rsvpReport'
 
 // пути страниц сайта и поддомены сервисов
-const reservedSlugs = new Set(['answers', 'privacy', 'api', 'og', 'ics', 'admin', 'previews', 'photos', 'music', 'www', 'mail', 'static'])
+const reservedSlugs = new Set(['answers', 'privacy', 'api', 'og', 'ics', 'admin', 'previews', 'photos', 'music', 'www', 'mail', 'static', '404', 'sitemap', 'robots', 'favicon', 'elektronnoe-priglashenie-na-svadbu', 'sayt-priglashenie-na-svadbu', 'tekst-priglasheniya-na-svadbu', 'kak-razoslat-priglasheniya-na-svadbu'])
 
 // адрес приглашения: поддомен <slug>.saywed.ru, поэтому не длиннее 63 символов
 export const invitationSlugSchema = z
